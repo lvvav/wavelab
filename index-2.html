@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>wavelab — каталог музыки</title>
+<meta name="theme-color" content="#0d0d11">
+<style>
+:root{
+  --bg:#0d0d11; --panel:#121217; --hover:#18181f; --line:#23232c;
+  --text:#ececf1; --mut:#8b8b99; --acc:#c6ff3d; --on:#11160a; --danger:#ff6b6b;
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;display:flex;overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i.f{fill:currentColor;stroke:none}
+.num{font-variant-numeric:tabular-nums}
+
+/* боковое меню */
+.side{width:232px;flex:none;border-right:1px solid var(--line);padding:22px 12px 100px;overflow-y:auto;background:var(--bg)}
+.logo{display:flex;align-items:center;gap:9px;padding:0 10px 22px;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.logo i{width:12px;height:12px;background:var(--acc);border-radius:3px}
+.nav-h{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:18px 10px 6px}
+.nv{display:flex;align-items:center;gap:11px;width:100%;padding:9px 10px;border-radius:var(--r);color:var(--mut);font-weight:500;text-align:left;transition:background .15s,color .15s}
+.nv:hover{background:var(--hover);color:var(--text)}
+.nv.on{background:var(--hover);color:var(--text)}
+.nv.on .i{color:var(--acc)}
+.nv .c{margin-left:auto;font-size:12px;color:var(--mut)}
+
+/* контент */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100%}
+.top{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line)}
+.search{flex:1;max-width:420px;position:relative}
+.search .i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut)}
+.search input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px 10px 38px;outline:0}
+.search input:focus{border-color:var(--acc)}
+.search input::placeholder{color:var(--mut)}
+select{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;outline:0;cursor:pointer}
+select:focus{border-color:var(--acc)}
+.scroll{flex:1;overflow-y:auto;padding:26px 28px 120px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.head h1{font-size:28px;letter-spacing:-.03em;line-height:1.1}
+.head p{color:var(--mut);margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;font-weight:600;background:var(--acc);color:var(--on);transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:none;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--hover);filter:none}
+
+/* таблица треков */
+.cols,.row{display:grid;grid-template-columns:40px minmax(0,1fr) 150px 120px 56px 112px;align-items:center;gap:12px;padding:0 12px}
+.cols{height:34px;color:var(--mut);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--line);margin-bottom:6px}
+.row{min-height:58px;border-radius:var(--r);cursor:pointer;transition:background .12s}
+.row:hover{background:var(--hover)}
+.row.cur{background:var(--hover)}
+.row.cur .tt{color:var(--acc)}
+.idx{position:relative;text-align:center;color:var(--mut);height:20px;line-height:20px}
+.idx .pl{display:none;position:absolute;inset:0;place-items:center;color:var(--text)}
+.row:hover .idx .n{display:none}.row:hover .idx .pl{display:grid}
+.row.cur .idx .n{display:none}.row.cur .idx .pl{display:grid;color:var(--acc)}
+.who{display:flex;align-items:center;gap:12px;min-width:0}
+.who div{min-width:0}
+.tt{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ar{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gn,.ql,.tm{color:var(--mut);font-size:13px}
+.ql b{font-weight:600;color:var(--text)}
+.ql.lossless b{color:var(--acc)}
+.tm{text-align:right}
+.acts{display:flex;justify-content:flex-end;gap:2px}
+.ab{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--mut);opacity:0;transition:.15s}
+.row:hover .ab,.row.cur .ab,.ab.on{opacity:1}
+.ab:hover{background:var(--line);color:var(--text)}
+.ab.on{color:var(--acc)}
+.ab.fv.on .i{fill:var(--acc)}
+@media(hover:none){.ab{opacity:1}}
+.empty{padding:60px 0;text-align:center;color:var(--mut)}
+.empty b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+
+/* обложки: плоские, без градиентов */
+.cv{position:relative;display:block;width:40px;height:40px;border-radius:6px;overflow:hidden;background:var(--bg0);flex:none}
+.cv::before,.cv::after{content:"";position:absolute}
+.cv[data-s="1"]::before{width:70%;height:70%;border-radius:50%;background:var(--fg0);left:15%;top:15%}
+.cv[data-s="2"]::before{width:60%;height:60%;background:var(--fg0);left:20%;top:20%;transform:rotate(18deg)}
+.cv[data-s="3"]::before{width:100%;height:50%;background:var(--fg0);left:0;bottom:0;border-radius:100% 100% 0 0}
+.cv[data-s="4"]::before{inset:0;background:var(--fg0);clip-path:polygon(50% 18%,88% 82%,12% 82%)}
+.cv[data-s="5"]::before{inset:0;background:repeating-linear-gradient(90deg,var(--fg0) 0 18%,transparent 18% 36%)}
+.cv.lg{width:56px;height:56px;border-radius:8px}
+
+/* плеер */
+.player{position:fixed;left:0;right:0;bottom:0;height:84px;z-index:30;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,560px) minmax(0,1fr);align-items:center;gap:20px;padding:0 24px;background:var(--panel);border-top:1px solid var(--line)}
+.p-left{display:flex;align-items:center;gap:12px;min-width:0}
+.p-left .t{min-width:0}
+.p-center{display:flex;flex-direction:column;gap:6px}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:6px}
+.ib{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--mut);transition:.15s}
+.ib:hover{color:var(--text)}
+.ib.on{color:var(--acc)}
+.ib.play{width:42px;height:42px;background:var(--text);color:var(--bg)}
+.ib.play:hover{transform:scale(1.06);color:var(--bg)}
+.seekrow{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px}
+.seekrow span{width:36px;text-align:center}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:4px;border-radius:4px;outline:0;cursor:pointer;background:linear-gradient(to right,var(--text) var(--p,0%),var(--line) var(--p,0%))}
+input[type=range]:hover{background:linear-gradient(to right,var(--acc) var(--p,0%),var(--line) var(--p,0%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--text);opacity:0;transition:.15s}
+input[type=range]:hover::-webkit-slider-thumb,input[type=range]:focus-visible::-webkit-slider-thumb{opacity:1}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--text)}
+.p-right{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.vol{display:flex;align-items:center;gap:6px;width:130px;color:var(--mut)}
+.dl{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:99px;background:var(--acc);color:var(--on);font-weight:600;white-space:nowrap}
+.dl:hover{filter:brightness(1.08)}
+.dl.off{opacity:.4;pointer-events:none}
+
+.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,10px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:99px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* телефон и планшет */
+.chips{display:none}
+@media(max-width:860px){
+  body{flex-direction:column;overflow:hidden}
+  .side{width:100%;border-right:0;border-bottom:1px solid var(--line);padding:12px 12px 8px;overflow:visible}
+  .logo{padding:0 4px 10px}
+  .nav-h,.side .genres{display:none}
+  .navrow{display:flex;gap:6px}
+  .nv{width:auto;flex:1;justify-content:center;padding:9px 6px;font-size:13px}
+  .nv .c{margin-left:4px}
+  .nv .i{display:none}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;padding:6px 13px;border-radius:99px;border:1px solid var(--line);color:var(--mut);font-weight:500;font-size:13px}
+  .chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .top{padding:12px 14px}
+  .scroll{padding:18px 14px 150px}
+  .head h1{font-size:23px}
+  .cols{display:none}
+  .row{grid-template-columns:44px minmax(0,1fr) auto;padding:0 6px;gap:10px}
+  .gn,.ql,.tm,.ab.dlb{display:none}
+  .ab{opacity:1;width:38px;height:38px}
+  .idx{display:none}
+  .row .who{grid-column:1/3}
+  .player{height:auto;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .p-center{display:contents}
+  .ctrls{grid-column:2;grid-row:1}
+  .seekrow{grid-column:1/-1;grid-row:2}
+  .p-right{grid-column:3;grid-row:1}
+  .hm,.vol,.dl span{display:none}
+  .dl{padding:10px;border-radius:50%}
+  .ib.play{width:44px;height:44px}
+  .toast{bottom:130px}
+}
+@media(max-width:860px) and (min-width:600px){.top{padding:12px 24px}.scroll{padding-left:24px;padding-right:24px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></symbol>
+<symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.3l8.8-8.9a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
+<symbol id="i-lib" viewBox="0 0 24 24"><path d="M4 4v16M9 4v16M14 6l5 14M14 6l-1 .3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-shuf" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+<symbol id="i-rep" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+<symbol id="i-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9zM16 8.5a5 5 0 0 1 0 7"/></symbol>
+</svg>
+
+<aside class="side">
+  <div class="logo"><i></i>wavelab</div>
+  <div class="navrow">
+    <button class="nv on" data-view="all" type="button"><svg class="i"><use href="#i-lib"/></svg>Каталог<span class="c" id="cAll"></span></button>
+    <button class="nv" data-view="fav" type="button"><svg class="i"><use href="#i-heart"/></svg>Избранное<span class="c" id="cFav"></span></button>
+    <button class="nv" data-view="queue" type="button"><svg class="i"><use href="#i-list"/></svg>Очередь<span class="c" id="cQ"></span></button>
+  </div>
+  <div class="genres"><div class="nav-h">Жанры</div><div id="genreNav"></div></div>
+</aside>
+
+<div class="main">
+  <div class="top">
+    <label class="search"><svg class="i"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Поиск по трекам и артистам" autocomplete="off" aria-label="Поиск"></label>
+    <select id="sort" aria-label="Сортировка">
+      <option value="def">По умолчанию</option><option value="pop">Популярные</option><option value="az">По названию</option><option value="art">По артисту</option>
+    </select>
+  </div>
+  <div class="scroll" id="scroll">
+    <div class="chips" id="chips"></div>
+    <div class="head">
+      <div><h1 id="title">Каталог</h1><p id="sub"></p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="playAll" type="button"><svg class="i f"><use href="#i-play"/></svg>Слушать всё</button><button class="btn ghost" id="shufAll" type="button"><svg class="i"><use href="#i-shuf"/></svg>Вперемешку</button></div>
+    </div>
+    <div class="cols"><span style="text-align:center">#</span><span>Название</span><span>Жанр</span><span>Качество</span><span style="text-align:right">Время</span><span></span></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<div class="player" id="player">
+  <div class="p-left">
+    <span class="cv lg" id="pCv" style="--bg0:#23232c;--fg0:#3a3a46" data-s="1"></span>
+    <div class="t"><div class="tt" id="pT">Ничего не играет</div><div class="ar" id="pA">Выберите трек из списка</div></div>
+  </div>
+  <div class="p-center">
+    <div class="ctrls">
+      <button class="ib hm" id="bShuf" type="button" aria-label="Вперемешку"><svg class="i"><use href="#i-shuf"/></svg></button>
+      <button class="ib" id="bPrev" type="button" aria-label="Предыдущий"><svg class="i f"><use href="#i-prev"/></svg></button>
+      <button class="ib play" id="bPlay" type="button" aria-label="Играть / пауза"><svg class="i f" id="bPlayI"><use href="#i-play"/></svg></button>
+      <button class="ib" id="bNext" type="button" aria-label="Следующий"><svg class="i f"><use href="#i-next"/></svg></button>
+      <button class="ib hm" id="bRep" type="button" aria-label="Повтор"><svg class="i"><use href="#i-rep"/></svg></button>
+    </div>
+    <div class="seekrow num"><span id="cur">0:00</span><input type="range" id="seek" min="0" max="100" step="0.1" value="0" aria-label="Перемотка"><span id="dur">0:00</span></div>
+  </div>
+  <div class="p-right">
+    <div class="vol"><svg class="i"><use href="#i-vol"/></svg><input type="range" id="vol" min="0" max="1" step="0.01" value="0.8" aria-label="Громкость"></div>
+    <button class="dl off" id="dl" type="button"><svg class="i"><use href="#i-dl"/></svg><span>Скачать в отличном качестве</span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<audio id="audio" preload="none"></audio>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+function ic(n,c){return '<svg class="i '+(c||'')+'"><use href="#i-'+n+'"/></svg>'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* ===== ГДЕ ЛЕЖАТ ТРЕКИ =====
+   Сайт на GitHub Pages сам найдёт mp3 в папке music — ничего менять не нужно. */
+var CONFIG={GITHUB_USER:'',GITHUB_REPO:'',BRANCH:'HEAD',FOLDER:'music'};
+
+var DEMO=[
+ {t:'Neon Horizon',  a:'Kira Vale',       g:'Synthwave', q:'FLAC 24-bit',  d:48210, c:['#2b2f3a','#e8e4d9'], s:1},
+ {t:'Midnight Drive',a:'The Aurora Club', g:'Electronic',q:'MP3 320 kbps', d:73990, c:['#c6ff3d','#14160c'], s:2},
+ {t:'Glass Rain',    a:'Lumen',           g:'Ambient',   q:'FLAC 24-bit',  d:31450, c:['#3c5a63','#d9e8e4'], s:3},
+ {t:'Solar Flare',   a:'Dex & Mora',      g:'House',     q:'MP3 320 kbps', d:59320, c:['#e5532d','#f4e9dc'], s:4},
+ {t:'Velvet Sky',    a:'Nova Reyes',      g:'Synthwave', q:'FLAC 24-bit',  d:22100, c:['#e8e4d9','#2b2f3a'], s:5},
+ {t:'Pulse 303',     a:'Kiro',            g:'House',     q:'MP3 320 kbps', d:84500, c:['#1f3fbf','#f0f0ff'], s:1},
+ {t:'Afterglow',     a:'Lumen',           g:'Ambient',   q:'FLAC 24-bit',  d:18700, c:['#d9a441','#2a1c05'], s:3},
+ {t:'Chrome Heart',  a:'Kira Vale',       g:'Synthwave', q:'FLAC 24-bit',  d:41230, c:['#4a4a55','#c6ff3d'], s:2},
+ {t:'Deep Signal',   a:'The Aurora Club', g:'Electronic',q:'MP3 320 kbps', d:67800, c:['#0f2a4d','#8fd0ff'], s:5},
+ {t:'Paper Moon',    a:'Nova Reyes',      g:'Lo-Fi',     q:'MP3 320 kbps', d:52400, c:['#efe3c8','#b5472f'], s:1},
+ {t:'Rainy Window',  a:'Mellow Fox',      g:'Lo-Fi',     q:'FLAC 24-bit',  d:36900, c:['#5f6f8a','#eef1f6'], s:4},
+ {t:'Orbit',         a:'Dex & Mora',      g:'Electronic',q:'FLAC 24-bit',  d:29800, c:['#2f6b4f','#e6f2d4'], s:2}
+];
+var TRACKS=[];
+var PAL=[['#2b2f3a','#e8e4d9'],['#c6ff3d','#14160c'],['#3c5a63','#d9e8e4'],['#e5532d','#f4e9dc'],['#e8e4d9','#2b2f3a'],['#1f3fbf','#f0f0ff'],['#d9a441','#2a1c05'],['#4a4a55','#c6ff3d'],['#0f2a4d','#8fd0ff'],['#efe3c8','#b5472f'],['#5f6f8a','#eef1f6'],['#2f6b4f','#e6f2d4']];
+function hash(str){var h=0;for(var i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))>>>0;return h}
+function ghInfo(){
+  if(CONFIG.GITHUB_USER&&CONFIG.GITHUB_REPO)return {u:CONFIG.GITHUB_USER,r:CONFIG.GITHUB_REPO};
+  var m=location.hostname.match(/^([^.]+)\.github\.io$/);if(!m)return null;
+  var seg=location.pathname.split('/')[1];
+  return {u:m[1],r:(seg&&!/\.html?$/i.test(seg))?seg:m[1]+'.github.io'};
+}
+function enc(p){return p.split('/').map(encodeURIComponent).join('/')}
+function fromPath(p,size,gh){
+  var rel=p.slice(CONFIG.FOLDER.length+1),parts=rel.split('/'),file=parts.pop(),genre=parts[0]||'Музыка';
+  var ext=(file.match(/\.([a-z0-9]+)$/i)||['','mp3'])[1].toUpperCase(),name=file.replace(/\.[^.]+$/,'').replace(/_/g,' ');
+  var sp=name.split(' - '),artist=sp.length>1?sp.shift().trim():'—',title=sp.join(' - ').trim();
+  var h=hash(name),mb=size?(size/1048576).toFixed(1).replace('.',',')+' МБ':'';
+  var sameOrigin=location.hostname.toLowerCase()===gh.u.toLowerCase()+'.github.io';
+  var src=sameOrigin?(location.pathname.replace(/[^\/]*$/,'')+enc(p)):'https://raw.githubusercontent.com/'+gh.u+'/'+gh.r+'/'+CONFIG.BRANCH+'/'+enc(p);
+  return {t:title,a:artist,g:genre,q:(ext==='FLAC'?'FLAC':ext)+(mb?' '+mb:''),d:0,dur:0,c:PAL[h%PAL.length],s:(h%5)+1,src:src,f:ext==='FLAC'}
+}
+function finishTracks(arr){TRACKS=arr;TRACKS.forEach(function(x,i){x.id=i;x.f=x.f||x.q.indexOf('FLAC')>-1})}
+function loadTracks(done){
+  var gh=ghInfo();
+  if(!gh){finishTracks(DEMO);return done()}
+  var ck='wl_tree_'+gh.u+gh.r,c;try{c=JSON.parse(sessionStorage.getItem(ck)||'null')}catch(e){}
+  function use(tree){
+    var l=tree.filter(function(n){return n.type==='blob'&&n.path.indexOf(CONFIG.FOLDER+'/')===0&&/\.(mp3|flac|wav|m4a|ogg)$/i.test(n.path)})
+      .map(function(n){return fromPath(n.path,n.size,gh)});
+    l.sort(function(a,b){return a.a.localeCompare(b.a,'ru')||a.t.localeCompare(b.t,'ru')});
+    finishTracks(l);done();
+  }
+  if(c&&Date.now()-c.t<120000)return use(c.tree);
+  fetch('https://api.github.com/repos/'+gh.u+'/'+gh.r+'/git/trees/'+CONFIG.BRANCH+'?recursive=1')
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+    .then(function(j){try{sessionStorage.setItem(ck,JSON.stringify({t:Date.now(),tree:j.tree}))}catch(e){}use(j.tree)})
+    .catch(function(){finishTracks([]);toast('Не удалось загрузить список треков');done()});
+}
+
+var BPMS=[100,118,84,124,96,126,88,108,122,92,78,112];
+var DURS=BPMS.map(function(b){return 16*4*60/b});
+var GEN={};
+function genUrl(id){
+  if(GEN[id])return GEN[id];
+  var sr=22050,BPM=BPMS[id%12],beat=60/BPM,bars=16;
+  var N=Math.floor(sr*bars*4*beat),buf=new Float32Array(N);
+  var root=[45,47,40,43,50,52,38,45,48,41,43,46][id%12];
+  var chords=[[0,3,7],[-4,0,3],[3,7,10],[-2,2,5]],offs=[0,-4,3,-2];
+  var seed=id*9301+49297;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
+  var house=(id===3||id===5||id===11||id===1||id===8);
+  function mf(m){return 440*Math.pow(2,(m-69)/12)}
+  function tone(st,len,f,amp,kind,dec){
+    var s0=Math.floor(st*sr),n=Math.floor(len*sr),w=2*Math.PI*f/sr,ph=0;
+    for(var i=0;i<n&&s0+i<N;i++){
+      var t=i/sr,e;
+      if(kind==='pad'){e=Math.sin(Math.PI*i/n);e*=e}else{e=Math.min(1,t*200)*Math.exp(-t*dec)}
+      var v=Math.sin(ph);
+      if(kind==='arp')v+=.35*Math.sin(ph*2)+.15*Math.sin(ph*3);
+      if(kind==='pad')v=.6*v+.4*Math.sin(ph*1.003*2);
+      buf[s0+i]+=v*e*amp;ph+=w;
+    }
+  }
+  function kick(st){
+    var s0=Math.floor(st*sr),n=Math.floor(.28*sr),ph=0;
+    for(var i=0;i<n&&s0+i<N;i++){var t=i/sr,f=48+120*Math.exp(-t*28);ph+=2*Math.PI*f/sr;buf[s0+i]+=Math.sin(ph)*Math.exp(-t*8)*.55}
+  }
+  function hat(st,a){
+    var s0=Math.floor(st*sr),n=Math.floor(.05*sr);
+    for(var i=0;i<n&&s0+i<N;i++){buf[s0+i]+=(rnd()*2-1)*Math.exp(-i/sr*70)*a}
+  }
+  for(var b=0;b<bars;b++){
+    var ci=b%4,base=root+offs[ci],t0=b*4*beat,ch=chords[ci];
+    // пэд (аккорды)
+    for(var k=0;k<3;k++)tone(t0,4*beat,mf(base+12+ch[k]),.045,'pad',0);
+    // бас
+    for(var s=0;s<8;s++){if(house||s%2===0)tone(t0+s*beat/2,beat/2*.95,mf(base-12+(s%4===3?ch[1]:0)),.22,'bass',5)}
+    // ударные
+    for(var q=0;q<4;q++){
+      if(house||q%2===0)kick(t0+q*beat);
+      if(b>=2){hat(t0+q*beat+beat/2,.07);if(house&&b>=4)hat(t0+q*beat,.03)}
+    }
+    // арпеджио (после вступления)
+    if(b>=1){
+      for(var a=0;a<8;a++){
+        var note=ch[Math.floor(rnd()*3)]+(rnd()>.55?24:12);
+        if(rnd()>.18)tone(t0+a*beat/2,beat/2,mf(base+note),.07,'arp',6);
+      }
+    }
+  }
+  // нормализация и мягкое ограничение
+  var pk=0;for(var i=0;i<N;i++){var v=Math.abs(buf[i]);if(v>pk)pk=v}
+  var g=pk?0.85/pk:1;
+  var dv=new DataView(new ArrayBuffer(44+N*2));
+  function ws(o,s){for(var j=0;j<s.length;j++)dv.setUint8(o+j,s.charCodeAt(j))}
+  ws(0,'RIFF');dv.setUint32(4,36+N*2,true);ws(8,'WAVE');ws(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);ws(36,'data');dv.setUint32(40,N*2,true);
+  for(var m=0;m<N;m++){var x=Math.tanh(buf[m]*g*1.2)*32000;dv.setInt16(44+m*2,x,true)}
+  GEN[id]=URL.createObjectURL(new Blob([dv],{type:'audio/wav'}));
+  return GEN[id];
+}
+
+
+/* ===== состояние ===== */
+function load(k,def){try{var v=JSON.parse(localStorage.getItem(k));return v==null?def:v}catch(e){return def}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var favs=load('wl3_favs',[]),vol=load('wl3_vol',0.8);
+var queue=[],view='all',genre='',query='',sortV='def',cur=-1,shuffle=false,rep=0,ORDER=[];
+var audio=$('audio');
+
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('on')},2200)}
+function fmt(s){return isFinite(s)?Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2):'0:00'}
+function fill(el){el.style.setProperty('--p',(el.value-el.min)/(el.max-el.min)*100+'%')}
+function cv(t,big){return '<span class="cv'+(big?' lg':'')+'" data-s="'+t.s+'" style="--bg0:'+t.c[0]+';--fg0:'+t.c[1]+'"></span>'}
+function dur(t){return t.dur?fmt(t.dur):t.src?'–:––':fmt(DURS[t.id%12])}
+
+/* ===== список ===== */
+function visible(){
+  var l;
+  if(view==='fav')l=favs.map(function(i){return TRACKS[i]});
+  else if(view==='queue')l=queue.map(function(i){return TRACKS[i]});
+  else l=TRACKS.slice();
+  if(genre&&view==='all')l=l.filter(function(t){return t.g===genre});
+  if(query)l=l.filter(function(t){return (t.t+' '+t.a+' '+t.g).toLowerCase().indexOf(query)>-1});
+  if(view!=='queue'){
+    if(sortV==='pop')l.sort(function(a,b){return b.d-a.d});
+    if(sortV==='az')l.sort(function(a,b){return a.t.localeCompare(b.t,'ru')});
+    if(sortV==='art')l.sort(function(a,b){return a.a.localeCompare(b.a,'ru')||a.t.localeCompare(b.t,'ru')});
+  }
+  return l;
+}
+function render(){
+  var l=visible();ORDER=l.map(function(t){return t.id});
+  var titles={all:'Каталог',fav:'Избранное',queue:'Очередь'};
+  $('title').textContent=genre&&view==='all'?genre:titles[view];
+  $('sub').textContent=l.length+' '+plural(l.length,['трек','трека','треков']);
+  $('playAll').hidden=$('shufAll').hidden=!l.length||view==='queue';
+  var html=l.map(function(t,n){
+    var isCur=t.id===cur,fv=favs.indexOf(t.id)>-1,playing=isCur&&!audio.paused;
+    return '<div class="row'+(isCur?' cur':'')+'" data-id="'+t.id+'" data-n="'+n+'">'+
+      '<div class="idx"><span class="n num">'+(n+1)+'</span><span class="pl">'+ic(playing?'pause':'play','f')+'</span></div>'+
+      '<div class="who">'+cv(t)+'<div><div class="tt">'+esc(t.t)+'</div><div class="ar">'+esc(t.a)+'</div></div></div>'+
+      '<div class="gn">'+esc(t.g)+'</div>'+
+      '<div class="ql'+(t.f?' lossless':'')+'"><b>'+esc(t.q.split(' ')[0])+'</b> '+esc(t.q.split(' ').slice(1).join(' '))+'</div>'+
+      '<div class="tm num">'+dur(t)+'</div>'+
+      '<div class="acts">'+
+        '<button class="ab fv'+(fv?' on':'')+'" data-a="fav" type="button" title="В избранное" aria-label="В избранное">'+ic('heart')+'</button>'+
+        (view==='queue'?'<button class="ab" data-a="unq" type="button" title="Убрать из очереди" aria-label="Убрать">'+ic('x')+'</button>':'<button class="ab" data-a="q" type="button" title="В очередь" aria-label="В очередь">'+ic('plus')+'</button>')+
+        '<button class="ab dlb" data-a="dl" type="button" title="Скачать" aria-label="Скачать">'+ic('dl')+'</button>'+
+      '</div></div>';
+  }).join('');
+  if(!l.length){
+    var msg={all:TRACKS.length?['Ничего не найдено','Попробуйте изменить запрос или жанр']:['Каталог пуст','Загрузите mp3 в папку music'],fav:['В избранном пока пусто','Нажмите на сердечко рядом с треком'],queue:['Очередь пуста','Нажмите «+» рядом с треком, чтобы добавить']}[view];
+    html='<div class="empty"><b>'+msg[0]+'</b>'+msg[1]+'</div>';
+  }
+  $('list').innerHTML=html;
+  renderNav();
+}
+function plural(n,f){n=Math.abs(n)%100;var m=n%10;return n>10&&n<20?f[2]:m>1&&m<5?f[1]:m===1?f[0]:f[2]}
+function renderNav(){
+  $('cAll').textContent=TRACKS.length;$('cFav').textContent=favs.length||'';$('cQ').textContent=queue.length||'';
+  document.querySelectorAll('.nv').forEach(function(b){b.classList.toggle('on',b.dataset.view===view&&!genre)});
+  var gs={};TRACKS.forEach(function(t){gs[t.g]=(gs[t.g]||0)+1});
+  var h='',ch='<button class="chip'+(!genre?' on':'')+'" data-g="" type="button">Все</button>';
+  Object.keys(gs).forEach(function(g){
+    h+='<button class="nv'+(genre===g&&view==='all'?' on':'')+'" data-g="'+g+'" type="button">'+g+'<span class="c">'+gs[g]+'</span></button>';
+    ch+='<button class="chip'+(genre===g?' on':'')+'" data-g="'+g+'" type="button">'+g+'</button>';
+  });
+  $('genreNav').innerHTML=h;$('chips').innerHTML=ch;
+  $('chips').style.display=view==='all'?'':'none';
+}
+
+/* ===== воспроизведение ===== */
+function playId(id,list){
+  var t=TRACKS[id];if(!t)return;
+  if(list)ORDER=list.slice();
+  cur=id;audio.src=t.src||genUrl(id);
+  var p=audio.play();if(p&&p.catch)p.catch(function(){toast('Нажмите Play ещё раз')});
+  $('pT').textContent=t.t;$('pA').textContent=t.a+' · '+t.q;
+  var c=$('pCv');c.dataset.s=t.s;c.style.setProperty('--bg0',t.c[0]);c.style.setProperty('--fg0',t.c[1]);
+  $('dl').classList.remove('off');
+  document.title=t.t+' — '+t.a;
+  if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:t.t,artist:t.a,album:'wavelab'})}catch(e){}}
+  render();
+}
+function toggle(){
+  if(cur<0){var l=visible();if(l.length)playId(l[0].id,ORDER);return}
+  audio.paused?audio.play():audio.pause();
+}
+function step(dir,auto){
+  if(!ORDER.length)ORDER=TRACKS.map(function(t){return t.id});
+  if(dir>0&&queue.length&&view!=='queue'){var n=queue.shift();return playId(n)}
+  var i=ORDER.indexOf(cur),n;
+  if(shuffle&&ORDER.length>1){do{n=ORDER[Math.floor(Math.random()*ORDER.length)]}while(n===cur)}
+  else{i+=dir;if(i>=ORDER.length){if(auto&&rep===0){audio.pause();return}i=0}if(i<0)i=ORDER.length-1;n=ORDER[i]}
+  playId(n);
+}
+audio.addEventListener('play',function(){$('bPlayI').innerHTML='<use href="#i-pause"/>';render()});
+audio.addEventListener('pause',function(){$('bPlayI').innerHTML='<use href="#i-play"/>';render()});
+audio.addEventListener('loadedmetadata',function(){$('dur').textContent=fmt(audio.duration);var t=TRACKS[cur];if(t&&!t.dur&&t.src&&isFinite(audio.duration)){t.dur=audio.duration;render()}});
+audio.addEventListener('timeupdate',function(){
+  if(!audio.duration)return;
+  $('seek').value=audio.currentTime/audio.duration*100;fill($('seek'));$('cur').textContent=fmt(audio.currentTime);
+});
+audio.addEventListener('ended',function(){if(rep===2){audio.currentTime=0;audio.play()}else step(1,true)});
+audio.addEventListener('error',function(){if(cur>-1)toast('Не удалось загрузить трек')});
+if('mediaSession' in navigator){try{
+  navigator.mediaSession.setActionHandler('play',toggle);navigator.mediaSession.setActionHandler('pause',toggle);
+  navigator.mediaSession.setActionHandler('nexttrack',function(){step(1)});navigator.mediaSession.setActionHandler('previoustrack',function(){step(-1)});
+}catch(e){}}
+
+/* ===== действия ===== */
+function toggleFav(id){
+  var i=favs.indexOf(id);
+  if(i>-1){favs.splice(i,1);toast('Убрано из избранного')}else{favs.push(id);toast('Добавлено в избранное')}
+  save('wl3_favs',favs);render();
+}
+function download(id){
+  var t=TRACKS[id];if(!t)return;toast('Скачивание: '+t.t);
+  var u=t.src||genUrl(id),ext=t.src?((t.src.split('?')[0].match(/\.[a-z0-9]{2,4}$/i)||['.mp3'])[0]):'.wav';
+  fetch(u).then(function(r){return r.blob()}).then(function(b){
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(t.a+' - '+t.t).replace(/[\\/:*?"<>|]/g,'_')+ext;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+  }).catch(function(){window.open(u,'_blank')});
+}
+$('list').addEventListener('click',function(e){
+  var r=e.target.closest('.row');if(!r)return;
+  var id=+r.dataset.id,b=e.target.closest('[data-a]'),a=b?b.dataset.a:'';
+  if(a==='fav')return toggleFav(id);
+  if(a==='q'){queue.push(id);toast('Добавлено в очередь: '+TRACKS[id].t);return renderNav()}
+  if(a==='unq'){queue.splice(+r.dataset.n,1);return render()}
+  if(a==='dl')return download(id);
+  if(view==='queue'){queue.splice(+r.dataset.n,1);renderNav();return playId(id)}
+  if(id===cur)toggle();else playId(id,ORDER);
+});
+document.addEventListener('click',function(e){
+  var n=e.target.closest('.nv,.chip');if(!n)return;
+  if(n.dataset.view){view=n.dataset.view;genre=''}
+  else if(n.dataset.g!==undefined){view='all';genre=n.dataset.g}
+  $('scroll').scrollTop=0;render();
+});
+$('q').oninput=function(e){query=e.target.value.trim().toLowerCase();render()};
+$('sort').onchange=function(e){sortV=e.target.value;render()};
+$('playAll').onclick=function(){if(ORDER.length){shuffle=false;$('bShuf').classList.remove('on');playId(ORDER[0],ORDER)}};
+$('shufAll').onclick=function(){if(ORDER.length){shuffle=true;$('bShuf').classList.add('on');playId(ORDER[Math.floor(Math.random()*ORDER.length)],ORDER)}};
+$('bPlay').onclick=toggle;
+$('bNext').onclick=function(){step(1)};
+$('bPrev').onclick=function(){if(audio.currentTime>3)audio.currentTime=0;else step(-1)};
+$('bShuf').onclick=function(){shuffle=!shuffle;this.classList.toggle('on',shuffle);toast(shuffle?'Вперемешку: вкл':'Вперемешку: выкл')};
+$('bRep').onclick=function(){rep=(rep+1)%3;this.classList.toggle('on',rep>0);toast(['Повтор выключен','Повтор списка','Повтор трека'][rep])};
+$('seek').oninput=function(e){if(audio.duration)audio.currentTime=e.target.value/100*audio.duration;fill(e.target)};
+$('vol').oninput=function(e){audio.volume=+e.target.value;fill(e.target);save('wl3_vol',+e.target.value)};
+$('dl').onclick=function(){if(cur>-1)download(cur)};
+document.addEventListener('keydown',function(e){
+  var tg=e.target.tagName;if(tg==='INPUT'&&e.target.type!=='range'||tg==='SELECT')return;
+  if(e.code==='Space'){e.preventDefault();toggle()}
+  else if(e.code==='ArrowRight'&&audio.duration){audio.currentTime=Math.min(audio.duration,audio.currentTime+10)}
+  else if(e.code==='ArrowLeft'){audio.currentTime=Math.max(0,audio.currentTime-10)}
+  else if(e.key==='n'||e.key==='N')step(1);
+  else if(e.key==='p'||e.key==='P')step(-1);
+  else if((e.key==='f'||e.key==='F')&&cur>-1)toggleFav(cur);
+});
+
+audio.volume=vol;$('vol').value=vol;fill($('vol'));fill($('seek'));
+loadTracks(render);
+})();
+</script>
+</body>
+</html>
