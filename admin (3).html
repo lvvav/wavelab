@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0d11">
+<title>Soundlife — админка</title>
+<style>
+:root{--bg:#0d0d11;--panel:#121217;--hover:#18181f;--line:#23232c;--text:#ececf1;--mut:#8b8b99;--acc:#c6ff3d;--on:#11160a;--bad:#ff6b6b;--warn:#ffb84d;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:22px 16px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+h1{font-size:26px;letter-spacing:-.04em;font-weight:800}
+h1 span{color:var(--acc)}
+h2{font-size:17px;letter-spacing:-.02em;margin-bottom:12px}
+.chip{font-size:13px;color:var(--mut);padding:6px 12px;border:1px solid var(--line);border-radius:99px}
+.chip.ok{color:var(--acc);border-color:var(--acc)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+details>summary{cursor:pointer;font-size:17px;font-weight:700;letter-spacing:-.02em;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"▾";color:var(--mut);transition:transform .2s}
+details[open]>summary::after{transform:rotate(180deg)}
+details .body{margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label.f{display:block;font-size:12px;color:var(--mut);font-weight:600}
+label.f input{display:block;width:100%;margin-top:5px;font-weight:400}
+input[type=text],input[type=password],input[type=search]{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;outline:0;color:var(--text);min-width:0}
+input[type=text]:focus,input[type=password]:focus,input[type=search]:focus{border-color:var(--acc)}
+.hint{color:var(--mut);font-size:12.5px;margin-top:10px}
+.hint b{color:var(--text);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:99px;font-weight:600;background:var(--acc);color:var(--on);transition:filter .15s,transform .15s}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.97)}
+.btn.ghost{background:none;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--hover);filter:none}
+.btn.bad{background:var(--bad);color:#190606}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{margin-top:10px;font-size:13px}
+.msg.bad{color:var(--bad)}.msg.ok{color:var(--acc)}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:30px 16px;text-align:center;color:var(--mut);cursor:pointer;transition:border-color .2s,background .2s,color .2s}
+.drop:hover,.drop.over{border-color:var(--acc);background:var(--hover);color:var(--text)}
+.drop b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 8px}
+.tools input{flex:1;min-width:140px}
+#queue,#exist{margin-top:6px}
+.it{display:grid;grid-template-columns:24px minmax(0,1fr) 150px 74px 28px;gap:8px 10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);border-radius:8px}
+.it:hover{background:var(--hover)}
+.it .nm{display:flex;align-items:center;gap:4px;min-width:0}
+.it .nm input{flex:1;width:100%}
+.it .ext{color:var(--mut);font-size:12px}
+.it .sz{color:var(--mut);font-size:12.5px;text-align:right;white-space:nowrap}
+.it .x{color:var(--mut);width:28px;height:28px;border-radius:50%}
+.it .x:hover{background:var(--line);color:var(--text)}
+.it .st{grid-column:2/-1;font-size:12.5px;color:var(--mut);display:flex;gap:10px;align-items:center;min-height:0}
+.it .st:empty{display:none}
+.it .st .bar{flex:1}
+.it.dup .st,.it.big .st{color:var(--warn)}
+.it.err .st{color:var(--bad)}
+.it.done .st{color:var(--acc)}
+.it.warnname .st{color:var(--warn)}
+.ex{display:grid;grid-template-columns:24px minmax(0,1fr) 74px;gap:10px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line);border-radius:8px;cursor:pointer}
+.ex:hover{background:var(--hover)}
+.ex .p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ex .p small{color:var(--mut)}
+.ex .sz{color:var(--mut);font-size:12.5px;text-align:right}
+input[type=checkbox]{width:17px;height:17px;accent-color:var(--acc)}
+.empty{padding:26px 0;text-align:center;color:var(--mut)}
+.sum{color:var(--mut);font-size:13px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:20;max-width:92vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:640px){
+  .it{grid-template-columns:24px minmax(0,1fr) 28px}
+  .it .in-genre{grid-column:2/3}
+  .it .sz{grid-column:2/3;text-align:left}
+  .it .st{grid-column:2/-1}
+}
+.linkb{color:var(--mut);text-decoration:underline;font-size:13px}
+.linkb:hover{color:var(--text)}
+textarea{width:100%;min-height:90px;display:block;margin-top:5px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--text);font:12px/1.4 ui-monospace,Consolas,monospace;outline:0;resize:vertical;word-break:break-all}
+textarea:focus{border-color:var(--acc)}
+details.mini{margin-top:12px}
+details.mini>summary{font-size:13px;font-weight:600;color:var(--mut);letter-spacing:0}
+details.mini>summary:hover{color:var(--text)}
+details.mini .hint{line-height:1.7}
+a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Soundlife <span>админка</span></h1>
+    <div class="chip" id="conn">не подключено</div>
+  </header>
+
+  <!-- вход -->
+  <section class="card" id="cLogin" hidden>
+    <!-- обычный вход -->
+    <div id="lgIn" hidden>
+      <h2>Вход</h2>
+      <label class="f">Пароль<input type="password" id="lpw" autocomplete="current-password" placeholder="Введите пароль"></label>
+      <div class="row" style="margin-top:14px"><button class="btn" id="bLogin" type="button">Войти</button></div>
+      <div style="margin-top:14px"><button class="linkb" id="bReset" type="button">Забыл пароль / настроить заново</button></div>
+    </div>
+
+    <!-- первая настройка -->
+    <div id="lgSet" hidden>
+      <h2>Первая настройка</h2>
+      <div class="grid">
+        <label class="f">Ваш ник на GitHub<input type="text" id="fOwner" placeholder="username" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
+        <label class="f">Репозиторий сайта<input type="text" id="fRepo" placeholder="soundlife" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
+      </div>
+      <label class="f" style="margin-top:12px">Токен GitHub<input type="password" id="fToken" placeholder="github_pat_…" autocomplete="off" spellcheck="false"></label>
+      <details class="mini">
+        <summary>Где взять токен?</summary>
+        <div class="hint">
+          1. Откройте <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a><br>
+          2. Name: любое, Expiration: например 1 год<br>
+          3. Repository access → <b>Only select repositories</b> → ваш репозиторий сайта<br>
+          4. Permissions → Repository permissions → <b>Contents: Read and write</b><br>
+          5. Generate token и скопируйте <b>github_pat_…</b>
+        </div>
+      </details>
+      <div class="grid" style="margin-top:14px">
+        <label class="f">Придумайте пароль<input type="password" id="npw" autocomplete="new-password" placeholder="не короче 6 символов"></label>
+        <label class="f">Повторите пароль<input type="password" id="npw2" autocomplete="new-password"></label>
+      </div>
+      <details class="mini">
+        <summary>Дополнительно</summary>
+        <div class="grid" style="margin-top:10px">
+          <label class="f">Ветка (можно пусто)<input type="text" id="fBranch" placeholder="main" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
+          <label class="f">Папка с музыкой<input type="text" id="fFolder" value="music" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
+        </div>
+      </details>
+      <div class="hint">Токен шифруется вашим паролем и хранится только на этом устройстве. Дальше для входа нужен будет только пароль.</div>
+      <div class="row" style="margin-top:14px"><button class="btn" id="bSetup" type="button">Сохранить и войти</button></div>
+      <div style="margin-top:14px"><button class="linkb" id="bToCode" type="button">У меня уже есть код доступа с другого устройства</button></div>
+    </div>
+
+    <!-- вход по коду -->
+    <div id="lgCode" hidden>
+      <h2>Вход по коду доступа</h2>
+      <label class="f">Код доступа<textarea id="lcode" placeholder="Вставьте код" spellcheck="false"></textarea></label>
+      <label class="f" style="margin-top:12px">Пароль<input type="password" id="lcpw" autocomplete="current-password"></label>
+      <div class="row" style="margin-top:14px"><button class="btn" id="bCodeGo" type="button">Войти</button></div>
+      <div style="margin-top:14px"><button class="linkb" id="bToSet" type="button">Назад</button></div>
+    </div>
+    <div class="msg" id="lgMsg"></div>
+  </section>
+
+  <div id="app" hidden>
+  <!-- загрузка -->
+  <section class="card" id="cUp">
+    <h2>2. Загрузка треков</h2>
+    <div class="drop" id="drop" tabindex="0" role="button">
+      <b>Перетащите сюда файлы или папку</b>
+      mp3, flac, wav, m4a, ogg и обложки jpg/png/webp. Без ограничения по количеству; один файл — до 99 МБ.
+    </div>
+    <input type="file" id="pick" multiple accept=".mp3,.flac,.wav,.m4a,.ogg,.jpg,.jpeg,.png,.webp,audio/*,image/*" hidden>
+    <input type="file" id="pickDir" webkitdirectory multiple hidden>
+    <div class="tools">
+      <button class="btn ghost" id="bPick" type="button">Выбрать файлы</button>
+      <button class="btn ghost" id="bPickDir" type="button">Выбрать папку</button>
+      <input type="text" id="fGenre" list="gl" placeholder="Жанр (папка) для новых файлов" autocomplete="off">
+      <button class="btn ghost" id="bGenreAll" type="button">Применить ко всем</button>
+      <datalist id="gl"></datalist>
+    </div>
+    <div class="hint" style="margin-top:0">Называйте файлы так: <b>Артист - Название.mp3</b>. Жанр — это подпапка внутри <b>music</b>. Одинаковые песни, которые уже есть на сайте, отмечаются и по умолчанию не загружаются.</div>
+
+    <div id="queue"></div>
+
+    <div id="upBar" hidden style="margin-top:14px">
+      <div class="bar"><i id="ovBar"></i></div>
+      <div class="sum" id="ovTxt" style="margin-top:6px"></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="bGo" type="button" disabled>Загрузить</button>
+      <button class="btn ghost" id="bStop" type="button" hidden>Остановить</button>
+      <button class="btn ghost" id="bClear" type="button">Очистить список</button>
+      <span class="sum" id="qSum"></span>
+    </div>
+    <div class="msg" id="upMsg"></div>
+  </section>
+
+  <!-- что уже на сайте -->
+  <section class="card" id="cEx">
+    <h2>3. Что уже на сайте</h2>
+    <div class="tools" style="margin-top:0">
+      <input type="search" id="exQ" placeholder="Поиск по файлам" autocomplete="off">
+      <button class="btn ghost" id="bRef" type="button">Обновить</button>
+      <button class="btn ghost" id="bSelVis" type="button">Выбрать найденные</button>
+      <button class="btn bad" id="bDel" type="button" disabled>Удалить выбранные</button>
+    </div>
+    <div class="sum" id="exSum"></div>
+    <div id="exist"><div class="empty">Сначала подключитесь к GitHub</div></div>
+  </section>
+  <section class="card" id="cAcc">
+    <h2>Доступ</h2>
+    <div class="row">
+      <button class="btn ghost" id="bCode" type="button">Код для другого устройства</button>
+      <button class="btn ghost" id="bOut" type="button">Выйти</button>
+      <button class="btn ghost" id="bWipe" type="button">Удалить доступ с этого устройства</button>
+    </div>
+    <div id="codeBox" hidden style="margin-top:12px">
+      <textarea id="codeOut" readonly></textarea>
+      <div class="hint">Это зашифрованный код. Вставьте его на другом устройстве в «У меня уже есть код доступа» и войдите тем же паролем. Без пароля он бесполезен.</div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="bCopy" type="button">Скопировать</button></div>
+    </div>
+  </section>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('on')},3200)}
+function mb(n){return n>=1048576?(n/1048576).toFixed(n>=10485760?0:1).replace('.',',')+' МБ':Math.max(1,Math.round(n/1024))+' КБ'}
+
+var MAX=99*1048576,CHUNK_FILES=15,CHUNK_BYTES=250*1048576,CONC=2;
+var AUDIO=/\.(mp3|flac|wav|m4a|ogg)$/i,IMG=/\.(jpe?g|png|webp)$/i;
+var CFG={};try{CFG=JSON.parse(localStorage.getItem('sl_admin')||'{}')||{}}catch(e){}
+var EXIST=[],EXPATH={},EXKEY={},defBranch='',Q=[],seq=0,uploading=false,abort=false,xhrs=[];
+
+/* ===== GitHub API ===== */
+function repoP(){return '/repos/'+CFG.owner+'/'+CFG.repo}
+function hdr(){return {'Authorization':'Bearer '+CFG.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}}
+async function gh(method,path,body){
+  var h=hdr();if(body)h['Content-Type']='application/json';
+  var r=await fetch('https://api.github.com'+path,{method:method,headers:h,body:body?JSON.stringify(body):undefined});
+  if(!r.ok){var t='';try{t=(await r.json()).message||''}catch(e){}var er=new Error(r.status+(t?': '+t:''));er.status=r.status;throw er}
+  return r.status===204?null:r.json();
+}
+async function br(){if(CFG.branch)return CFG.branch;if(!defBranch){var j=await gh('GET',repoP());defBranch=j.default_branch}return defBranch}
+function nice(e){
+  if(e.status===401)return 'Токен не подходит или просрочен (401).';
+  if(e.status===403)return 'Нет прав или превышен лимит запросов (403). Проверьте права Contents: Read and write.';
+  if(e.status===404)return 'Репозиторий или ветка не найдены (404). Проверьте ник, имя репозитория и доступ токена.';
+  if(e.status===409)return 'Репозиторий пуст. Создайте в нём хотя бы один файл (например README) и повторите.';
+  return e.message;
+}
+
+/* ===== вход по паролю ===== */
+var enc=new TextEncoder(),dec=new TextDecoder(),VAULT=localStorage.getItem('sl_vault')||'';
+function b2s(buf){var a=new Uint8Array(buf),s='';for(var i=0;i<a.length;i+=8192)s+=String.fromCharCode.apply(null,a.subarray(i,i+8192));return btoa(s)}
+function s2b(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function keyFrom(pw,salt,it){
+  var k=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:it,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function seal(obj,pw){
+  var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),it=250000,key=await keyFrom(pw,salt,it);
+  var c=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,enc.encode(JSON.stringify(obj)));
+  return btoa(JSON.stringify({v:1,it:it,s:b2s(salt),i:b2s(iv),c:b2s(c)}));
+}
+async function unseal(code,pw){
+  var o=JSON.parse(atob(code.trim())),key=await keyFrom(pw,s2b(o.s),o.it);
+  var p=await crypto.subtle.decrypt({name:'AES-GCM',iv:s2b(o.i)},key,s2b(o.c));
+  return JSON.parse(dec.decode(p));
+}
+function lgMsg(t,bad){var m=$('lgMsg');m.textContent=t||'';m.className='msg'+(bad?' bad':'')}
+function setConn(ok,txt){var c=$('conn');c.textContent=txt;c.classList.toggle('ok',ok)}
+function showLogin(which){
+  ['lgIn','lgSet','lgCode'].forEach(function(id){$(id).hidden=id!==which});
+  $('cLogin').hidden=false;$('app').hidden=true;lgMsg('');
+}
+async function verify(cfg){
+  CFG=cfg;defBranch='';
+  var j=await gh('GET',repoP());
+  if(j.permissions&&!j.permissions.push)throw Object.assign(new Error('У токена нет права записи в этот репозиторий.'),{status:0});
+  defBranch=j.default_branch;await br();
+}
+async function launch(){
+  setConn(true,CFG.owner+'/'+CFG.repo+' · '+await br());
+  $('cLogin').hidden=true;$('app').hidden=false;
+  await loadList();updateGo();
+}
+function readSetup(){
+  var o=$('fOwner').value.trim(),r=$('fRepo').value.trim();
+  if(r.indexOf('/')>-1){var p=r.split('/');o=o||p[0];r=p[p.length-1]}
+  return {owner:o,repo:r.replace(/\.git$/,''),branch:$('fBranch').value.trim(),folder:($('fFolder').value.trim()||'music').replace(/^\/+|\/+$/g,''),token:$('fToken').value.trim()};
+}
+async function login(code,pw,store){
+  var cfg;
+  try{cfg=await unseal(code,pw)}catch(e){lgMsg('Неверный пароль или повреждённый код.',1);return}
+  lgMsg('Подключаюсь…');
+  try{
+    await verify(cfg);
+    if(store){VAULT=code;localStorage.setItem('sl_vault',code)}
+    await launch();
+  }catch(e){
+    CFG={};lgMsg(nice(e)+' Если токен просрочен, нажмите «Забыл пароль / настроить заново».',1);
+  }
+}
+$('bLogin').onclick=function(){var pw=$('lpw').value;if(!pw){lgMsg('Введите пароль.',1);return}login(VAULT,pw,false)};
+$('lpw').addEventListener('keydown',function(e){if(e.key==='Enter')$('bLogin').click()});
+$('bReset').onclick=function(){
+  if(!confirm('Удалить сохранённый доступ с этого устройства и настроить заново?'))return;
+  localStorage.removeItem('sl_vault');VAULT='';showLogin('lgSet');
+};
+$('bSetup').onclick=async function(){
+  var cfg=readSetup(),pw=$('npw').value;
+  if(!cfg.owner||!cfg.repo||!cfg.token){lgMsg('Заполните ник, репозиторий и токен.',1);return}
+  if(pw.length<6){lgMsg('Пароль должен быть не короче 6 символов.',1);return}
+  if(pw!==$('npw2').value){lgMsg('Пароли не совпадают.',1);return}
+  lgMsg('Проверяю токен…');this.disabled=true;
+  try{
+    await verify(cfg);
+    var code=await seal(cfg,pw);
+    VAULT=code;localStorage.setItem('sl_vault',code);
+    await launch();
+  }catch(e){CFG={};lgMsg(nice(e),1)}
+  this.disabled=false;
+};
+$('bToCode').onclick=function(){showLogin('lgCode')};
+$('bToSet').onclick=function(){showLogin('lgSet')};
+$('bCodeGo').onclick=function(){
+  var code=$('lcode').value.trim(),pw=$('lcpw').value;
+  if(!code||!pw){lgMsg('Вставьте код и введите пароль.',1);return}
+  login(code,pw,true);
+};
+$('bCode').onclick=function(){$('codeOut').value=VAULT;$('codeBox').hidden=!$('codeBox').hidden};
+$('bCopy').onclick=function(){
+  var t=$('codeOut');t.select();
+  (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(function(){toast('Код скопирован')},function(){try{document.execCommand('copy');toast('Код скопирован')}catch(e){toast('Выделите код и скопируйте вручную')}});
+};
+$('bOut').onclick=function(){location.reload()};
+$('bWipe').onclick=function(){
+  if(!confirm('Удалить доступ с этого устройства? Чтобы войти снова, понадобится токен или код доступа.'))return;
+  localStorage.removeItem('sl_vault');location.reload();
+};
+
+/* ===== имена, дубли ===== */
+function clean(s){return String(s).replace(/[\\\/:*?"<>|]+/g,'_').replace(/\s+/g,' ').trim().replace(/^\.+|\.+$/g,'')}
+function baseOf(p){return p.slice(p.lastIndexOf('/')+1).replace(/\.[^.]+$/,'')}
+function normKey(name){
+  var n=name.replace(/_/g,' '),sp=n.split(' - '),a=sp.length>1?sp.shift().trim():'—',t=sp.join(' - ').trim();
+  return (a+' '+t).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+}
+function pathOf(it){var g=clean(it.genre);return CFG.folder+'/'+(g?g+'/':'')+clean(it.name)+'.'+it.ext}
+function isAudio(it){return AUDIO.test('.'+it.ext)}
+function checkDup(it){
+  it.dup='';
+  if(it.status==='big')return;
+  var p=pathOf(it).toLowerCase();
+  if(EXPATH[p])it.dup='file';
+  else if(isAudio(it)&&EXKEY[normKey(it.name)])it.dup='song';
+}
+
+/* ===== список на сайте ===== */
+async function loadList(){
+  $('exSum').textContent='Загружаю список…';
+  try{
+    var b=await br();
+    var j=await gh('GET',repoP()+'/git/trees/'+encodeURI(b)+'?recursive=1');
+    EXIST=j.tree.filter(function(n){return n.type==='blob'&&n.path.indexOf(CFG.folder+'/')===0&&(AUDIO.test(n.path)||IMG.test(n.path))});
+    EXIST.sort(function(a,c){return a.path.localeCompare(c.path,'ru')});
+    EXPATH={};EXKEY={};var gs={};
+    EXIST.forEach(function(n){
+      EXPATH[n.path.toLowerCase()]=1;
+      if(AUDIO.test(n.path))EXKEY[normKey(baseOf(n.path))]=n.path;
+      var rel=n.path.slice(CFG.folder.length+1).split('/');if(rel.length>1)gs[rel.slice(0,-1).join('/')]=1;
+    });
+    $('gl').innerHTML=Object.keys(gs).sort().map(function(g){return '<option value="'+esc(g)+'">'}).join('');
+    Q.forEach(checkDup);renderQueue();renderExist();
+    if(j.truncated)$('exSum').textContent+=' (список обрезан GitHub — слишком много файлов)';
+  }catch(e){$('exSum').textContent='Не удалось загрузить список: '+nice(e)}
+}
+function renderExist(){
+  var q=$('exQ').value.trim().toLowerCase(),box=$('exist');
+  var l=EXIST.filter(function(n){return !q||n.path.toLowerCase().indexOf(q)>-1});
+  var tot=EXIST.reduce(function(a,n){return a+(n.size||0)},0);
+  $('exSum').textContent=EXIST.length?('Файлов: '+EXIST.length+' · '+mb(tot)+(q?' · найдено '+l.length:'')):'';
+  if(!l.length){box.innerHTML='<div class="empty">'+(CFG.token?(EXIST.length?'Ничего не найдено':'В папке пока пусто'):'Сначала подключитесь к GitHub')+'</div>';updateDel();return}
+  box.innerHTML=l.slice(0,600).map(function(n){
+    var rel=n.path.slice(CFG.folder.length+1),i=rel.lastIndexOf('/'),d=i>-1?rel.slice(0,i+1):'';
+    return '<label class="ex"><input type="checkbox" data-p="'+esc(n.path)+'"><div class="p"><small>'+esc(d)+'</small>'+esc(rel.slice(i+1))+'</div><span class="sz">'+mb(n.size||0)+'</span></label>';
+  }).join('')+(l.length>600?'<div class="empty">Показаны первые 600. Уточните поиск.</div>':'');
+  updateDel();
+}
+function sel(){return Array.prototype.slice.call($('exist').querySelectorAll('input:checked')).map(function(c){return c.dataset.p})}
+function updateDel(){var n=sel().length;$('bDel').disabled=!n||uploading;$('bDel').textContent=n?'Удалить выбранные ('+n+')':'Удалить выбранные'}
+$('exist').addEventListener('change',updateDel);
+$('exQ').oninput=renderExist;
+$('bRef').onclick=function(){if(CFG.token)loadList()};
+$('bSelVis').onclick=function(){$('exist').querySelectorAll('input').forEach(function(c){c.checked=true});updateDel()};
+$('bDel').onclick=async function(){
+  var ps=sel();if(!ps.length||uploading)return;
+  if(!confirm('Удалить файлов: '+ps.length+'? Это нельзя отменить из админки.'))return;
+  $('bDel').disabled=true;
+  try{
+    for(var i=0;i<ps.length;i+=300){
+      await commit(ps.slice(i,i+300).map(function(p){return {path:p,mode:'100644',type:'blob',sha:null}}),'Удаление файлов: '+ps.length);
+    }
+    toast('Удалено: '+ps.length);await loadList();
+  }catch(e){toast('Ошибка: '+nice(e))}
+  updateDel();
+};
+
+/* ===== очередь загрузки ===== */
+function extOf(n){var m=n.match(/\.([a-z0-9]+)$/i);return m?m[1].toLowerCase():''}
+function addFiles(files){
+  var skipped=0,added=0,g0=clean($('fGenre').value);
+  Array.prototype.forEach.call(files,function(f){
+    var ext=extOf(f.name);
+    if(!AUDIO.test('.'+ext)&&!IMG.test('.'+ext)){skipped++;return}
+    if(Q.some(function(x){return x.file.name===f.name&&x.file.size===f.size&&x.file.lastModified===f.lastModified}))return;
+    var genre=g0;
+    if(!genre&&f.webkitRelativePath){var pp=f.webkitRelativePath.split('/');if(pp.length>2)genre=clean(pp[pp.length-2])}
+    var it={id:++seq,file:f,size:f.size,ext:ext,name:f.name.replace(/\.[^.]+$/,'').replace(/\s+/g,' ').trim(),genre:genre,sel:true,status:'ready',prog:0,msg:''};
+    if(f.size>MAX){it.status='big';it.sel=false}
+    checkDup(it);if(it.dup)it.sel=false;
+    Q.push(it);added++;
+  });
+  renderQueue();
+  if(skipped)toast('Пропущено файлов неподдерживаемого типа: '+skipped);
+}
+function statusHTML(it){
+  if(it.status==='up')return '<div class="bar"><i style="width:'+Math.round(it.prog*100)+'%"></i></div><span>'+Math.round(it.prog*100)+'%</span>';
+  if(it.status==='queued')return 'ждёт очереди…';
+  if(it.status==='commit')return 'сохраняю в репозитории…';
+  if(it.status==='done')return '✓ загружено';
+  if(it.status==='err')return 'Ошибка: '+esc(it.msg);
+  if(it.status==='big')return 'больше 99 МБ — GitHub не принимает такие файлы';
+  if(it.dup==='file')return 'такой файл уже есть на сайте (будет заменён, если оставить галочку)';
+  if(it.dup==='song')return 'такая песня уже есть: '+esc(EXKEY[normKey(it.name)]?EXKEY[normKey(it.name)].slice(CFG.folder.length+1):'');
+  if(isAudio(it)&&it.name.indexOf(' - ')<0)return 'лучше назвать «Артист - Название»';
+  return '';
+}
+function rowCls(it){return 'it '+(it.status==='done'?'done':it.status==='err'?'err':it.status==='big'?'big':it.dup?'dup':(isAudio(it)&&it.name.indexOf(' - ')<0&&it.status==='ready')?'warnname':'')}
+function rowHTML(it){
+  var lock=uploading||it.status==='done'?' disabled':'';
+  return '<div class="'+rowCls(it)+'" id="r'+it.id+'" data-id="'+it.id+'">'+
+    '<input type="checkbox" class="sel"'+(it.sel?' checked':'')+(it.status==='big'||it.status==='done'?' disabled':lock)+'>'+
+    '<div class="nm"><input type="text" class="in-name" value="'+esc(it.name)+'"'+lock+'><span class="ext">.'+esc(it.ext)+'</span></div>'+
+    '<input type="text" class="in-genre" list="gl" placeholder="жанр" value="'+esc(it.genre)+'"'+lock+'>'+
+    '<span class="sz">'+mb(it.size)+'</span>'+
+    '<button class="x" type="button" title="Убрать"'+(uploading&&it.status!=='done'&&it.status!=='err'&&it.status!=='ready'?' disabled':'')+'>✕</button>'+
+    '<div class="st">'+statusHTML(it)+'</div></div>';
+}
+function renderQueue(){
+  $('queue').innerHTML=Q.length?Q.map(rowHTML).join(''):'';
+  updateGo();
+}
+function updRow(it){
+  var el=$('r'+it.id);if(!el)return;
+  el.className=rowCls(it);
+  var st=el.querySelector('.st');
+  if(it.status==='up'&&st.querySelector('.bar i')){st.querySelector('.bar i').style.width=Math.round(it.prog*100)+'%';st.querySelector('span').textContent=Math.round(it.prog*100)+'%'}
+  else st.innerHTML=statusHTML(it);
+  var c=el.querySelector('.sel');if(c)c.disabled=uploading||it.status==='big'||it.status==='done';
+}
+function updateGo(){
+  var s=Q.filter(function(i){return i.sel&&(i.status==='ready'||i.status==='err')}),b=s.reduce(function(a,i){return a+i.size},0);
+  $('bGo').disabled=!CFG.token||uploading||!s.length;
+  $('bGo').textContent=s.length?'Загрузить ('+s.length+' · '+mb(b)+')':'Загрузить';
+  $('qSum').textContent=Q.length?('В списке: '+Q.length):'';
+  $('bStop').hidden=!uploading;
+  updateDel();
+}
+function find(e){var r=e.target.closest('.it');return r?Q.filter(function(i){return i.id==r.dataset.id})[0]:null}
+$('queue').addEventListener('input',function(e){
+  var it=find(e);if(!it)return;
+  if(e.target.classList.contains('in-name'))it.name=e.target.value;
+  if(e.target.classList.contains('in-genre'))it.genre=e.target.value;
+});
+$('queue').addEventListener('change',function(e){
+  var it=find(e);if(!it)return;
+  if(e.target.classList.contains('sel')){it.sel=e.target.checked;updateGo();return}
+  if(e.target.classList.contains('in-name')||e.target.classList.contains('in-genre')){
+    checkDup(it);if(it.dup)it.sel=false;else if(it.status==='ready')it.sel=true;
+    var el=$('r'+it.id);el.querySelector('.sel').checked=it.sel;updRow(it);updateGo();
+  }
+});
+$('queue').addEventListener('click',function(e){
+  var x=e.target.closest('.x');if(!x||x.disabled)return;var it=find(e);if(!it)return;
+  Q=Q.filter(function(i){return i!==it});renderQueue();
+});
+$('bClear').onclick=function(){if(uploading)return;Q=[];$('upMsg').textContent='';$('upBar').hidden=true;renderQueue()};
+$('bGenreAll').onclick=function(){
+  if(uploading)return;var g=clean($('fGenre').value);
+  Q.forEach(function(it){if(it.status==='done')return;it.genre=g;checkDup(it);if(it.dup)it.sel=false;else if(it.status==='ready')it.sel=true});
+  renderQueue();
+};
+
+/* выбор файлов */
+$('bPick').onclick=$('drop').onclick=function(){$('pick').click()};
+$('drop').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('pick').click()}};
+$('bPickDir').onclick=function(){$('pickDir').click()};
+$('pick').onchange=function(){addFiles(this.files);this.value=''};
+$('pickDir').onchange=function(){addFiles(this.files);this.value=''};
+['dragenter','dragover'].forEach(function(ev){$('drop').addEventListener(ev,function(e){e.preventDefault();this.classList.add('over')})});
+['dragleave','drop'].forEach(function(ev){$('drop').addEventListener(ev,function(e){e.preventDefault();this.classList.remove('over')})});
+async function readEntry(en,out,path){
+  if(en.isFile){await new Promise(function(res){en.file(function(f){try{Object.defineProperty(f,'webkitRelativePath',{value:path+f.name})}catch(e){}out.push(f);res()},res)})}
+  else if(en.isDirectory){
+    var rd=en.createReader(),all=[];
+    for(;;){var ch=await new Promise(function(res){rd.readEntries(res,function(){res([])})});if(!ch.length)break;all=all.concat(ch)}
+    for(var i=0;i<all.length;i++)await readEntry(all[i],out,path+en.name+'/');
+  }
+}
+$('drop').addEventListener('drop',async function(e){
+  var items=e.dataTransfer.items;
+  if(items&&items.length&&items[0].webkitGetAsEntry){
+    var out=[],ens=[];for(var i=0;i<items.length;i++){var en=items[i].webkitGetAsEntry();if(en)ens.push(en)}
+    for(var k=0;k<ens.length;k++)await readEntry(ens[k],out,'');
+    addFiles(out);
+  }else addFiles(e.dataTransfer.files);
+});
+window.addEventListener('dragover',function(e){e.preventDefault()});
+window.addEventListener('drop',function(e){e.preventDefault()});
+
+/* ===== загрузка ===== */
+function b64(file){return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){var r=fr.result;res(r.slice(r.indexOf(',')+1))};fr.onerror=function(){rej(new Error('Не удалось прочитать файл'))};fr.readAsDataURL(file)})}
+function postBlob(content,onp){
+  return new Promise(function(res,rej){
+    var x=new XMLHttpRequest();x.open('POST','https://api.github.com'+repoP()+'/git/blobs');
+    var h=hdr();Object.keys(h).forEach(function(k){x.setRequestHeader(k,h[k])});x.setRequestHeader('Content-Type','application/json');
+    x.upload.onprogress=function(e){if(e.lengthComputable)onp(e.loaded/e.total)};
+    x.onload=function(){
+      xhrs=xhrs.filter(function(v){return v!==x});
+      if(x.status>=200&&x.status<300){try{res(JSON.parse(x.responseText).sha)}catch(e){rej(new Error('Неверный ответ GitHub'))}}
+      else{var m='';try{m=JSON.parse(x.responseText).message}catch(e){}var er=new Error(x.status+(m?': '+m:''));er.status=x.status;rej(er)}
+    };
+    x.onerror=function(){xhrs=xhrs.filter(function(v){return v!==x});rej(new Error('Сеть недоступна'))};
+    x.onabort=function(){rej(new Error('Остановлено'))};
+    xhrs.push(x);x.send(JSON.stringify({content:content,encoding:'base64'}));
+  });
+}
+async function blobRetry(content,onp){
+  for(var a=0;;a++){
+    try{return await postBlob(content,onp)}
+    catch(e){if(abort||a>=2||(e.status&&e.status<500&&e.status!==429))throw e;await new Promise(function(r){setTimeout(r,1200*(a+1))})}
+  }
+}
+async function commit(entries,msg){
+  for(var a=0;a<5;a++){
+    var b=await br();
+    var ref=await gh('GET',repoP()+'/git/ref/heads/'+encodeURI(b)),head=ref.object.sha;
+    var c=await gh('GET',repoP()+'/git/commits/'+head);
+    var tr=await gh('POST',repoP()+'/git/trees',{base_tree:c.tree.sha,tree:entries});
+    var nc=await gh('POST',repoP()+'/git/commits',{message:msg,tree:tr.sha,parents:[head]});
+    try{await gh('PATCH',repoP()+'/git/refs/heads/'+encodeURI(b),{sha:nc.sha});return}
+    catch(e){if(e.status!==422||a===4)throw e}
+  }
+}
+function overall(list,t0){
+  var tot=list.reduce(function(a,i){return a+i.size},0),got=list.reduce(function(a,i){return a+i.size*(i.status==='done'||i.status==='commit'?1:i.status==='up'?i.prog:0)},0);
+  var n=list.filter(function(i){return i.status==='done'}).length,sec=(Date.now()-t0)/1000;
+  $('ovBar').style.width=(tot?got/tot*100:0)+'%';
+  $('ovTxt').textContent='Готово файлов: '+n+' из '+list.length+' · '+mb(got)+' из '+mb(tot)+(sec>2&&got>0?' · '+(got/1048576/sec).toFixed(1).replace('.',',')+' МБ/с':'');
+}
+async function run(){
+  var list=Q.filter(function(i){return i.sel&&(i.status==='ready'||i.status==='err')});
+  if(!list.length||uploading)return;
+  uploading=true;abort=false;
+  list.forEach(function(i){i.status='queued';i.prog=0;i.msg=''});
+  renderQueue();$('upBar').hidden=false;$('upMsg').textContent='';$('upMsg').className='msg';
+  var t0=Date.now(),todo=list.slice(),pending=[],pBytes=0,chain=Promise.resolve(),tick=setInterval(function(){overall(list,t0)},400);
+  function flush(){
+    if(!pending.length)return;
+    var batch=pending.splice(0);pBytes=0;
+    chain=chain.then(async function(){
+      if(abort)return;
+      batch.forEach(function(i){i.status='commit';updRow(i)});
+      try{
+        await commit(batch.map(function(i){return {path:pathOf(i),mode:'100644',type:'blob',sha:i.sha}}),'Добавлено треков: '+batch.length);
+        batch.forEach(function(i){i.status='done';i.sel=false;updRow(i)});
+      }catch(e){batch.forEach(function(i){i.status='err';i.msg=nice(e);updRow(i)})}
+    });
+  }
+  async function worker(){
+    while(todo.length&&!abort){
+      var it=todo.shift();
+      it.status='up';it.prog=0;updRow(it);
+      try{
+        var data=await b64(it.file);
+        it.sha=await blobRetry(data,function(p){it.prog=p;updRow(it)});data=null;
+        pending.push(it);pBytes+=it.size;
+        if(pending.length>=CHUNK_FILES||pBytes>=CHUNK_BYTES)flush();
+      }catch(e){it.status='err';it.msg=abort?'остановлено':nice(e);updRow(it)}
+    }
+  }
+  var ws=[];for(var k=0;k<CONC;k++)ws.push(worker());
+  await Promise.all(ws);flush();await chain;
+  clearInterval(tick);overall(list,t0);
+  list.forEach(function(i){if(i.status==='queued'||i.status==='up'){i.status='ready';i.prog=0}});
+  var ok=list.filter(function(i){return i.status==='done'}).length,bad=list.filter(function(i){return i.status==='err'}).length;
+  uploading=false;abort=false;
+  $('upMsg').className='msg '+(bad?'bad':'ok');
+  $('upMsg').textContent=(ok?'Загружено: '+ok+'. Сайт обновится примерно через минуту. ':'')+(bad?'С ошибкой: '+bad+' (нажмите «Загрузить» ещё раз, чтобы повторить).':'');
+  renderQueue();
+  if(ok){toast('Готово: '+ok+' файл(ов)');loadList()}
+}
+$('bGo').onclick=run;
+$('bStop').onclick=function(){abort=true;xhrs.slice().forEach(function(x){try{x.abort()}catch(e){}});$('upMsg').textContent='Останавливаю…'};
+window.addEventListener('beforeunload',function(e){if(uploading){e.preventDefault();e.returnValue=''}});
+
+/* ===== старт ===== */
+var OLD=CFG;CFG={};
+try{localStorage.removeItem('sl_admin')}catch(e){}
+if(!window.crypto||!crypto.subtle){
+  showLogin('lgSet');lgMsg('Браузер не поддерживает шифрование на этой странице. Откройте её по https:// (например, на GitHub Pages).',1);
+}else if(VAULT){showLogin('lgIn');setTimeout(function(){$('lpw').focus()},50)}
+else{
+  var m=location.hostname.match(/^([^.]+)\.github\.io$/);
+  $('fOwner').value=OLD.owner||(m?m[1]:'');
+  $('fRepo').value=OLD.repo||(m?(location.pathname.split('/')[1]||'').replace(/\.html?$/i,'')||m[1]+'.github.io':'');
+  if(OLD.token)$('fToken').value=OLD.token;
+  if(OLD.branch)$('fBranch').value=OLD.branch;
+  if(OLD.folder)$('fFolder').value=OLD.folder;
+  showLogin('lgSet');
+}
+})();
+</script>
+</body>
+</html>
