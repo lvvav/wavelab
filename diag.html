@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soundlife — диагностика</title>
+<style>
+body{margin:0;background:#0d0d11;color:#ececf1;font:15px/1.5 system-ui,sans-serif;padding:18px}
+h1{font-size:22px;margin:0 0 6px}p{color:#8b8b99;margin:0 0 14px}
+button{background:#c6ff3d;color:#11160a;border:0;border-radius:99px;padding:12px 22px;font:600 15px system-ui;margin-right:8px}
+button.g{background:#23232c;color:#ececf1}
+pre{white-space:pre-wrap;word-break:break-word;background:#121217;border:1px solid #23232c;border-radius:10px;padding:12px;font:13px/1.45 ui-monospace,monospace;margin-top:16px}
+</style></head><body>
+<h1>Диагностика Soundlife</h1>
+<p>Нажмите «Проверить», подождите около 20 секунд и пришлите скриншот или скопируйте текст.</p>
+<button id="go">Проверить</button><button class="g" id="cp">Скопировать</button>
+<pre id="out">Ждёт запуска…</pre>
+<script>
+var KEY='AIzaSyD7LrzbNF6YB8X4rzwTUB_04EVCHg31TVo',FOLDER='19ai5CUlJXEafuBN5aESU2bSplwbk58Em',B='https://www.googleapis.com/drive/v3/files';
+var out=document.getElementById('out'),buf='';
+function log(s){buf+=s+'\n';out.textContent=buf}
+function t0(){return Date.now()}
+async function step(name,fn){
+  var s=t0();
+  try{var r=await fn();log('✔ '+name+' ('+(t0()-s)+' мс): '+r)}
+  catch(e){log('✘ '+name+' ('+(t0()-s)+' мс): '+(e&&e.name)+' — '+(e&&e.message))}
+}
+async function body(r){var x=await r.text();return x.slice(0,300).replace(/\s+/g,' ')}
+document.getElementById('go').onclick=async function(){
+  buf='';log('Адрес страницы: '+location.origin+'\nБраузер: '+navigator.userAgent.slice(0,90)+'\nСеть: '+(navigator.onLine?'есть':'нет')+(navigator.connection?' ('+navigator.connection.effectiveType+')':'')+'\n');
+  var id='';
+  await step('1. Список файлов (обычный запрос)',async function(){
+    var r=await fetch(B+'?q='+encodeURIComponent("'"+FOLDER+"' in parents and trashed=false")+'&fields=files(id,name,mimeType,size)&pageSize=5&key='+KEY);
+    var tx=await r.text();
+    if(r.ok){var j=JSON.parse(tx);var f=(j.files||[]).filter(function(x){return /audio/.test(x.mimeType)})[0]||(j.files||[])[0];if(f)id=f.id;return 'HTTP '+r.status+', файлов в ответе: '+(j.files||[]).length+(f?', первый: '+f.name+' ('+Math.round((+f.size||0)/1048576)+' МБ)':'')}
+    return 'HTTP '+r.status+' '+tx.slice(0,300).replace(/\s+/g,' ');
+  });
+  if(!id){log('\nДальше проверять нечего: список не получен.');return}
+  var U=B+'/'+encodeURIComponent(id)+'?alt=media&key='+KEY;
+  await step('2. Трек: запрос с Range (так читаются теги)',async function(){
+    var r=await fetch(U,{headers:{Range:'bytes=0-99'}});
+    var n=(await r.arrayBuffer()).byteLength;
+    return 'HTTP '+r.status+', получено байт: '+n+(r.status===200?' (Range проигнорирован)':'');
+  });
+  await step('3. Трек: простой запрос, читаем первые 200 КБ',async function(){
+    var r=await fetch(U);
+    if(!r.ok)return 'HTTP '+r.status+' '+await body(r);
+    var rd=r.body.getReader(),got=0;
+    while(got<200000){var o=await rd.read();if(o.done)break;got+=o.value.length}
+    try{rd.cancel()}catch(e){}
+    return 'HTTP '+r.status+', получено '+Math.round(got/1024)+' КБ, тип '+r.headers.get('content-type');
+  });
+  await step('4. Трек: проигрывание через <audio> (до 15 с)',function(){
+    return new Promise(function(res,rej){
+      var a=new Audio();a.preload='auto';var done=false;
+      function fin(f,v){if(done)return;done=true;clearTimeout(tm);a.src='';f(v)}
+      var tm=setTimeout(function(){fin(rej,new Error('не загрузился за 15 секунд'))},15000);
+      a.addEventListener('canplay',function(){fin(res,'готов к воспроизведению, длительность '+Math.round(a.duration)+' с')});
+      a.addEventListener('error',function(){fin(rej,new Error('ошибка аудио, код '+(a.error&&a.error.code)))});
+      a.src=U;
+    });
+  });
+  await step('5. Для сравнения: сайт google.com доступен',async function(){
+    await fetch('https://www.google.com/generate_204',{mode:'no-cors'});return 'ответ получен';
+  });
+  log('\nГотово. Пришлите этот текст.');
+};
+document.getElementById('cp').onclick=function(){try{navigator.clipboard.writeText(buf);this.textContent='Скопировано'}catch(e){}};
+</script></body></html>
