@@ -72,17 +72,18 @@
   "aa": "Nirvana",
   "y": "1993"
  },
- "music/Nirvana - Endless, Nameles Nirvana.mp3": {
-  "a": "Nirvana",
-  "al": "Nevermind",
-  "aa": "Nirvana",
-  "y": "1991",
-  "n": 13
- },
  "music/CUPSIZE - ты уебалась головой_compressed.mp3": {
   "al": "удалитттт в ближаеще время"
  },
  "music/Cupsize - Мы делили апельсин.mp3": {
   "al": "анрелиз"
+ },
+ "music/Nirvana - Endless, Nameles.mp3": {
+  "a": "Nirvana",
+  "al": "Nevermind",
+  "aa": "Nirvana",
+  "y": "1991",
+  "n": 13,
+  "t": "Endless, Nameles"
  }
 }
