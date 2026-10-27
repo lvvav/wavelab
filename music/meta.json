@@ -83,9 +83,6 @@
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/CUPSIZE - 107.1 (hitmo.net).mp3": {
-  "a": "CUPSIZE"
- },
  "music/CUPSIZE - больше, чем творчество.mp3": {
   "a": "CUPSIZE"
  },
@@ -324,5 +321,9 @@
  "music/CUPSIZE - Давай увидимся.mp3": {
   "a": "CUPSIZE",
   "t": "Давай увидимся"
+ },
+ "music/CUPSIZE - 107.1.mp3": {
+  "a": "CUPSIZE",
+  "t": "107.1"
  }
 }
