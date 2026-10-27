@@ -52,24 +52,6 @@
   "n": 13,
   "t": "Endless, Nameles"
  },
- "music/CUPSIZE - Семнадцатилетняя.mp3": {
-  "al": "Как испортить вечеринку?",
-  "aa": "CUPSIZE",
-  "y": "2023",
-  "n": 13
- },
- "music/CUPSIZE - Травматика.mp3": {
-  "al": "Как испортить вечеринку?",
-  "aa": "CUPSIZE",
-  "y": "2023",
-  "n": 6
- },
- "music/CUPSIZE - Юра, Юра.mp3": {
-  "al": "Как испортить вечеринку?",
-  "aa": "CUPSIZE",
-  "y": "2023",
-  "n": 1
- },
  "music/пошлаямолли/Пошлая Молли - Любимая песня твоей сестры.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
@@ -105,11 +87,245 @@
   "aa": "Пошлая Молли",
   "y": "2016"
  },
+ "music/CUPSIZE - 107.1 (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - больше, чем творчество.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Василий.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - верёвка.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - вишлист.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - влечение.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Воздух.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - все мои поступки.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Высокий градус.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Давай увидимся (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - детская травма.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - ДПП (Аутро).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Дьявол!.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Злой отчим.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - ЗППП.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - И это прекрасно.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Или хотя бы завтра... (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Кислород (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Клей.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Конъюнктивит.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - малолетки.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - маршрутка.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Минус, плюс (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - мой врач думает, что у меня шизофрения.mp3": {
+  "a": "CUPSIZE"
+ },
  "music/CUPSIZE - Мы делили апельсин.mp3": {
   "al": "заставь меня плакать",
   "a": "CUPSIZE",
   "aa": "CUPSIZE",
   "y": "2026",
   "n": 26
+ },
+ "music/CUPSIZE - нам это нравится.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - напорносайтах.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - неудобно.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Но им не смешно.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - ну почему.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Они все дрочат на тебя в интернете.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Оригами.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - первокурсница.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Переломай мои кости (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Песня про спид.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Печаль (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - по барабану.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - По улице иду я.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - пока-пока.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - привет, если ты мне не ответишь.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - прыгaй, дура!.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Пьяные.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Пятый Элемент.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Самокрутки (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - север.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Семнадцатилетняя.mp3": {
+  "al": "Как испортить вечеринку?",
+  "aa": "CUPSIZE",
+  "y": "2023",
+  "n": 13,
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - семнадцать ножевых (1).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - сигареты.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - следак.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - станцуй со мной.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Стенки моего подъезда.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - тварьтварьтварьтварь.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Твои поцелуи (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - тетрадь.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Травматика.mp3": {
+  "al": "Как испортить вечеринку?",
+  "aa": "CUPSIZE",
+  "y": "2023",
+  "n": 6,
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - трамадол.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Ты Любишь Танцевать.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - ты уебалась головой.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Улыбнись (hitmo.net).mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - урод.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - фура.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Целовались.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Целую Тебя.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - черновик.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - шАхАшАхА.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Юра, Юра.mp3": {
+  "al": "Как испортить вечеринку?",
+  "aa": "CUPSIZE",
+  "y": "2023",
+  "n": 1,
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - я без ума от тебя.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Я схожу с ума.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - я тупая, моя жизнь тупая.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/Cupsize/CUPSIZE - будка.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/Cupsize/CUPSIZE - ванна, красный пол.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/Cupsize/CUPSIZE - вата.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/Cupsize/CUPSIZE - велосипед.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/Cupsize/CUPSIZE - вся моя жизнь говно.mp3": {
+  "a": "CUPSIZE"
+ },
+ "music/Cupsize/CUPSIZE - розовая могила.mp3": {
+  "a": "CUPSIZE"
  }
 }
