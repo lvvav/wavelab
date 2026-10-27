@@ -110,9 +110,6 @@
  "music/CUPSIZE - Высокий градус.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Давай увидимся (hitmo.net).mp3": {
-  "a": "CUPSIZE"
- },
  "music/CUPSIZE - детская травма.mp3": {
   "a": "CUPSIZE"
  },
@@ -323,5 +320,9 @@
  },
  "music/Cupsize/CUPSIZE - розовая могила.mp3": {
   "a": "CUPSIZE"
+ },
+ "music/CUPSIZE - Давай увидимся.mp3": {
+  "a": "CUPSIZE",
+  "t": "Давай увидимся"
  }
 }
