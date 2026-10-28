@@ -1057,6 +1057,31 @@ body:not(.hasTrack){padding-bottom:8px}
 @media(min-width:861px){#sortBtn2{display:none!important}}
 .pvb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--acc);color:var(--on,#000);font-size:11px;font-weight:700;vertical-align:1px;white-space:nowrap}
 .ms-note{padding:6px 16px 0;color:var(--mut);font-size:12px}
+
+.pvw{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--mut);cursor:pointer}
+.pvw.on{color:var(--acc)}.pvw .i{width:20px;height:20px}
+.ms-r .pvw{align-self:center}
+.wrp{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;background:radial-gradient(120% 80% at 50% 0%,#2a3a0a 0%,#06080a 60%);color:#fff}
+.wrp.on{display:flex}
+.wrp-h{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 6px}
+.wrp-h b{font-size:15px;letter-spacing:.02em}
+.wrp-s{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.wrp-s::-webkit-scrollbar{display:none}
+.wc{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:10px 26px 40px;max-width:560px;margin:0 auto;overflow-y:auto}
+.wc small{color:#c9d6a8;font-size:14px}
+.wc .big{font-size:76px;line-height:1;font-weight:800;color:var(--acc);letter-spacing:-.04em}
+.wc h2{font-size:30px;line-height:1.12;letter-spacing:-.02em}
+.wc .row2{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+.wc .row2 div{min-width:90px}.wc .row2 b{display:block;font-size:26px;color:#fff}.wc .row2 span{font-size:12px;color:#c9d6a8}
+.wc ol{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:10px;counter-reset:w}
+.wc li{display:flex;gap:12px;align-items:center;counter-increment:w;min-width:0}
+.wc li::before{content:counter(w);width:22px;text-align:center;font-weight:800;color:var(--acc)}
+.wc li div{min-width:0}.wc li b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}.wc li span{display:block;font-size:12px;color:#c9d6a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wc .btn{align-self:flex-start;margin-top:16px}
+.wrp-d{display:flex;justify-content:center;gap:6px;padding:0 0 calc(16px + env(safe-area-inset-bottom))}
+.wrp-d i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28)}.wrp-d i.on{background:var(--acc);width:20px;border-radius:4px}
+.wrp-btn{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,var(--acc),#7dd957);color:#11160a;font-weight:800;font-size:16px;text-align:left}
+.wrp-btn small{display:block;font-weight:500;font-size:12px;opacity:.75}
 </style>
 </head>
 <body>
@@ -1288,6 +1313,7 @@ body:not(.hasTrack){padding-bottom:8px}
 </div></div>
 
 
+<div class="wrp" id="wrp" aria-hidden="true" role="dialog" aria-label="Итоги года"><div class="wrp-h"><b id="wrpT">Итоги года</b><button class="ib" id="wrpX" type="button" aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></div><div class="wrp-s" id="wrpS"></div><div class="wrp-d" id="wrpD"></div></div>
 <div class="toast" id="toast" role="status"></div>
 <audio id="audio" preload="none"></audio>
 
@@ -1569,7 +1595,7 @@ function render(){
   }
   if(view==='albums')html=al.length?'<div class="agrid">'+al.map(acard).join('')+'</div>':'<div class="empty"><b>Альбомов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
   if(view==='artists')html=ar2.length?'<div class="agrid">'+ar2.map(rcard).join('')+'</div>':'<div class="empty"><b>Артистов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
-  if(view==='stats')html=statsHtml();
+  if(view==='stats')html=wrpBtn()+statsHtml();
   if(view==='pls')html=PL.length?'<div class="agrid">'+PL.map(pcard).join('')+'</div>':'<div class="empty"><b>Плейлистов пока нет</b>Нажмите «Новый плейлист» или «⋯» у любого трека</div>';
   if(relView)html=relScreen(RS);
   else if(view==='artist'&&AR&&l.length){
@@ -1975,6 +2001,29 @@ function srchShow(on){
   if(on){var a=$('profBtn');$('msAv').innerHTML=a&&a.innerHTML?a.innerHTML:ic('user');renderSrch()}
   bnavPaint();navNote();
 }
+var LAY_E='qwertyuiop[]asdfghjkl;\'zxcvbnm,./`',LAY_R='йцукенгшщзхъфывапролджэячсмитьбю.ё';
+function layFix(q){var o='',i,k;for(i=0;i<q.length;i++){k=LAY_E.indexOf(q[i]);o+=k>-1?LAY_R[k]:q[i]}return o}
+function layFixR(q){var o='',i,k;for(i=0;i<q.length;i++){k=LAY_R.indexOf(q[i]);o+=k>-1?LAY_E[k]:q[i]}return o}
+function fzNorm(x){return String(x).toLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}]+/gu,' ').trim()}
+function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;var p=[],i,j,c,t,pv;for(j=0;j<=b.length;j++)p[j]=j;
+  for(i=1;i<=a.length;i++){pv=p[0];p[0]=i;for(j=1;j<=b.length;j++){t=p[j];c=a.charAt(i-1)===b.charAt(j-1)?0:1;p[j]=Math.min(p[j]+1,p[j-1]+1,pv+c);pv=t}}return p[b.length]}
+function fzWord(q,w){if(w.indexOf(q)>-1)return 0;var m=q.length<=2?0:q.length<=5?1:2;if(!m)return 99;var d=lev(q,w,m);if(d<=m)return d;
+  if(w.length>q.length){d=lev(q,w.slice(0,q.length),m);if(d<=m)return d+.5}return 99}
+function fzScore(qw,text){var ws=fzNorm(text).split(' '),tot=0,i,j,b,d;for(i=0;i<qw.length;i++){b=99;for(j=0;j<ws.length;j++){d=fzWord(qw[i],ws[j]);if(d<b)b=d;if(!b)break}if(b>=99)return -1;tot+=b}return tot}
+function srchExact(q){return {ar:ARTS.filter(function(x){return x.n.toLowerCase().indexOf(q)>-1}).slice(0,3),
+  al:ALB.filter(function(x){return (x.t+' '+x.a).toLowerCase().indexOf(q)>-1}).slice(0,4),
+  tr:TRACKS.filter(function(t){return !t.dup&&(t.t+' '+ad(t)+' '+(t.al||'')).toLowerCase().indexOf(q)>-1}).slice(0,25)}}
+function srchFuzzy(q){var qw=fzNorm(q).split(' ').filter(Boolean);if(!qw.length)return {ar:[],al:[],tr:[]};
+  function pick(list,txt,n){var o=[];list.forEach(function(x){var sc=fzScore(qw,txt(x));if(sc>=0)o.push([sc,x])});o.sort(function(a,b){return a[0]-b[0]});return o.slice(0,n).map(function(x){return x[1]})}
+  return {ar:pick(ARTS,function(x){return x.n},3),al:pick(ALB,function(x){return x.t+' '+x.a},4),tr:pick(TRACKS.filter(function(t){return !t.dup}),function(t){return t.t+' '+ad(t)},12)}}
+function srchFind(q){var S=srchExact(q),n=function(x){return x.ar.length+x.al.length+x.tr.length};if(n(S)>=3)return S;
+  var alt=[layFix(q),layFixR(q)].filter(function(a){return a&&a!==q});
+  for(var i=0;i<alt.length;i++){var A=srchExact(alt[i]);if(n(A)>n(S)){A.fz='Раскладка: показано по запросу «'+esc(alt[i])+'»';return A}}
+  var F=srchFuzzy(q);
+  function merge(a,b,key){var seen={};a.forEach(function(x){seen[key(x)]=1});return a.concat(b.filter(function(x){return !seen[key(x)]}))}
+  var M={ar:merge(S.ar,F.ar,function(x){return x.k}),al:merge(S.al,F.al,function(x){return x.k}),tr:merge(S.tr,F.tr,function(x){return x.id})};
+  if(n(M)>n(S))M.fz='Точных совпадений мало: показываем похожее';
+  return M}
 function renderSrch(){
   var q=$('msQ').value.trim().toLowerCase();$('msX').hidden=!q;var B=$('msBody'),h='';
   if(!q){
@@ -1982,19 +2031,25 @@ function renderSrch(){
     var ks=Object.keys(gs);
     h=ks.length?'<div class="ms-h3">Жанры</div><div class="ms-g">'+ks.map(function(g){return '<button class="ms-t" data-g="'+esc(g)+'" style="background:'+msCol(g)+'" type="button"><span>'+esc(g)+'</span>'+(im[g]?'<i style="background-image:url(\''+im[g]+'\')"></i>':'<i></i>')+'</button>'}).join('')+'</div>':'<div class="ms-e">Музыка загружается…</div>';
   }else{
-    var ar=ARTS.filter(function(x){return x.n.toLowerCase().indexOf(q)>-1}).slice(0,3),
-        al=ALB.filter(function(x){return (x.t+' '+x.a).toLowerCase().indexOf(q)>-1}).slice(0,4),
-        tr=TRACKS.filter(function(t){return !t.dup&&(t.t+' '+ad(t)+' '+(t.al||'')).toLowerCase().indexOf(q)>-1}).slice(0,25);
+    var S=srchFind(q),ar=S.ar,al=S.al,tr=S.tr;
     function bg(i){return i?' style="background-image:url(\''+i+'\')"':''}
+    if(S.fz&&(ar.length||al.length||tr.length))h+='<div class="ms-note">'+S.fz+'</div>';
     if(ar.length)h+='<div class="ms-h3">Исполнители</div>'+ar.map(function(x){return '<button class="ms-r ar" data-sr="'+esc(x.k)+'" type="button"><span class="c"'+bg(x.img)+'>'+(x.img?'':ic('user'))+'</span><div><div class="n">'+esc(x.n)+'</div><div class="s">Исполнитель</div></div></button>'}).join('');
     if(al.length)h+='<div class="ms-h3">Альбомы</div>'+al.map(function(x){return '<button class="ms-r" data-sa="'+esc(x.k)+'" type="button"><span class="c"'+bg(x.img)+'>'+(x.img?'':ic('disc'))+'</span><div><div class="n">'+esc(x.t)+'</div><div class="s">Альбом · '+esc(x.a)+'</div></div></button>'}).join('');
     if(tr.length)h+='<div class="ms-h3">Треки</div>'+tr.map(function(t){return '<button class="ms-r" data-st="'+t.id+'" type="button"><span class="c"'+bg(t.img)+'>'+(t.img?'':ic('disc'))+'</span><div><div class="n">'+esc(t.t)+'</div><div class="s">'+esc(t.a)+'</div></div></button>'}).join('');
-    if(PVR.q===q&&PVR.list.length)h+='<div class="ms-h3">Нет на сайте</div><div class="ms-note">Отрывки по 30 секунд (iTunes). Полного трека в нашем хранилище нет.</div>'+PVR.list.map(function(r,i){return '<button class="ms-r" data-pv="'+i+'" type="button"><span class="c"'+bg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">30 сек</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div></button>'}).join('');
+    if(PVR.q===q&&PVR.list.length)h+='<div class="ms-h3">Нет на сайте</div><div class="ms-note">Отрывки по 30 секунд (iTunes). Полного трека в нашем хранилище нет.</div>'+PVR.list.map(function(r,i){return '<button class="ms-r" data-pv="'+i+'" type="button"><span class="c"'+bg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">30 сек</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div><span class="pvw'+(wishHas(r.id)?' on':'')+'" role="button" tabindex="0" data-wish="'+i+'" title="Хочу этот трек" aria-label="Хочу этот трек">'+ic(wishHas(r.id)?'check':'plus')+'</span></button>'}).join('');
     if(!h)h='<div class="ms-e">'+(PVR.busy===q?'Ищу…':'Ничего не найдено по запросу «'+esc($('msQ').value.trim())+'»')+'</div>';
   }
   B.innerHTML=h;
 }
-var PVR={q:'',list:[],busy:''},pvT=0,PVC={};
+var PVR={q:'',list:[],busy:''},pvT=0,PVC={},WISH=load('wl_wish',[]);if(!Array.isArray(WISH))WISH=[];
+function wishHas(id){return WISH.some(function(w){return w.id===id})}
+function wishSave(){save('wl_wish',WISH.slice(0,300))}
+function wishToggle(r){var i=-1;WISH.forEach(function(w,n){if(w.id===r.id)i=n});
+  if(i>-1){WISH.splice(i,1);toast('Убрано из «Хочу послушать»');if(SB&&USER)SB.from('wishes').delete().eq('user_id',USER.id).eq('key','it:'+r.id).then(function(){}).catch(function(){})}
+  else{WISH.unshift({id:r.id,t:r.t,a:r.a,al:r.al,img:r.img,src:r.src});toast('Добавлено в «Хочу послушать». Загрузим полный трек');if(SB&&USER)SB.from('wishes').upsert({user_id:USER.id,key:'it:'+r.id,t:r.t,a:r.a,al:r.al||''}).then(function(){}).catch(function(){})}
+  wishSave();if(mlibOn)renderMlib()}
+function wishLoad(){if(!SB||!USER)return;SB.from('wishes').select('key,t,a,al').eq('user_id',USER.id).then(function(r){if(!r||r.error||!r.data)return;var ch=false;r.data.forEach(function(x){var id=+String(x.key).replace('it:','');if(id&&!wishHas(id)){WISH.push({id:id,t:x.t,a:x.a,al:x.al||'',img:'',src:''});ch=true}});if(ch){wishSave();if(mlibOn)renderMlib()}}).catch(function(){})}
 function pvNorm(x){return String(x).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim()}
 function pvQuery(){var q=$('msQ').value.trim().toLowerCase();clearTimeout(pvT);if(q.length<3||navigator.onLine===false){PVR={q:'',list:[],busy:''};return}
   if(PVC[q]){PVR={q:q,list:PVC[q],busy:''};renderSrch();return}
@@ -2012,6 +2067,7 @@ $('msQ').oninput=function(){renderSrch();pvQuery()};
 $('msX').onclick=function(){$('msQ').value='';PVR={q:'',list:[],busy:''};renderSrch();$('msQ').focus()};
 $('msAv').onclick=function(){$('profBtn').click()};
 $('msBody').onclick=function(e){
+  var w=e.target.closest('[data-wish]');if(w){var r0=PVR.list[+w.dataset.wish];if(r0){wishToggle(r0);renderSrch()}return}
   var b=e.target.closest('button');if(!b)return;
   var d=b.dataset;
   if(d.pv!==undefined){pvPlay(+d.pv);return}
@@ -2031,6 +2087,8 @@ function renderMlib(){
   function it(cls,attr,c,st,n,sub,mx){return '<button class="ml-i '+cls+'" '+attr+' type="button"><span class="ml-c"'+st+'>'+c+'</span>'+(mx||'')+'<div class="ml-n">'+esc(n)+'</div><div class="ml-t">'+esc(sub)+'</div></button>'}
   if(all||mlF==='pl'){
     if(all)o.push(it('fv','data-mf="1"',ic('heart'),'','Любимые треки','Плейлист · '+favCount()+' '+plural(favCount(),['трек','трека','треков'])));
+    if(all&&WISH.length)o.push(it('fv','data-mw="1"',ic('plus'),'','Хочу послушать','Список · '+WISH.length+' '+plural(WISH.length,['трек','трека','треков'])));
+    if(all&&NEWK.length)o.push(it('fv','data-mn="1"',ic('disc'),'','Новое в хранилище','Новых треков: '+NEWK.length));
     FOL.p.forEach(function(pid){var r=RPL[pid];if(r)o.push(it('','data-mq="'+esc(pid)+'"',ic('list'),'',r.n,'Плейлист · '+((PEOPLE[r.o]&&PEOPLE[r.o].n)?'@'+PEOPLE[r.o].n:'публичный')))});
     PL.forEach(function(p){o.push(it('','data-mp="'+esc(p.id)+'"',ic('list'),'',p.n,'Плейлист · '+p.k.length+' '+plural(p.k.length,['трек','трека','треков']),mxb('pl',p.id)))});
   }
@@ -2044,6 +2102,8 @@ $('mlPlus').onclick=function(){newPl(function(){renderMlib()})};
 $('mlAv').onclick=function(){$('profBtn').click()};
 $('mlG').onclick=function(e){
   var b=e.target.closest('.ml-i');if(!b)return;
+  if(b.dataset.mw){openSheetX('wish');return}
+  if(b.dataset.mn){openSheetX('new');return}
   if(b.dataset.mfind){findUser();return}
   if(b.dataset.mu){usrOpen(b.dataset.mu);return}
   if(b.dataset.mq){plOpen(b.dataset.mq);return}
@@ -2318,6 +2378,7 @@ function navBack(){
 try{if(!(history.state&&history.state.a)){history.replaceState({g:1},'');history.pushState({a:1},'')}}catch(e){}
 function closeTop(){
   var ask=document.querySelector('.ask.on');if(ask){var c=ask.querySelector('.ask-c');if(c)c.click();return true}
+  if($('wrp').classList.contains('on')){wrpClose();return true}
   if($('mn').classList.contains('on')){closeMenu();return true}
   if($('acc').classList.contains('on')){accClose();return true}
   if($('about').classList.contains('on')){aboutOpen(false);return true}
@@ -2535,6 +2596,7 @@ $('gear').onclick=function(){setOpen(true)};
 $('setX').onclick=function(){setOpen(false)};
 $('set').onclick=function(e){if(e.target===this)setOpen(false)};
 document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false)});
+var NEWK=load('wl_newk',[]);if(!Array.isArray(NEWK))NEWK=[];
 var PROF=load('wl_prof',null),FOL=load('wl_fol',{u:[],p:[]}),RPL={},PEOPLE={},USR=null,pendPl='',askedNick=false;
 if(!FOL||!Array.isArray(FOL.u)||!Array.isArray(FOL.p))FOL={u:[],p:[]};
 /* ===== аккаунты и синхронизация: Supabase + Яндекс ID + Google + почта ===== */
@@ -2806,7 +2868,7 @@ function profLoad(){if(!SB||!USER)return;var id=USER.id;
     PROF=(r&&r.data)||{nick:'',avatar:''};PROF.nick=PROF.nick||'';PROF.avatar=PROF.avatar||'';save('wl_prof',PROF);accPaint();
     if(!PROF.nick&&!askedNick){askedNick=true;setTimeout(function(){if(USER&&!PROF.nick)nickAsk()},1500)}
   }).catch(function(){});
-  folLoad()}
+  folLoad();wishLoad()}
 function profSave(patch,okMsg){if(!SB||!USER)return;var row={user_id:USER.id,nick:(patch.nick!==undefined?patch.nick:(PROF&&PROF.nick))||null,avatar:(patch.avatar!==undefined?patch.avatar:(PROF&&PROF.avatar))||'',updated_at:new Date().toISOString()};
   SB.from('profiles').upsert(row).then(function(r){
     if(r.error){toast(r.error.code==='23505'?'Этот ник уже занят':(/relation|does not exist|schema cache/i.test(r.error.message||'')?'На сервере нет таблиц. Нужно выполнить SQL из файла supabase_v5.sql':'Не удалось сохранить'));return}
@@ -2859,6 +2921,25 @@ function plOpen(pid){if(!SB){toast('Сервис загружается, поп�
     SB.from('profiles').select('user_id,nick,avatar').eq('user_id',q.owner).maybeSingle().then(function(r2){if(r2&&r2.data)PEOPLE[q.owner]={n:r2.data.nick||'без ника',a:r2.data.avatar||''};go()}).catch(go)
   }).catch(function(){toast('Нет связи с сервером')})}
 /* люди */
+function openSheetX(k){mnKind=k;mnKey='';mnId=-1;renderSheetX();$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
+function renderSheetX(){var h,c=function(i){return cv({img:i||''})};
+  if(mnKind==='wish'){h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px"><div><div class="tt">Хочу послушать</div><div class="ar">Отрывки по 30 секунд. Эти треки мы постараемся добавить</div></div></div>'+
+    (WISH.length?WISH.map(function(w,i){return '<button class="mi" data-m="wpl" data-x="'+i+'" type="button">'+ic('play')+esc(w.a+' — '+w.t)+'</button>'}).join('')+mi('wclr','x','Очистить список'):'<div class="ms-note" style="padding:18px 16px">Пока пусто. В поиске нажми «+» у отрывка</div>')}
+  else{var l=NEWK.map(byKey).filter(Boolean);h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px"><div><div class="tt">Новое в хранилище</div><div class="ar">Треки, которые появились с вашего прошлого визита</div></div></div>'+
+    (l.length?l.slice(0,40).map(function(t){return '<button class="mi" data-m="npl" data-x="'+t.id+'" type="button">'+ic('play')+esc(ad(t)+' — '+t.t)+'</button>'}).join('')+mi('nclr','check','Отметить прочитанным'):'<div class="ms-note" style="padding:18px 16px">Новых треков нет</div>')}
+  $('mnBody').innerHTML=h}
+function sheetPick(b){var m=b.dataset.m,x=+b.dataset.x;
+  if(m==='wpl'){var w=WISH[x];if(!w)return;if(!w.src){toast('Отрывок недоступен офлайн. Найди трек в поиске');return}closeMenu();PVR={q:'~',list:WISH.filter(function(z){return z.src}),busy:''};pvPlay(PVR.list.indexOf(w))}
+  else if(m==='wclr'){WISH=[];wishSave();closeMenu();if(mlibOn)renderMlib();toast('Список очищен')}
+  else if(m==='npl'){closeMenu();var ids=NEWK.map(byKey).filter(Boolean).map(function(t){return t.id});playId(x,ids)}
+  else if(m==='nclr'){NEWK=[];save('wl_newk',NEWK);closeMenu();if(mlibOn)renderMlib();toast('Готово')}}
+function newCheck(){try{var keys=TRACKS.filter(function(t){return !t.dup&&!t.pv&&t.key}).map(function(t){return t.key}),seen=load('wl_seen',null);
+  if(!keys.length)return;
+  if(!Array.isArray(seen)){save('wl_seen',keys);return}
+  var set={};seen.forEach(function(k){set[k]=1});var fresh=keys.filter(function(k){return !set[k]});
+  if(fresh.length&&fresh.length<keys.length){var have={};NEWK.forEach(function(k){have[k]=1});fresh.forEach(function(k){if(!have[k])NEWK.unshift(k)});NEWK=NEWK.slice(0,100);save('wl_newk',NEWK);
+    setTimeout(function(){toast('Новых треков в хранилище: '+fresh.length+'. Смотри в Медиатеке')},2500)}
+  if(fresh.length)save('wl_seen',seen.concat(fresh))}catch(e){}}
 function findUser(){if(!SB){toast('Сервис загружается, попробуйте ещё раз');return}
   askName('Ник человека',''  ,function(n){n=n.toLowerCase().replace(/^@/,'');
     SB.from('profiles').select('user_id,nick,avatar').eq('nick',n).maybeSingle().then(function(r){
@@ -3090,6 +3171,7 @@ function shareAA(kind,key){
 function menuX(b){
   if(mnKind==='sort')return sortPick(b);
   if(mnKind==='usr')return usrPick(b);
+  if(mnKind==='wish'||mnKind==='new')return sheetPick(b);
   var m=b.dataset.m,k=mnKey,kind=mnKind,A=mxObj(),ids=mxIds();
   if(!A){closeMenu();return}
   if(m==='plall')return renderMenu('pl');
@@ -3122,6 +3204,7 @@ function plObj(id){var p=PL.filter(function(x){return x.id===id})[0];if(!p)retur
 function renderMenuX(mode){
   if(mnKind==='sort')return renderSort();
   if(mnKind==='usr')return renderUsr();
+  if(mnKind==='wish'||mnKind==='new')return renderSheetX();
   if(mnKind==='pl'){var O=plObj(mnKey);if(!O)return;
     $('mnBody').innerHTML='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:''})+'<div><div class="tt">'+esc(O.n)+'</div><div class="ar">Плейлист · '+O.tr.length+' '+plural(O.tr.length,['трек','трека','треков'])+'</div></div></div>'+
       mi('play','play','Слушать')+mi('shuf','shuf','Вперемешку')+mi('next','plus','Играть следующим')+mi('qall','list','Добавить в очередь')+mi('offall','dl','Сохранить офлайн')+mi('plshare','share','Поделиться ссылкой')+mi('pub','list',O.p.pub?'Сделать приватным':'Сделать публичным')+mi('ren','list','Переименовать');return}
@@ -3536,6 +3619,34 @@ function perChart(P){
   bars.forEach(function(b){if(b[1]>mx)mx=b[1]});
   return '<div class="dcs">'+bars.map(function(b){return '<div class="dc'+(b[1]===mx&&b[1]>0?' pk':'')+'" title="'+b[2]+' — '+fmtMin(b[1])+' мин"><i style="--h:'+(b[1]/mx).toFixed(3)+'"></i><span>'+b[0]+'</span></div>'}).join('')+'</div>';
 }
+function wrapData(){
+  var now=new Date(),y=now.getFullYear(),L=Math.min(364,Math.floor((now-new Date(y,0,1))/864e5)+1),pm=perTracks(L),map={},tot=0,days=0,A={},G={},T=[],best=['',0],k,t;
+  TRACKS.forEach(function(x){map[x.key]=x});
+  Object.keys(ST.day).forEach(function(d){if(d.indexOf(y+'-')!==0)return;var s=ST.day[d];tot+=s;if(s>=60)days++;if(s>best[1])best=[d,s]});
+  var seen={};
+  for(k in pm){t=map[k];if(!t||t.dup||pm[k]<1)continue;var dk=dupKey(t);if(seen[dk])continue;seen[dk]=1;T.push([t,pm[k]]);A[t.a]=(A[t.a]||0)+pm[k];if(t.g)G[t.g]=(G[t.g]||0)+pm[k]}
+  T.sort(function(a,b){return b[1]-a[1]});
+  function top(o,n){return Object.keys(o).map(function(x){return [x,o[x]]}).sort(function(a,b){return b[1]-a[1]}).slice(0,n)}
+  var mxh=Math.max.apply(0,ST.hr),streak=0,i,d;
+  for(i=0;i<400;i++){d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);if((ST.day[dayKey(d)]||0)>=60)streak++;else if(i>0)break}
+  return {y:y,tot:tot,days:days,best:best,T:T.slice(0,5),A:top(A,5),G:top(G,3),hr:mxh?ST.hr.indexOf(mxh):-1,streak:streak,alb:Math.floor(tot/2700)}}
+function wrpOk(){var n=new Date(),y=n.getFullYear(),s=0;Object.keys(ST.day).forEach(function(d){if(d.indexOf(y+'-')===0)s+=ST.day[d]});return s>=300}
+function wrpBtn(){if(!wrpOk())return '';return '<button class="wrp-btn" data-wrp type="button">'+ic('play','f')+'<span>Итоги '+new Date().getFullYear()+'<small>Ваш год в музыке: минуты, артисты, треки</small></span></button>'}
+function wrpOpen(){var D=wrapData(),h='',cards=[],MN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  $('wrpT').textContent='Итоги '+D.y;
+  var hrs=D.tot/3600;
+  cards.push('<div class="wc"><small>Ваш '+D.y+' в музыке</small><div class="big">'+fmtMin(D.tot)+'</div><h2>минут музыки</h2><div class="row2"><div><b>'+(hrs>=10?Math.round(hrs):hrs.toFixed(1))+'</b><span>часов</span></div><div><b>'+D.days+'</b><span>дней слушали</span></div><div><b>'+D.streak+'</b><span>дней подряд</span></div></div></div>');
+  if(D.A.length)cards.push('<div class="wc"><small>Главный артист</small><h2>'+esc(D.A[0][0])+'</h2><small>'+fmtDur(D.A[0][1])+' вместе</small><ol>'+D.A.map(function(x){return '<li><div><b>'+esc(x[0])+'</b><span>'+fmtDur(x[1])+'</span></div></li>'}).join('')+'</ol></div>');
+  if(D.T.length)cards.push('<div class="wc"><small>Трек года</small><h2>'+esc(D.T[0][0].t)+'</h2><small>'+esc(D.T[0][0].a)+' · '+fmtDur(D.T[0][1])+'</small><ol>'+D.T.map(function(x){return '<li><div><b>'+esc(x[0].t)+'</b><span>'+esc(ad(x[0]))+'</span></div></li>'}).join('')+'</ol><button class="btn" data-wplay type="button">'+ic('play','f')+'Включить топ</button></div>');
+  var bd=D.best[0]?(+D.best[0].slice(8,10))+' '+MN[+D.best[0].slice(5,7)-1]:'';
+  cards.push('<div class="wc"><small>Ваши привычки</small>'+(D.hr>=0?'<h2>Чаще всего вы слушаете в '+D.hr+':00</h2>':'')+(D.G.length?'<small>Любимый жанр: '+esc(D.G[0][0])+'</small>':'')+(bd?'<small>Самый музыкальный день: '+bd+' ('+fmtDur(D.best[1])+')</small>':'')+'<small>Это примерно '+D.alb+' '+plural(D.alb,['альбом','альбома','альбомов'])+' подряд</small></div>');
+  $('wrpS').innerHTML=cards.join('');$('wrpD').innerHTML=cards.map(function(_,i){return '<i'+(i?'':' class="on"')+'></i>'}).join('');
+  $('wrpS').scrollLeft=0;$('wrp').classList.add('on');$('wrp').setAttribute('aria-hidden','false');$('wrp')._top=D.T.map(function(x){return x[0].id})}
+function wrpClose(){$('wrp').classList.remove('on');$('wrp').setAttribute('aria-hidden','true')}
+$('wrpX').onclick=wrpClose;
+$('wrpS').addEventListener('scroll',function(){var i=Math.round(this.scrollLeft/this.clientWidth);[].forEach.call($('wrpD').children,function(d,n){d.classList.toggle('on',n===i)})},{passive:true});
+$('wrpS').addEventListener('click',function(e){if(e.target.closest('[data-wplay]')){var l=$('wrp')._top||[];if(l.length){wrpClose();playId(l[0],l)}}});
+document.addEventListener('click',function(e){if(e.target.closest('[data-wrp]'))wrpOpen()});
 function statsHtml(){
   var map={},tot=0,nT=0,plays=0,A={},G={},arr=[],i;
   TRACKS.forEach(function(t){map[t.key]=t});
@@ -3999,7 +4110,7 @@ audio.addEventListener('play',function(){document.body.classList.add('playing')}
 audio.volume=vol;$('vol').value=vol;fill($('vol'));fill($('seek'));
 render();
 accInit();
-loadTracks(function(){loading=false;render();openFromHash();loadCovers();resume();offScan()});
+loadTracks(function(){loading=false;newCheck();render();openFromHash();loadCovers();resume();offScan()});
 })();
 </script>
 </body>

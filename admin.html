@@ -267,6 +267,12 @@ body.noanim *,body.noanim *::before,body.noanim *::after{animation:none!importan
     <div class="sum" id="exSum"></div>
     <div id="exist"><div class="empty">Сначала войдите</div></div>
   </section>
+  <section class="card" id="cWish">
+    <h2>Хотят послушать</h2>
+    <div class="sum">Отрывки, которые слушатели отметили «+» в поиске, но которых нет в хранилище.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn ghost" id="wRef" type="button">Обновить</button></div>
+    <div id="wList"><div class="empty">Нажмите «Обновить»</div></div>
+  </section>
   <section class="card" id="cArt">
     <h2>4. Артисты</h2>
     <div class="tools" style="margin-top:0">
@@ -1460,6 +1466,16 @@ $('bGo').onclick=run;
 $('bStop').onclick=function(){abort=true;xhrs.slice().forEach(function(x){try{x.abort()}catch(e){}});$('upMsg').textContent='Останавливаю…'};
 window.addEventListener('beforeunload',function(e){if(uploading){e.preventDefault();e.returnValue=''}});
 
+
+/* ===== «Хочу послушать»: сводка по слушателям (Supabase, только чтение) ===== */
+var W_URL='https://zpmzqgxwqoisfvahfhqc.supabase.co',W_KEY='sb_publishable_EJD_GXiloGMd6DDMt87G8Q_PxYmI8eF';
+$('wRef').onclick=function(){
+  var box=$('wList');box.innerHTML='<div class="empty">Загружаю…</div>';
+  fetch(W_URL+'/rest/v1/wishes_top?select=t,a,al,n&order=n.desc,last_at.desc&limit=100',{headers:{apikey:W_KEY,Authorization:'Bearer '+W_KEY}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(l){
+    if(!Array.isArray(l)||!l.length){box.innerHTML='<div class="empty">Пока никто ничего не отметил</div>';return}
+    box.innerHTML=l.map(function(x){return '<div class="it" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><b style="min-width:28px;text-align:center;color:var(--acc)">'+(+x.n||0)+'</b><div style="min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.a)+' — '+esc(x.t)+'</div><div style="color:var(--mut);font-size:12px">'+esc(x.al||'')+'</div></div></div>'}).join('');
+  }).catch(function(){box.innerHTML='<div class="empty">Не удалось загрузить. Проверьте, что SQL из supabase_v6.sql выполнен</div>'});
+};
 /* ===== старт ===== */
 CFG={};
 try{localStorage.removeItem('sl_admin')}catch(e){}
