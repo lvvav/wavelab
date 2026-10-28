@@ -2054,6 +2054,11 @@ function renderSrch(){
 var PVR={q:'',list:[],busy:''},pvT=0,PVC={},WISH=load('wl_wish',[]);if(!Array.isArray(WISH))WISH=[];
 function wishHas(id){return WISH.some(function(w){return w.id===id})}
 function wishSave(){save('wl_wish',WISH.slice(0,300))}
+function wishState(w){var o=META&&META['@wishes']&&META['@wishes'][pvNorm(w.a+' '+w.t)];return o&&o.s||''}
+function wishReal(w){var k=pvNorm(w.a+' '+w.t),r=null;TRACKS.forEach(function(t){if(!r&&!t.pv&&!t.dup&&pvNorm(t.a+' '+t.t)===k)r=t});return r}
+function wishNotify(){try{var msg='',ch=false;WISH.forEach(function(w){var r=wishReal(w),s=r?'site':wishState(w);if(!s||w.nS===s)return;w.nS=s;ch=true;
+  if(!msg)msg=s==='site'?'Трек «'+w.t+'» теперь на сайте!':s==='ok'?'Твой запрос принят: «'+w.t+'» скоро появится':'Трек «'+w.t+'» пока добавить не получится'});
+  if(ch){wishSave();if(msg)setTimeout(function(){toast(msg)},3500)}}catch(e){}}
 function wishToggle(r){var i=-1;WISH.forEach(function(w,n){if(w.id===r.id)i=n});
   if(i>-1){WISH.splice(i,1);toast('Убрано из «Хочу послушать»');if(SB&&USER)SB.from('wishes').delete().eq('user_id',USER.id).eq('key','it:'+r.id).then(function(){}).catch(function(){})}
   else{WISH.unshift({id:r.id,t:r.t,a:r.a,al:r.al,img:r.img,src:r.src});toast('Добавлено в «Хочу послушать». Загрузим полный трек');if(SB&&USER)SB.from('wishes').upsert({user_id:USER.id,key:'it:'+r.id,t:r.t,a:r.a,al:r.al||''}).then(function(){}).catch(function(){})}
@@ -2933,12 +2938,12 @@ function plOpen(pid){if(!SB){toast('Сервис загружается, поп�
 function openSheetX(k){mnKind=k;mnKey='';mnId=-1;renderSheetX();$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
 function renderSheetX(){var h,c=function(i){return cv({img:i||''})};
   if(mnKind==='wish'){h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px"><div><div class="tt">Хочу послушать</div><div class="ar">Отрывки по 30 секунд. Эти треки мы постараемся добавить</div></div></div>'+
-    (WISH.length?WISH.map(function(w,i){return '<button class="mi" data-m="wpl" data-x="'+i+'" type="button">'+ic('play')+esc(w.a+' — '+w.t)+'</button>'}).join('')+mi('wclr','x','Очистить список'):'<div class="ms-note" style="padding:18px 16px">Пока пусто. В поиске нажми «+» у отрывка</div>')}
+    (WISH.length?WISH.map(function(w,i){var r=wishReal(w),st=wishState(w),tag=r?' · на сайте ✓':st==='ok'?' · принято ✓':st==='no'?' · не добавим ✕':' · ждёт';return '<button class="mi" data-m="wpl" data-x="'+i+'" type="button">'+ic('play')+esc(w.a+' — '+w.t+tag)+'</button>'}).join('')+mi('wclr','x','Очистить список'):'<div class="ms-note" style="padding:18px 16px">Пока пусто. В поиске нажми «+» у отрывка</div>')}
   else{var l=NEWK.map(byKey).filter(Boolean);h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px"><div><div class="tt">Новое в хранилище</div><div class="ar">Треки, которые появились с вашего прошлого визита</div></div></div>'+
     (l.length?l.slice(0,40).map(function(t){return '<button class="mi" data-m="npl" data-x="'+t.id+'" type="button">'+ic('play')+esc(ad(t)+' — '+t.t)+'</button>'}).join('')+mi('nclr','check','Отметить прочитанным'):'<div class="ms-note" style="padding:18px 16px">Новых треков нет</div>')}
   $('mnBody').innerHTML=h}
 function sheetPick(b){var m=b.dataset.m,x=+b.dataset.x;
-  if(m==='wpl'){var w=WISH[x];if(!w)return;if(!w.src){toast('Отрывок недоступен офлайн. Найди трек в поиске');return}closeMenu();PVR={q:'~',list:WISH.filter(function(z){return z.src}),busy:''};pvPlay(PVR.list.indexOf(w))}
+  if(m==='wpl'){var w=WISH[x];if(!w)return;var rl=wishReal(w);if(rl){closeMenu();playId(rl.id,[rl.id]);return}if(!w.src){toast('Отрывок недоступен офлайн. Найди трек в поиске');return}closeMenu();PVR={q:'~',list:WISH.filter(function(z){return z.src}),busy:''};pvPlay(PVR.list.indexOf(w))}
   else if(m==='wclr'){WISH=[];wishSave();closeMenu();if(mlibOn)renderMlib();toast('Список очищен')}
   else if(m==='npl'){closeMenu();var ids=NEWK.map(byKey).filter(Boolean).map(function(t){return t.id});playId(x,ids)}
   else if(m==='nclr'){NEWK=[];save('wl_newk',NEWK);closeMenu();if(mlibOn)renderMlib();toast('Готово')}}
@@ -4119,7 +4124,7 @@ audio.addEventListener('play',function(){document.body.classList.add('playing')}
 audio.volume=vol;$('vol').value=vol;fill($('vol'));fill($('seek'));
 render();
 accInit();
-loadTracks(function(){loading=false;newCheck();render();openFromHash();loadCovers();resume();offScan()});
+loadTracks(function(){loading=false;newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
 })();
 </script>
 </body>

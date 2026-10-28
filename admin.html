@@ -257,6 +257,7 @@ body.noanim *,body.noanim *::before,body.noanim *::after{animation:none!importan
     <div class="tools" style="margin-top:0">
       <input type="search" id="exQ" placeholder="Поиск по файлам" autocomplete="off">
       <button class="btn ghost" id="bRef" type="button">Обновить</button>
+      <button class="btn ghost" id="bFoldEx" type="button">Свернуть список</button>
       <button class="btn ghost" id="bSelVis" type="button">Выбрать найденные</button>
       <button class="btn" id="bEdit" type="button" disabled>Изменить выбранные</button>
       <button class="btn bad" id="bDel" type="button" disabled>Удалить выбранные</button>
@@ -265,13 +266,20 @@ body.noanim *,body.noanim *::before,body.noanim *::after{animation:none!importan
     </div>
     <div class="sum" id="popSum"></div>
     <div class="sum" id="exSum"></div>
-    <div id="exist"><div class="empty">Сначала войдите</div></div>
+    <div id="exWrap"><div id="exist"><div class="empty">Сначала войдите</div></div></div>
   </section>
   <section class="card" id="cWish">
-    <h2>Хотят послушать</h2>
-    <div class="sum">Отрывки, которые слушатели отметили «+» в поиске, но которых нет в хранилище.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn ghost" id="wRef" type="button">Обновить</button></div>
-    <div id="wList"><div class="empty">Нажмите «Обновить»</div></div>
+    <h2>Хотят послушать <span id="wBadge" style="color:var(--acc);font-weight:700"></span></h2>
+    <div class="sum">Отрывки, которые слушатели отметили «+» в поиске, но которых нет в хранилище. Решение увидят и слушатели.</div>
+    <div class="tools" style="margin-top:8px">
+      <button class="btn ghost" id="wRef" type="button">Обновить</button>
+      <button class="btn" id="wSave" type="button" disabled>Сохранить решения</button>
+      <button class="btn ghost" id="wFold" type="button">Свернуть</button>
+    </div>
+    <div id="wBody">
+      <div class="tools" id="wTabs" style="margin-top:8px"></div>
+      <div id="wList"><div class="empty">Загружаю…</div></div>
+    </div>
   </section>
   <section class="card" id="cArt">
     <h2>4. Артисты</h2>
@@ -686,7 +694,7 @@ async function loadList(){
       }catch(e){toast('GitHub: '+(e.message||'не удалось загрузить список'))}
     }
     $('gl').innerHTML=Object.keys(gs).sort().map(function(g){return '<option value="'+esc(g)+'">'}).join('');
-    Q.forEach(checkDup);renderQueue();renderExist();renderArtists();
+    Q.forEach(checkDup);renderQueue();renderExist();renderArtists();try{wPaint()}catch(e){}
   }catch(e){$('exSum').textContent='Не удалось загрузить список: '+nice(e)}
 }
 function renderExist(){
@@ -1467,15 +1475,54 @@ $('bStop').onclick=function(){abort=true;xhrs.slice().forEach(function(x){try{x.
 window.addEventListener('beforeunload',function(e){if(uploading){e.preventDefault();e.returnValue=''}});
 
 
-/* ===== «Хочу послушать»: сводка по слушателям (Supabase, только чтение) ===== */
-var W_URL='https://zpmzqgxwqoisfvahfhqc.supabase.co',W_KEY='sb_publishable_EJD_GXiloGMd6DDMt87G8Q_PxYmI8eF';
-$('wRef').onclick=function(){
-  var box=$('wList');box.innerHTML='<div class="empty">Загружаю…</div>';
-  fetch(W_URL+'/rest/v1/wishes_top?select=t,a,al,n&order=n.desc,last_at.desc&limit=100',{headers:{apikey:W_KEY,Authorization:'Bearer '+W_KEY}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(l){
-    if(!Array.isArray(l)||!l.length){box.innerHTML='<div class="empty">Пока никто ничего не отметил</div>';return}
-    box.innerHTML=l.map(function(x){return '<div class="it" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><b style="min-width:28px;text-align:center;color:var(--acc)">'+(+x.n||0)+'</b><div style="min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.a)+' — '+esc(x.t)+'</div><div style="color:var(--mut);font-size:12px">'+esc(x.al||'')+'</div></div></div>'}).join('');
-  }).catch(function(){box.innerHTML='<div class="empty">Не удалось загрузить. Проверьте, что SQL из supabase_v6.sql выполнен</div>'});
+/* ===== «Хочу послушать»: сводка (Supabase, только чтение) + решения (в meta.json) ===== */
+var W_URL='https://zpmzqgxwqoisfvahfhqc.supabase.co',W_KEY='sb_publishable_EJD_GXiloGMd6DDMt87G8Q_PxYmI8eF',WL=[],WS={},WSD=false,WF='new',WT=0;
+function wKey(a,t){return (a+' '+t).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim()}
+function wOnSite(x){return !!(typeof EXKEY!=='undefined'&&EXKEY&&EXKEY[normKey(x.a+' - '+x.t)])}
+function wSt(x){var o=WS[wKey(x.a,x.t)];return o&&o.s||''}
+function wPaint(){
+  if(!WSD)WS=JSON.parse(JSON.stringify((META&&META['@wishes'])||{}));
+  var n={new:0,ok:0,no:0,site:0},all=WL.length;
+  WL.forEach(function(x){if(wOnSite(x))n.site++;else{var s=wSt(x);n[s==='ok'?'ok':s==='no'?'no':'new']++}});
+  $('wBadge').textContent=n.new?'· новых: '+n.new:'';
+  var T=[['new','Новые'],['ok','Принятые'],['no','Отклонённые'],['site','Уже на сайте'],['all','Все']];
+  $('wTabs').innerHTML=T.map(function(t){return '<button class="btn ghost'+(WF===t[0]?' on':'')+'" data-wf="'+t[0]+'" type="button"'+(WF===t[0]?' style="border-color:var(--acc);color:var(--acc)"':'')+'>'+t[1]+' '+(t[0]==='all'?all:n[t[0]])+'</button>'}).join('');
+  var l=WL.filter(function(x){var on=wOnSite(x),s=wSt(x);return WF==='all'||(WF==='site'?on:(!on&&(WF==='new'?!s:s===WF)))});
+  $('wList').innerHTML=l.length?l.slice(0,300).map(function(x){var k=wKey(x.a,x.t),s=wSt(x),on=wOnSite(x),tag=on?'уже на сайте':s==='ok'?'принято':s==='no'?'отклонено':'новое';
+    return '<div class="it" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><b style="min-width:28px;text-align:center;color:var(--acc)">'+(+x.n||0)+'</b><div style="min-width:0;flex:1"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.a)+' — '+esc(x.t)+'</div><div style="color:var(--mut);font-size:12px">'+esc(x.al||'')+' · '+tag+'</div></div>'+
+      (on?'':'<button class="btn ghost" data-w="ok" data-k="'+esc(k)+'" type="button" title="Принять">✓</button><button class="btn ghost" data-w="no" data-k="'+esc(k)+'" type="button" title="Отклонить">✕</button>'+(s?'<button class="btn ghost" data-w="reset" data-k="'+esc(k)+'" type="button" title="Вернуть в новые">↺</button>':''))+'</div>'}).join(''):'<div class="empty">Тут пусто</div>';
+  $('wSave').disabled=!WSD;
+}
+$('wTabs').addEventListener('click',function(e){var b=e.target.closest('[data-wf]');if(!b)return;WF=b.dataset.wf;wPaint()});
+$('wList').addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(!b)return;var k=b.dataset.k,a=b.dataset.w;
+  if(a==='reset')delete WS[k];else WS[k]={s:a,t:Date.now()};WSD=true;wPaint()});
+function wLoad(){
+  fetch(W_URL+'/rest/v1/wishes_top?select=t,a,al,n&order=n.desc,last_at.desc&limit=500',{headers:{apikey:W_KEY,Authorization:'Bearer '+W_KEY}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(l){
+    WL=Array.isArray(l)?l:[];wPaint();
+  }).catch(function(){$('wList').innerHTML='<div class="empty">Не удалось загрузить. Проверьте, что SQL из supabase_v6.sql выполнен</div>'});
+}
+$('wRef').onclick=function(){$('wList').innerHTML='<div class="empty">Загружаю…</div>';wLoad()};
+$('wSave').onclick=async function(){
+  var btn=this;if(!CFG.token){toast('Сначала войдите');return}
+  if(METABAD){toast('Файл meta.json повреждён: сохранить нельзя');return}
+  var nm=JSON.parse(JSON.stringify(META));if(Object.keys(WS).length)nm['@wishes']=WS;else delete nm['@wishes'];
+  var js=JSON.stringify(nm,null,1);
+  if(js===JSON.stringify(META,null,1)){WSD=false;wPaint();toast('Ничего не изменено');return}
+  btn.disabled=true;
+  try{var b2=await putText(js);await commit([{path:CFG.folder+'/meta.json',mode:'100644',type:'blob',sha:b2.sha}],'Хочу послушать: решения');
+    toast('Сохранено. Слушатели увидят решения в течение пары минут.');WSD=false;await loadList();wPaint()}
+  catch(e){toast(nice(e))}finally{btn.disabled=!WSD}
 };
+setInterval(function(){if(!document.hidden&&!WSD)wLoad()},60000);
+wLoad();
+/* сворачивание длинных списков (запоминается) */
+function foldInit(btn,box,more,onTxt,offTxt,key){
+  var st;try{st=localStorage.getItem(key)==='1'}catch(e){st=false}
+  function paint(){box.hidden=st;(more||[]).forEach(function(m){if(m)m.hidden=st});btn.textContent=st?offTxt:onTxt}
+  btn.onclick=function(){st=!st;try{localStorage.setItem(key,st?'1':'0')}catch(e){}paint()};paint();
+}
+foldInit($('wFold'),$('wBody'),[],'Свернуть','Развернуть','ad_fold_w');
+foldInit($('bFoldEx'),$('exWrap'),[$('exSum'),$('popSum')],'Свернуть список','Показать список','ad_fold_ex');
 /* ===== старт ===== */
 CFG={};
 try{localStorage.removeItem('sl_admin')}catch(e){}
