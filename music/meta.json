@@ -254,9 +254,6 @@
   "n": 6,
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - трамадол.mp3": {
-  "a": "CUPSIZE"
- },
  "music/CUPSIZE - Ты Любишь Танцевать.mp3": {
   "a": "CUPSIZE"
  },
@@ -325,5 +322,8 @@
  "music/CUPSIZE - 107.1.mp3": {
   "a": "CUPSIZE",
   "t": "107.1"
+ },
+ "music/CUPSIZE - трамадол.mp3": {
+  "a": "CUPSIZE"
  }
 }
