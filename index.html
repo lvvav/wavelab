@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<script>document.addEventListener("gesturestart",function(e){e.preventDefault()});document.addEventListener("wheel",function(e){if(e.ctrlKey)e.preventDefault()},{passive:false});document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&(e.key==="+"||e.key==="-"||e.key==="="||e.key==="0"))e.preventDefault()})</script>
+<style>html{touch-action:manipulation}</style>
 <title>SoundLife — каталог музыки</title>
 <meta name="theme-color" content="#0d0d11">
 <link rel="manifest" href="manifest.webmanifest">

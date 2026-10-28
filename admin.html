@@ -2,10 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0d0d11">
+<script>document.addEventListener("gesturestart",function(e){e.preventDefault()});document.addEventListener("wheel",function(e){if(e.ctrlKey)e.preventDefault()},{passive:false});document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&(e.key==="+"||e.key==="-"||e.key==="="||e.key==="0"))e.preventDefault()})</script>
+<style>html{touch-action:manipulation}</style>
 <title>SoundLife — админка</title>
 <style>
 :root{--bg:#0d0d11;--panel:#121217;--hover:#18181f;--line:#23232c;--text:#ececf1;--mut:#8b8b99;--acc:#c6ff3d;--on:#11160a;--bad:#ff6b6b;--warn:#ffb84d;--r:10px}
