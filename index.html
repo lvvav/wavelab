@@ -1499,7 +1499,7 @@ function loadTracks(done){
 
 /* ===== состояние ===== */
 function load(k,def){try{var v=JSON.parse(localStorage.getItem(k));return v==null?def:v}catch(e){return def}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}if(SKEYS&&SKEYS[k])syncMark(k)}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));if(k==='wl3_set'&&!window.__slApplying)localStorage.setItem('wl_set_t',String(Date.now()))}catch(e){}if(SKEYS&&SKEYS[k])syncMark(k)}
 var favs=load('wl3_favs',[]).filter(function(x){return typeof x==='string'}),vol=load('wl3_vol',0.8);
 var lastVk='',enT=0,popKey='',lastNp=-2,PL=load('wl_pl',[]),plId='',HIST=load('wl_hist',[]),CNT=load('wl_cnt',{}),loading=true,resumePos=0,ALB=[],albK='',ARTS=[],artK='',artTab='tracks',artTabFor='',albFrom='',albFromFor='',dynAcc='',dynFor='',queue=[],view='all',genre='',query='',sortV=load('wl_sort','def'),cur=-1,shuffle=false,rep=0,ORDER=[],VORD=[],lastPos=-1;
 var audio=$('audio');
@@ -2659,7 +2659,7 @@ var PROF=load('wl_prof',null),FOL=load('wl_fol',{u:[],p:[]}),RPL={},PEOPLE={},US
 if(!FOL||!Array.isArray(FOL.u)||!Array.isArray(FOL.p))FOL={u:[],p:[]};
 /* ===== аккаунты и синхронизация: Supabase + Яндекс ID + Google + почта ===== */
 var SUPA_ON=!!(CONFIG.SUPA_URL&&CONFIG.SUPA_KEY),SB=null,USER=null,accMode='login',accBusy=false,
-  SYNC=load('wl_sync',{}),SKEYS={wl3_favs:1,wl_pl:1,wl_hist:1,wl_cnt:1,wl_stats:1,wl_dt:1},
+  SYNC=load('wl_sync',{}),SKEYS={wl3_favs:1,wl_pl:1,wl_hist:1,wl_cnt:1,wl_stats:1,wl_dt:1,wl_lib:1,wl3_set:1},
   syncT=0,syncDue=0,syncBusy=false,syncApplying=false,dirtyRev=0,syncSt='',syncAt=0,YA_TOK='',YA_ERR=false;
 if(!SYNC||typeof SYNC!=='object'||Array.isArray(SYNC))SYNC={};
 try{localStorage.removeItem('wl_acc')}catch(e){}
@@ -2785,7 +2785,10 @@ function normDT(o){
   if(typeof o.n!=='number')o.n=Object.keys(o.ks).length;
   return o;
 }
-function snapshot(){return {v:1,favs:favs,pl:PL,hist:HIST,cnt:CNT,st:ST,dt:DT}}
+function setT(){return +(function(){try{return localStorage.getItem('wl_set_t')}catch(e){return 0}})()||0}
+function libNorm(o){o=o&&typeof o==='object'&&!Array.isArray(o)?o:{};return {al:(Array.isArray(o.al)?o.al:[]).filter(function(x){return typeof x==='string'}),ar:(Array.isArray(o.ar)?o.ar:[]).filter(function(x){return typeof x==='string'})}}
+function setPick(o){var r={};Object.keys(DEF).forEach(function(k){if(o&&o[k]!==undefined&&typeof o[k]===typeof DEF[k])r[k]=o[k]});if(Array.isArray(r.eqv)&&r.eqv.length!==10)delete r.eqv;return r}
+function snapshot(){return {v:2,favs:favs,pl:PL,hist:HIST,cnt:CNT,st:ST,dt:DT,lib:libNorm(LIB),set:{t:setT(),v:setPick(S)}}}
 function mx(a,b){var r={},k;a=a||{};b=b||{};for(k in a)r[k]=a[k];for(k in b)r[k]=Math.max(+r[k]||0,+b[k]||0);return r}
 function uniq(a,b,n){var s={},r=[];(a||[]).concat(b||[]).forEach(function(x){if(typeof x==='string'&&!s[x]){s[x]=1;r.push(x)}});return n?r.slice(0,n):r}
 function mergeData(L,C){
@@ -2797,6 +2800,8 @@ function mergeData(L,C){
     if(pm[p.id]){pm[p.id].k=uniq(pm[p.id].k,p.k)}else{pm[p.id]={id:p.id,n:p.n,k:uniq(p.k)};pr.push(pm[p.id])}
   });
   r.pl=pr;r.hist=uniq(L.hist,C.hist,50);r.cnt=mx(L.cnt,C.cnt);
+  var ll=libNorm(L.lib),cl=libNorm(C.lib);r.lib={al:uniq(ll.al,cl.al),ar:uniq(ll.ar,cl.ar)};
+  r.set=(C.set&&C.set.v&&(+C.set.t||0)>(L.set&&+L.set.t||0))?C.set:(L.set||C.set);
   r.st={sec:mx(ls.sec,cs.sec),pl:mx(ls.pl,cs.pl),sk:mx(ls.sk,cs.sk),day:mx(ls.day,cs.day),hr:ls.hr.map(function(v,i){return Math.max(v||0,cs.hr[i]||0)})};
   for(k in cd.ks)rev[cd.ks[k]]=k;
   for(day in cd.d){
@@ -2819,9 +2824,18 @@ function applyData(d){
     HIST=(Array.isArray(d.hist)?d.hist:[]).filter(function(x){return typeof x==='string'}).slice(0,50);
     CNT=d.cnt&&typeof d.cnt==='object'&&!Array.isArray(d.cnt)?d.cnt:{};
     ST=normST(d.st);DT=normDT(d.dt);
-    save('wl3_favs',favs);save('wl_pl',PL);save('wl_hist',HIST);save('wl_cnt',CNT);save('wl_stats',ST);save('wl_dt',DT);
+    if(d.lib)LIB=libNorm(d.lib);else if(d.v>=2)LIB={al:[],ar:[]};
+    window.__slApplying=true;
+    if(d.set&&d.set.v&&(+d.set.t||0)>=setT()){
+      var ns=setPick(d.set.v);Object.keys(DEF).forEach(function(k){S[k]=ns[k]!==undefined?ns[k]:(Array.isArray(DEF[k])?DEF[k].slice():DEF[k])});
+      S.eqv=Array.isArray(S.eqv)&&S.eqv.length===10?S.eqv.slice():new Array(10).fill(0);
+      save('wl3_set',S);try{localStorage.setItem('wl_set_t',String(+d.set.t||0))}catch(e){}
+      try{applyTheme();paintSet();if(S.eq&&typeof eqApply==='function')eqApply()}catch(e){}
+    }
+    window.__slApplying=false;
+    save('wl3_favs',favs);save('wl_pl',PL);save('wl_hist',HIST);save('wl_cnt',CNT);save('wl_stats',ST);save('wl_dt',DT);save('wl_lib',LIB);
   }finally{syncApplying=false}
-  yrC.m=null;render();
+  yrC.m=null;render();try{renderLib()}catch(e){}
 }
 function syncSched(d){
   if(!USER||syncApplying)return;
@@ -2844,7 +2858,7 @@ function syncRun(manual){
     if(!USER||USER.id!==uid)return;
     var row=res.data,cts=row?Date.parse(row.updated_at):0,same=SYNC.uid===uid,push=false;
     if(!row){
-      if(SYNC.uid&&!same)applyData({});else push=true;
+      if(SYNC.uid&&!same)applyData({v:2});else push=true;
     }else if(!same){
       if(SYNC.uid)applyData(row.data);
       else{applyData(mergeData(snapshot(),row.data));push=true}
