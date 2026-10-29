@@ -22,7 +22,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;display:flex;overflow:hidden}
+body{background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Roboto,Arial,"Noto Sans","Liberation Sans",sans-serif;display:flex;overflow:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-synthesis:none}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 [hidden]{display:none!important}
@@ -34,7 +34,7 @@ button{cursor:pointer;border:0;background:none}
 /* боковое меню */
 .side{width:232px;flex:none;border-right:1px solid var(--line);padding:22px 12px 100px;overflow-y:auto;background:var(--bg)}
 .logo{display:flex;align-items:center;gap:9px;padding:0 10px 22px;font-size:18px;font-weight:700;letter-spacing:-.02em}
-.logo{font-size:26px;font-weight:800;letter-spacing:-.05em;line-height:1;padding-bottom:20px}
+.logo{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1;padding-bottom:20px}
 .nav-h{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:18px 10px 6px}
 .nv{display:flex;align-items:center;gap:11px;width:100%;padding:9px 10px;border-radius:var(--r);color:var(--mut);font-weight:500;text-align:left;transition:background .15s,color .15s}
 .nv:hover{background:var(--hover);color:var(--text)}
@@ -426,7 +426,7 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.35)}
 .np-trk.dr .ghost{visibility:visible}
 .acd.rd{text-align:center}
 .acd.rd .cv{border-radius:50%}
-.cv.ini{display:grid;place-items:center;font-weight:800;font-size:44px;letter-spacing:-.04em}
+.cv.ini{display:grid;place-items:center;font-weight:800;font-size:44px;letter-spacing:-.02em}
 .navrow .nv:nth-child(7){animation-delay:465ms}
 
 /* ===== v5: дизайн «Звук × Spotify × Яндекс Музыка» ===== */
@@ -446,7 +446,7 @@ select{border-radius:99px;background:color-mix(in srgb,var(--text) 8%,transparen
 .gear{border-radius:50%;background:color-mix(in srgb,var(--text) 8%,transparent);border-color:transparent}
 .scroll{padding:8px 24px 28px!important}
 .head{margin-top:4px}
-.head h1{font-size:40px;font-weight:800;letter-spacing:-.045em}
+.head h1{font-size:40px;font-weight:800;letter-spacing:-.025em}
 .btn{padding:11px 20px}
 .cols{background:color-mix(in srgb,var(--panel) 88%,transparent)}
 .row{border-radius:12px}
@@ -472,7 +472,7 @@ select{border-radius:99px;background:color-mix(in srgb,var(--text) 8%,transparen
 @keyframes wvA{from{transform:translate(0,0) scale(1)}to{transform:translate(12%,14%) scale(1.25)}}
 .wave::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(0,0,0,.38),transparent 70%)}
 .wv-t small{display:block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
-.wv-t b{display:block;font-size:clamp(30px,5vw,52px);font-weight:800;letter-spacing:-.05em;line-height:1.05;margin:4px 0 6px}
+.wv-t b{display:block;font-size:clamp(30px,5vw,52px);font-weight:800;letter-spacing:-.025em;line-height:1.05;margin:4px 0 6px}
 .wv-t span{opacity:.9}
 .wv-go{width:72px;height:72px;flex:none;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;box-shadow:0 12px 30px -8px rgba(0,0,0,.6);transition:transform .2s}
 .wv-go .i{width:30px;height:30px}
@@ -551,7 +551,7 @@ body::before{animation:none}
 .stc h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:12px}
 .stc.big{grid-column:1/-1;color:#fff;padding:26px 28px;background:radial-gradient(70% 120% at 10% 0,var(--acc),transparent 60%),radial-gradient(60% 120% at 90% 20%,#7b5cff,transparent 60%),radial-gradient(70% 140% at 60% 120%,#ff4fa3,transparent 60%),#0c0c14}
 .stc.big small{display:block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
-.sbig{font-size:clamp(34px,6vw,60px);font-weight:800;letter-spacing:-.05em;line-height:1.05;margin:4px 0 4px}
+.sbig{font-size:clamp(34px,6vw,60px);font-weight:800;letter-spacing:-.025em;line-height:1.05;margin:4px 0 4px}
 .s3{display:flex;gap:28px;margin-top:16px;flex-wrap:wrap}
 .s3 b{display:block;font-size:24px;font-weight:800;letter-spacing:-.03em}
 .s3 span{font-size:12px;opacity:.85}
@@ -1725,14 +1725,18 @@ function paintStatCard(){
 $('statCard').onclick=function(){view='stats';genre='';query='';$('scroll').scrollTop=0;render()};
 function albOfTrack(t){var k=((t.aa||t.a)+'|'+t.al).toLowerCase();return ALB.filter(function(x){return x.k===k})[0]}
 var HOME_N=3;
+function homeN(){
+  if(!(window.matchMedia&&matchMedia('(min-width:861px)').matches))return HOME_N;
+  var w=($('home')&&$('home').clientWidth)||Math.max(0,innerWidth-300);
+  return Math.max(HOME_N,Math.min(12,Math.floor((w+12)/192)-1))}
 function histAlb(){var hist=[];HIST.forEach(function(k){var t=byKey(k);if(t&&t.al){var A=albOfTrack(t);if(A&&!hist.some(function(x){return x.k===A.k}))hist.push(A)}});return hist}
 function moreCard(v){return '<button class="acd more" data-more="'+v+'" type="button"><span class="mo-c">'+ic('next')+'</span><div class="tt">Показать всё</div></button>'}
 function homeRows(hist){
-  var h='',used={};
-  if(hist.length){hist.slice(0,HOME_N).forEach(function(A){used[A.k]=1});h+='<h3 class="hs-t">Слушаем дальше?</h3><div class="hs">'+hist.slice(0,HOME_N).map(function(A,i){return acard(A,i)}).join('')+(hist.length>HOME_N?moreCard('hist'):'')+'</div>'}
+  var h='',used={},N=homeN();
+  if(hist.length){hist.slice(0,N).forEach(function(A){used[A.k]=1});h+='<h3 class="hs-t">Слушаем дальше?</h3><div class="hs">'+hist.slice(0,N).map(function(A,i){return acard(A,i)}).join('')+(hist.length>N?moreCard('hist'):'')+'</div>'}
   var rest=ALB.filter(function(A){return !used[A.k]});
-  if(rest.length)h+='<h3 class="hs-t">Альбомы для тебя</h3><div class="hs">'+rest.slice(0,HOME_N).map(function(A,i){return acard(A,i)}).join('')+(rest.length>HOME_N?moreCard('albums'):'')+'</div>';
-  if(ARTS.length)h+='<h3 class="hs-t">Исполнители</h3><div class="hs">'+ARTS.slice(0,HOME_N).map(function(R){return '<button class="acd rd" data-hr="'+esc(R.k)+'" type="button">'+cv({img:R.img})+mxb('ar',R.k)+'<div class="tt">'+esc(R.n)+'</div><div class="ar">Исполнитель</div></button>'}).join('')+(ARTS.length>HOME_N?moreCard('artists'):'')+'</div>';
+  if(rest.length)h+='<h3 class="hs-t">Альбомы для тебя</h3><div class="hs">'+rest.slice(0,N).map(function(A,i){return acard(A,i)}).join('')+(rest.length>N?moreCard('albums'):'')+'</div>';
+  if(ARTS.length)h+='<h3 class="hs-t">Исполнители</h3><div class="hs">'+ARTS.slice(0,N).map(function(R){return '<button class="acd rd" data-hr="'+esc(R.k)+'" type="button">'+cv({img:R.img})+mxb('ar',R.k)+'<div class="tt">'+esc(R.n)+'</div><div class="ar">Исполнитель</div></button>'}).join('')+(ARTS.length>N?moreCard('artists'):'')+'</div>';
   return h}
 function paintHomeM(){
   var tl=[{c:'fv',a:'data-qv="fav"',h:ic('heart'),st:'',n:'Любимые треки'}],seen={};
@@ -3337,6 +3341,7 @@ function jumpChk(){
 }
 var jq=0;$('scroll').addEventListener('scroll',function(){if(jq)return;jq=requestAnimationFrame(function(){jq=0;jumpChk()})},{passive:true});
 window.addEventListener('resize',jumpChk);
+(function(){var t=null,last=0;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(function(){var h=$('home');if(!h||h.hidden)return;var n=homeN();if(n===last)return;last=n;if(!(window.matchMedia&&matchMedia('(max-width:860px)').matches))$('hsRows').innerHTML=homeRows(histAlb())},150)})})();
 $('jump').onclick=function(){var r=document.querySelector('#list .row.cur');if(r)r.scrollIntoView({behavior:S.anim?'smooth':'auto',block:'center'})};
 $('backBtn').onclick=function(){if(view==='artist'&&artTab!=='tracks'){artTab='tracks';$('scroll').scrollTop=0;render();return}if(view==='album'&&albFrom&&albFromFor===albK){view='artist';artK=albFrom;albFrom='';albFromFor=''}else view=view==='pl'?'pls':view==='artist'?'artists':'albums';$('scroll').scrollTop=0;render()};
 $('qx').onclick=function(e){e.preventDefault();query='';$('q').value='';this.hidden=true;$('q').focus();render()};
