@@ -1994,6 +1994,20 @@ document.addEventListener('click',function(e){
   $('scroll').scrollTop=0;render();
 });
 $('q').oninput=function(e){query=e.target.value.trim().toLowerCase();$('qx').hidden=!e.target.value;render()};
+/* защита от автозаполнения браузера: в поиск сам подставлялся «ник/репозиторий» */
+(function(){
+  ['q','msQ'].forEach(function(id){var el=$(id);if(!el)return;
+    el.setAttribute('name','sl-'+id+'-nofill');el.setAttribute('autocomplete','off');el.setAttribute('autocorrect','off');el.setAttribute('autocapitalize','off');el.setAttribute('spellcheck','false');
+    el.readOnly=true;
+    var un=function(){el.readOnly=false};
+    el.addEventListener('focus',un);el.addEventListener('pointerdown',un);el.addEventListener('touchstart',un,{passive:true});el.addEventListener('keydown',un)});
+  function wipe(){var el=$('q');
+    if(el&&el.value&&document.activeElement!==el){el.value='';$('qx').hidden=true;if(query){query='';render()}}
+    var m=$('msQ');if(m&&m.value&&document.activeElement!==m&&!m.dataset.typed){m.value='';var x=$('msX');if(x)x.hidden=true}}
+  [150,600,1500,3500].forEach(function(ms){setTimeout(wipe,ms)});
+  window.addEventListener('pageshow',function(){setTimeout(wipe,60)});
+  var mq=$('msQ');if(mq)mq.addEventListener('keydown',function(){mq.dataset.typed='1'});
+})();
 /* ===== Нижняя навигация ===== */
 function bnavPaint(){
   var b=document.querySelectorAll('#bnav button');if(!b.length)return;
