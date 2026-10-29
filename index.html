@@ -2787,7 +2787,7 @@ var QR={sid:'',pk:'',t:0,iv:0},QR_PEND='';
 function qrRnd(n){var a=new Uint8Array(n),r='',i;try{crypto.getRandomValues(a)}catch(e){for(i=0;i<n;i++)a[i]=Math.floor(Math.random()*256)}for(i=0;i<n;i++)r+=(a[i]%36).toString(36);return r}
 function qrFn(body,tok){
   return fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/qr-auth',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+(tok||CONFIG.SUPA_KEY)},body:JSON.stringify(body)})
-    .then(function(r){return r.json().catch(function(){return {}})});
+    .then(function(r){return r.json().catch(function(){return {}}).then(function(j){j=j&&typeof j==='object'?j:{};j._st=r.status;return j})});
 }
 function qrLib(cb){
   if(window.qrcode)return cb(true);
@@ -2809,7 +2809,7 @@ function qrStart(){
   qrShow('<p>Готовим код…</p>');
   qrFn({action:'create',sid:sid,pk:pk}).then(function(j){
     if(QR.sid!==sid)return;
-    if(!j||!j.ok)throw new Error('create');
+    if(!j||!j.ok){var er=new Error('create');er.info='HTTP '+(j&&j._st||'?')+(j&&j.error?', '+j.error:'')+(j&&j.message?', '+String(j.message).slice(0,80):'');throw er}
     var url=siteUrl()+'#qr='+sid;
     qrLib(function(ok){
       if(QR.sid!==sid)return;
@@ -2817,7 +2817,7 @@ function qrStart(){
       qrShow(img+'<p>'+(img?'Откройте камеру на телефоне, где вы уже вошли в SoundLife, и наведите на код.':'Откройте эту ссылку на телефоне, где вы уже вошли в SoundLife:')+'</p>'+(img?'':'<p class="qrlink">'+esc(url)+'</p>')+'<p id="qrSt">Ждём подтверждения… код действует 5 минут</p><button class="btn ghost" id="qrNew" type="button">Новый код</button><button class="alink" id="qrBack" type="button">Назад ко входу</button>');
       QR.iv=setInterval(function(){qrPoll(sid,pk)},2000);
     });
-  }).catch(function(){if(QR.sid===sid)qrShow('<p>Не удалось получить код. Проверьте интернет и попробуйте ещё раз.</p><button class="btn ghost" id="qrNew" type="button">Повторить</button><button class="alink" id="qrBack" type="button">Назад ко входу</button>')});
+  }).catch(function(er){if(QR.sid===sid)qrShow('<p>Не удалось получить код.</p><p style="font-size:12px">Причина: '+esc((er&&er.info)||'нет связи с сервером ('+((er&&er.message)||'')+')')+'</p><button class="btn ghost" id="qrNew" type="button">Повторить</button><button class="alink" id="qrBack" type="button">Назад ко входу</button>')});
 }
 function qrPoll(sid,pk){
   if(QR.sid!==sid)return;
