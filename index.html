@@ -1083,6 +1083,40 @@ body:not(.hasTrack){padding-bottom:8px}
 .wrp-btn{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,var(--acc),#7dd957);color:#11160a;font-weight:800;font-size:16px;text-align:left}
 .wrp-btn small{display:block;font-weight:500;font-size:12px;opacity:.75}
 
+/* ===== итоги года: красивее ===== */
+@property --wa{syntax:'<color>';inherits:true;initial-value:#c6ff3d}
+@property --wb{syntax:'<color>';inherits:true;initial-value:#7b5cff}
+.wrp{--wa:#c6ff3d;--wb:#7b5cff;background:#06080a;isolation:isolate;overflow:hidden;transition:--wa .7s,--wb .7s}
+.wrp::before,.wrp::after{content:"";position:absolute;z-index:-1;width:min(120vmax,900px);aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:.55;animation:wrpd 16s ease-in-out infinite alternate}
+.wrp::before{left:-35%;top:-30%;background:radial-gradient(circle,var(--wa) 0,transparent 62%)}
+.wrp::after{right:-40%;bottom:-35%;background:radial-gradient(circle,var(--wb) 0,transparent 62%);animation-duration:21s;animation-delay:-6s}
+@keyframes wrpd{from{transform:translate(0,0) scale(1)}to{transform:translate(9%,7%) scale(1.18)}}
+.wrp-h,.wrp-s,.wrp-d{position:relative;z-index:1}
+.wc{align-items:flex-start}
+.wc>*{opacity:0;transform:translateY(22px)}
+.wc.act>*{animation:wrpin .6s cubic-bezier(.2,.8,.2,1) both}
+.wc.act>*:nth-child(2){animation-delay:.08s}.wc.act>*:nth-child(3){animation-delay:.16s}.wc.act>*:nth-child(4){animation-delay:.24s}.wc.act>*:nth-child(5){animation-delay:.32s}.wc.act>*:nth-child(6){animation-delay:.4s}
+@keyframes wrpin{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.wc small{color:rgba(255,255,255,.78);letter-spacing:.06em;text-transform:uppercase;font-weight:700;font-size:12px}
+.wc .big{font-size:clamp(72px,24vw,128px);background:linear-gradient(120deg,#fff,var(--wa));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;padding-bottom:6px}
+.wc h2{font-size:clamp(30px,8vw,44px);font-weight:800;letter-spacing:-.03em;overflow-wrap:anywhere}
+.wc .row2 span{color:rgba(255,255,255,.75)}
+.wc .row2{width:100%}
+.wc .row2 div{flex:1;background:rgba(255,255,255,.09);border-radius:16px;padding:12px 14px}
+.wc li{background:rgba(255,255,255,.08);border-radius:14px;padding:8px 12px 8px 10px}
+.wc li span{color:rgba(255,255,255,.7)}
+.wc ol{width:100%}
+.wc .wcv{width:48px;height:48px;border-radius:8px;flex:none}
+.wc .wph{width:min(52vw,220px);height:min(52vw,220px);border-radius:50%;box-shadow:0 20px 60px -10px var(--wa);background-size:cover;background-position:center}
+.wc .wph.sq{border-radius:18px}
+.wc .wph.ph::after,.wc .wph .i{font-size:70px}
+.wsp{text-align:left}
+.wsp .btn{margin-top:10px}
+.wsp .btn.ghost{color:#fff;border-color:rgba(255,255,255,.35)}
+.wsp-row{display:flex;gap:10px;flex-wrap:wrap}
+@media(prefers-reduced-motion:reduce){.wrp::before,.wrp::after{animation:none}.wc>*{opacity:1;transform:none}.wc.act>*{animation:none}}
+body.noanim .wc>*{opacity:1;transform:none}
+
 #list{position:relative}
 .swu{position:absolute;z-index:1;border-radius:var(--r,10px);display:flex;align-items:center;overflow:hidden;pointer-events:none;transition:opacity .22s}
 .swu[data-m=l]{background:#ff3d7f;justify-content:flex-end;color:#fff}
@@ -3931,21 +3965,43 @@ function wrapData(){
   for(i=0;i<400;i++){d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);if((ST.day[dayKey(d)]||0)>=60)streak++;else if(i>0)break}
   return {y:y,tot:tot,days:days,best:best,T:T.slice(0,5),A:top(A,5),G:top(G,3),hr:mxh?ST.hr.indexOf(mxh):-1,streak:streak,alb:Math.floor(tot/2700)}}
 function wrpOk(){var n=new Date(),y=n.getFullYear(),s=0;Object.keys(ST.day).forEach(function(d){if(d.indexOf(y+'-')===0)s+=ST.day[d]});return s>=300}
-function wrpBtn(){if(!wrpOk())return '';return '<button class="wrp-btn" data-wrp type="button">'+ic('play','f')+'<span>Итоги '+new Date().getFullYear()+'<small>Ваш год в музыке: минуты, артисты, треки</small></span></button>'}
-function wrpOpen(){var D=wrapData(),h='',cards=[],MN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+function wrpDec(){return new Date().getMonth()===11}
+function wrpBtn(){if(!wrpOk())return '';return '<button class="wrp-btn" data-wrp type="button">'+ic('play','f')+'<span>Итоги '+new Date().getFullYear()+'<small>'+(wrpDec()?'Ваш год в музыке: минуты, артисты, треки':'Спойлер: лучше смотреть в декабре')+'</small></span></button>'}
+var WTH=[['#c6ff3d','#7b5cff'],['#ff4fa3','#7b5cff'],['#ff8a4d','#ff4fa3'],['#4de0c0','#7b5cff']];
+function wrpCover(t){return t&&t.img?' style="background-image:url(\''+t.img+'\')"':''}
+function wrpAct(){
+  var sc=$('wrpS'),i=Math.max(0,Math.round(sc.scrollLeft/(sc.clientWidth||1))),th=WTH[i%WTH.length],w=$('wrp');
+  [].forEach.call($('wrpD').children,function(d,n){d.classList.toggle('on',n===i)});
+  [].forEach.call(sc.children,function(c,n){c.classList.toggle('act',n===i)});
+  w.style.setProperty('--wa',th[0]);w.style.setProperty('--wb',th[1]);
+  var c=sc.children[i],bg=c&&c.querySelector('[data-cnt]');
+  if(bg&&!bg._d){bg._d=1;var to=+bg.dataset.cnt,t0=Date.now();(function f(){var k=Math.min(1,(Date.now()-t0)/1100);k=1-Math.pow(1-k,3);bg.textContent=fmtMin(to*60*k);if(k<1)requestAnimationFrame(f)})()}
+}
+function wrpOpen(go){
+  var now=new Date();
+  $('wrp').classList.add('on');$('wrp').setAttribute('aria-hidden','false');
+  if(!go&&!wrpDec()){
+    $('wrpT').textContent='Итоги '+now.getFullYear();
+    $('wrpS').innerHTML='<div class="wc wsp"><small>Стоп, спойлер</small><h2>Итоги года лучше смотреть в декабре</h2><small style="text-transform:none;letter-spacing:0;font-weight:500;font-size:15px">Сейчас год ещё не закончился: цифры будут меняться, а сюрприз пропадёт. Хотите посмотреть заранее?</small><div class="wsp-row"><button class="btn" data-wspoil="no" type="button">Подождать до декабря</button><button class="btn ghost" data-wspoil="go" type="button">Всё равно открыть</button></div></div>';
+    $('wrpD').innerHTML='';$('wrpS').scrollLeft=0;wrpAct();return;
+  }
+  var D=wrapData(),cards=[],MN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   $('wrpT').textContent='Итоги '+D.y;
   var hrs=D.tot/3600;
-  cards.push('<div class="wc"><small>Ваш '+D.y+' в музыке</small><div class="big">'+fmtMin(D.tot)+'</div><h2>минут музыки</h2><div class="row2"><div><b>'+(hrs>=10?Math.round(hrs):hrs.toFixed(1))+'</b><span>часов</span></div><div><b>'+D.days+'</b><span>дней слушали</span></div><div><b>'+D.streak+'</b><span>дней подряд</span></div></div></div>');
-  if(D.A.length)cards.push('<div class="wc"><small>Главный артист</small><h2>'+esc(D.A[0][0])+'</h2><small>'+fmtDur(D.A[0][1])+' вместе</small><ol>'+D.A.map(function(x){return '<li><div><b>'+esc(x[0])+'</b><span>'+fmtDur(x[1])+'</span></div></li>'}).join('')+'</ol></div>');
-  if(D.T.length)cards.push('<div class="wc"><small>Трек года</small><h2>'+esc(D.T[0][0].t)+'</h2><small>'+esc(D.T[0][0].a)+' · '+fmtDur(D.T[0][1])+'</small><ol>'+D.T.map(function(x){return '<li><div><b>'+esc(x[0].t)+'</b><span>'+esc(ad(x[0]))+'</span></div></li>'}).join('')+'</ol><button class="btn" data-wplay type="button">'+ic('play','f')+'Включить топ</button></div>');
+  cards.push('<div class="wc"><small>Ваш '+D.y+' в музыке</small><div class="big" data-cnt="'+Math.round(D.tot/60)+'">'+fmtMin(D.tot)+'</div><h2>минут музыки</h2><div class="row2"><div><b>'+(hrs>=10?Math.round(hrs):hrs.toFixed(1))+'</b><span>часов</span></div><div><b>'+D.days+'</b><span>дней слушали</span></div><div><b>'+D.streak+'</b><span>дней подряд</span></div></div></div>');
+  if(D.A.length){var R=ARTS.filter(function(x){return x.n===D.A[0][0]})[0];
+    cards.push('<div class="wc"><small>Главный артист</small>'+(R&&R.img?'<div class="wph"'+wrpCover(R)+'></div>':'')+'<h2>'+esc(D.A[0][0])+'</h2><small>'+fmtDur(D.A[0][1])+' вместе</small><ol>'+D.A.map(function(x){return '<li><div><b>'+esc(x[0])+'</b><span>'+fmtDur(x[1])+'</span></div></li>'}).join('')+'</ol></div>')}
+  if(D.T.length)cards.push('<div class="wc"><small>Трек года</small>'+(D.T[0][0].img?'<div class="wph sq"'+wrpCover(D.T[0][0])+'></div>':'')+'<h2>'+esc(D.T[0][0].t)+'</h2><small>'+esc(D.T[0][0].a)+' · '+fmtDur(D.T[0][1])+'</small><ol>'+D.T.map(function(x){return '<li>'+(x[0].img?'<span class="cv wcv im"'+wrpCover(x[0])+'></span>':'')+'<div><b>'+esc(x[0].t)+'</b><span>'+esc(ad(x[0]))+'</span></div></li>'}).join('')+'</ol><button class="btn" data-wplay type="button">'+ic('play','f')+'Включить топ</button></div>');
   var bd=D.best[0]?(+D.best[0].slice(8,10))+' '+MN[+D.best[0].slice(5,7)-1]:'';
   cards.push('<div class="wc"><small>Ваши привычки</small>'+(D.hr>=0?'<h2>Чаще всего вы слушаете в '+D.hr+':00</h2>':'')+(D.G.length?'<small>Любимый жанр: '+esc(D.G[0][0])+'</small>':'')+(bd?'<small>Самый музыкальный день: '+bd+' ('+fmtDur(D.best[1])+')</small>':'')+'<small>Это примерно '+D.alb+' '+plural(D.alb,['альбом','альбома','альбомов'])+' подряд</small></div>');
   $('wrpS').innerHTML=cards.join('');$('wrpD').innerHTML=cards.map(function(_,i){return '<i'+(i?'':' class="on"')+'></i>'}).join('');
-  $('wrpS').scrollLeft=0;$('wrp').classList.add('on');$('wrp').setAttribute('aria-hidden','false');$('wrp')._top=D.T.map(function(x){return x[0].id})}
+  $('wrpS').scrollLeft=0;$('wrp')._top=D.T.map(function(x){return x[0].id});wrpAct()}
 function wrpClose(){$('wrp').classList.remove('on');$('wrp').setAttribute('aria-hidden','true')}
 $('wrpX').onclick=wrpClose;
-$('wrpS').addEventListener('scroll',function(){var i=Math.round(this.scrollLeft/this.clientWidth);[].forEach.call($('wrpD').children,function(d,n){d.classList.toggle('on',n===i)})},{passive:true});
-$('wrpS').addEventListener('click',function(e){if(e.target.closest('[data-wplay]')){var l=$('wrp')._top||[];if(l.length){wrpClose();playId(l[0],l)}}});
+$('wrpS').addEventListener('scroll',function(){clearTimeout(wrpAct.t);wrpAct.t=setTimeout(wrpAct,40)},{passive:true});
+$('wrpS').addEventListener('click',function(e){
+  var sp=e.target.closest('[data-wspoil]');if(sp){if(sp.dataset.wspoil==='go')wrpOpen(true);else wrpClose();return}
+  if(e.target.closest('[data-wplay]')){var l=$('wrp')._top||[];if(l.length){wrpClose();playId(l[0],l)}}});
 document.addEventListener('click',function(e){if(e.target.closest('[data-wrp]'))wrpOpen()});
 function statsHtml(){
   var map={},tot=0,nT=0,plays=0,A={},G={},arr=[],i;
