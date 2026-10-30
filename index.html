@@ -2513,6 +2513,25 @@ if('mediaSession' in navigator){try{
   navigator.mediaSession.setActionHandler('seekbackward',function(){audio.currentTime=Math.max(0,audio.currentTime-10)});
   navigator.mediaSession.setActionHandler('seekforward',function(){audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10)});
 }catch(e){}}
+/* медиаклавиши и кнопки наушников на ПК: состояние плеера для системы + запасной перехват клавиш */
+(function(){
+  if('mediaSession' in navigator){
+    var ps=function(){try{navigator.mediaSession.playbackState=audio.paused?'paused':'playing'}catch(e){}};
+    ['play','playing','pause','ended'].forEach(function(ev){audio.addEventListener(ev,ps)});
+    try{
+      navigator.mediaSession.setActionHandler('play',function(){if(audio.paused)toggle()});
+      navigator.mediaSession.setActionHandler('pause',function(){if(!audio.paused)toggle()});
+      navigator.mediaSession.setActionHandler('nexttrack',function(){step(1)});
+      navigator.mediaSession.setActionHandler('previoustrack',prevTrack);
+    }catch(e){}
+  }
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='MediaTrackNext'){e.preventDefault();step(1)}
+    else if(k==='MediaTrackPrevious'){e.preventDefault();prevTrack()}
+    else if(k==='MediaPlayPause'){e.preventDefault();toggle()}
+  });
+})();
 /* ===== кнопки в системном плеере (только в Android-приложении) ===== */
 (function(){
   var C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return;
