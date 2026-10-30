@@ -2848,7 +2848,7 @@ function qrAsk(){
   o.querySelector('.ask-o').onclick=function(){
     close();
     SB.auth.getSession().then(function(r){var tk=r&&r.data&&r.data.session&&r.data.session.access_token;if(!tk)throw new Error('no');return qrFn({action:'approve',sid:sid},tk)})
-      .then(function(j){toast(j&&j.ok?'Готово: устройство вошло в ваш аккаунт':'Не получилось: код устарел. Обновите его на компьютере')})
+      .then(function(j){toast(j&&j.ok?'Готово: устройство вошло в ваш аккаунт':'Не получилось ('+(j&&j.status==='expired'?'код устарел':((j&&j.error)||'')+' HTTP '+(j&&j._st||'?')+(j&&j.message?' '+String(j.message).slice(0,60):''))+'). Обновите код на компьютере')})
       .catch(function(){toast('Не получилось подтвердить вход')});
   };
 }
