@@ -3072,7 +3072,7 @@ function syncRun(manual){
       if(r2.error)throw r2.error;
       SYNC.ts=ts;if(dirtyRev===rev)SYNC.dirty=0;syncSv();
     });
-  }).then(function(){syncAt=Date.now();setSt('ok');if(manual)toast('Синхронизировано')},function(){failed=true;setSt('err');if(manual)toast('Не удалось синхронизировать')})
+  }).then(function(){syncAt=Date.now();setSt('ok');try{sharePush()}catch(e){}if(manual)toast('Синхронизировано')},function(){failed=true;setSt('err');if(manual)toast('Не удалось синхронизировать')})
     .then(function(){syncBusy=false;if(SYNC.dirty&&USER&&!syncT)syncSched(failed?60000:4000)});
 }
 function onSession(ev,s){
@@ -3130,14 +3130,24 @@ function shareLink(h,ti){var u=((window.SLN&&window.SLN.site)||(location.origin+
   else if(navigator.clipboard)navigator.clipboard.writeText(u).then(function(){toast('Ссылка скопирована')},function(){toast(u)});
   else toast(u)}
 function profRow(){return '<div class="fr"><div>'+(PROF&&PROF.nick?'@'+esc(PROF.nick):'Ник не выбран')+'<small>ник уникальный, по нему вас находят другие</small></div></div>'+
+  '<div class="fr"><div>Показывать мою медиатеку<small>друзья видят мои альбомы, артистов и недавние лайки</small></div><button class="btn ghost" id="pfShare" type="button">'+(SHARE_ON?'Включено':'Выключено')+'</button></div>'+
   '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="pfNick" type="button">'+(PROF&&PROF.nick?'Сменить ник':'Придумать ник')+'</button><button class="btn ghost" id="pfAva" type="button">Сменить аватарку</button><button class="btn ghost" id="pfFind" type="button">Найти человека</button></div>'}
 $('accBox').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
-  if(b.id==='pfNick')nickAsk();else if(b.id==='pfAva')avaPick();else if(b.id==='pfFind'){setOpen(false);findUser()}});
+  if(b.id==='pfNick')nickAsk();else if(b.id==='pfAva')avaPick();else if(b.id==='pfShare'){SHARE_ON=!SHARE_ON;try{localStorage.setItem('wl_shareon',SHARE_ON?'1':'0')}catch(e){}accPaint();sharePush();toast(SHARE_ON?'Друзья видят вашу медиатеку':'Медиатека скрыта от других')}else if(b.id==='pfFind'){setOpen(false);findUser()}});
+var SHARE_ON=(function(){try{return localStorage.getItem('wl_shareon')!=='0'}catch(e){return true}})(),SHARE_LAST=(function(){try{return localStorage.getItem('wl_sharelast')||''}catch(e){return ''}})();
+function shareSnap(){var f=favs.filter(function(k){return k.indexOf('my:')!==0});return {al:LIB.al.slice(0,40),ar:LIB.ar.slice(0,40),fav:f.slice(-30).reverse(),n:{f:f.length,p:PL.length}}}
+function sharePush(){
+  if(!SB||!USER||!PROF||!PROF.nick)return;
+  var v=SHARE_ON?shareSnap():null,js=JSON.stringify(v);
+  if(js===SHARE_LAST)return;
+  SB.from('profiles').update({share:v}).eq('user_id',USER.id).then(function(r){if(r&&!r.error){SHARE_LAST=js;try{localStorage.setItem('wl_sharelast',js)}catch(e){}}}).catch(function(){});
+}
 function profLoad(){if(!SB||!USER)return;var id=USER.id;
   SB.from('profiles').select('nick,avatar').eq('user_id',id).maybeSingle().then(function(r){
     if(!USER||USER.id!==id)return;
     PROF=(r&&r.data)||{nick:'',avatar:''};PROF.nick=PROF.nick||'';PROF.avatar=PROF.avatar||'';save('wl_prof',PROF);accPaint();
     if(!PROF.nick&&!askedNick){askedNick=true;setTimeout(function(){if(USER&&!PROF.nick)nickAsk()},1500)}
+    sharePush();
   }).catch(function(){});
   folLoad();wishLoad()}
 function profSave(patch,okMsg){if(!SB||!USER)return;var row={user_id:USER.id,nick:(patch.nick!==undefined?patch.nick:(PROF&&PROF.nick))||null,avatar:(patch.avatar!==undefined?patch.avatar:(PROF&&PROF.avatar))||'',updated_at:new Date().toISOString()};
@@ -3216,19 +3226,35 @@ function findUser(){if(!SB){toast('Сервис загружается, попр
     SB.from('profiles').select('user_id,nick,avatar').eq('nick',n).maybeSingle().then(function(r){
       if(!r||!r.data){toast('Такого ника нет');return}usrOpen(r.data.user_id,r.data)}).catch(function(){toast('Нет связи с сервером')})},'Найти')}
 function usrOpen(id,row){
-  var go=function(q,pls){PEOPLE[id]={n:q.nick||'без ника',a:q.avatar||''};USR={id:id,pls:pls||[]};mnKind='usr';mnKey=id;mnId=-1;renderUsr();$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')};
+  var go=function(q,pls,sh){PEOPLE[id]={n:q.nick||'без ника',a:q.avatar||''};USR={id:id,pls:pls||[],share:sh};mnKind='usr';mnKey=id;mnId=-1;renderUsr();$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')};
   if(!SB)return;
   Promise.all([row?Promise.resolve({data:row}):SB.from('profiles').select('user_id,nick,avatar').eq('user_id',id).maybeSingle(),
-    SB.from('public_playlists').select('id,name,tracks').eq('owner',id)]).then(function(a){
+    SB.from('public_playlists').select('id,name,tracks').eq('owner',id),
+    SB.from('profiles').select('share').eq('user_id',id).maybeSingle().then(function(r){return (r&&!r.error&&r.data)?{ok:1,v:r.data.share}:{ok:0}}).catch(function(){return {ok:0}})]).then(function(a){
     if(!a[0]||!a[0].data){toast('Профиль не найден');return}
-    go(a[0].data,(a[1]&&a[1].data)||[])}).catch(function(){toast('Нет связи с сервером')})}
-function renderUsr(){if(!USR)return;var q=PEOPLE[USR.id]||{n:'?',a:''},on=FOL.u.indexOf(USR.id)>-1,me=USER&&USER.id===USR.id;
-  $('mnBody').innerHTML='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:q.a}).replace('<span class="cv','<span class="cv rdm')+'<div><div class="tt">@'+esc(q.n)+'</div><div class="ar">'+USR.pls.length+' '+plural(USR.pls.length,['публичный плейлист','публичных плейлиста','публичных плейлистов'])+'</div></div></div>'+
-    (me?'':'<button class="mi'+(on?' on':'')+'" data-m="ufol" type="button">'+(on?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(on?'Отписаться':'Подписаться')+'</button>')+
-    USR.pls.map(function(p){return mi('upl','list',esc(p.name)+' · '+(Array.isArray(p.tracks)?p.tracks.length:0),p.id)}).join('')}
+    go(a[0].data,(a[1]&&a[1].data)||[],a[2]&&a[2].ok?(a[2].v||null):undefined)}).catch(function(){toast('Нет связи с сервером')})}
+function renderUsr(){if(!USR)return;var q=PEOPLE[USR.id]||{n:'?',a:''},on=FOL.u.indexOf(USR.id)>-1,me=USER&&USER.id===USR.id,sh=USR.share&&typeof USR.share==='object'?USR.share:null;
+  var als=sh?(sh.al||[]).map(function(k){return ALB.filter(function(x){return x.k===k})[0]}).filter(Boolean):[],
+      ars=sh?(sh.ar||[]).map(function(k){return ARTS.filter(function(x){return x.k===k})[0]}).filter(Boolean):[],
+      lks=sh?(sh.fav||[]).map(byKey).filter(function(t){return t&&!t.mine&&!t.pv}):[],
+      nF=sh&&sh.n&&sh.n.f!=null?sh.n.f:lks.length,
+      st=[USR.pls.length+' '+plural(USR.pls.length,['плейлист','плейлиста','плейлистов'])];
+  if(sh){st.unshift((sh.al||[]).length+' '+plural((sh.al||[]).length,['альбом','альбома','альбомов']),(sh.ar||[]).length+' '+plural((sh.ar||[]).length,['артист','артиста','артистов']),nF+' '+plural(nF,['лайк','лайка','лайков']))}
+  var H=function(t){return '<div class="sec" style="margin:16px 2px 4px">'+t+'</div>'},h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:q.a}).replace('<span class="cv','<span class="cv rdm')+'<div><div class="tt">@'+esc(q.n)+'</div><div class="ar" style="white-space:normal;line-height:1.35">'+st.join(' · ')+'</div></div></div>'+
+    (me?'':'<button class="mi'+(on?' on':'')+'" data-m="ufol" type="button">'+(on?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(on?'Отписаться':'Подписаться')+'</button>');
+  if(USR.pls.length)h+=H('Плейлисты')+USR.pls.map(function(p){return mi('upl','list',esc(p.name)+' · '+(Array.isArray(p.tracks)?p.tracks.length:0),p.id)}).join('');
+  if(als.length)h+=H('Сохранённые альбомы')+als.slice(0,8).map(function(A){return mi('ual','disc',esc(A.t)+' · '+esc(A.a),A.k)}).join('');
+  if(ars.length)h+=H('Артисты')+ars.slice(0,8).map(function(R){return mi('uar','user',esc(R.n),R.k)}).join('');
+  if(lks.length)h+=H('Недавние лайки')+lks.slice(0,8).map(function(t){return mi('utr','play',esc(t.t)+' · '+esc(ad(t)),t.key)}).join('');
+  if(USR.share===null&&!me)h+='<div class="hint" style="padding:14px 4px 4px;color:var(--mut)">Пользователь скрыл свою медиатеку</div>';
+  else if(sh&&!als.length&&!ars.length&&!lks.length&&!USR.pls.length)h+='<div class="hint" style="padding:14px 4px 4px;color:var(--mut)">Пока ничего нет</div>';
+  $('mnBody').innerHTML=h}
 function usrPick(b){var m=b.dataset.m;
   if(m==='ufol'){folToggle('user',USR.id,function(){renderUsr()})}
-  else if(m==='upl'){closeMenu();plOpen(b.dataset.x)}}
+  else if(m==='upl'){closeMenu();plOpen(b.dataset.x)}
+  else if(m==='ual'){closeMenu();view='album';albK=b.dataset.x;albFrom='';genre='';query='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
+  else if(m==='uar'){closeMenu();view='artist';artK=b.dataset.x;genre='';query='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
+  else if(m==='utr'){var t=byKey(b.dataset.x);closeMenu();if(t)playId(t.id)}}
 
 /* «О сайте» */
 function aboutOpen(o){$('about').classList.toggle('on',o);$('about').setAttribute('aria-hidden',o?'false':'true')}
