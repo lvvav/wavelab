@@ -2786,7 +2786,7 @@ var QR={sid:'',pk:'',t:0,iv:0},QR_PEND='';
 (function(){var m=(location.hash||'').match(/^#qr=([a-z0-9]{20,64})$/);if(m){QR_PEND=m[1];try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}})();
 function qrRnd(n){var a=new Uint8Array(n),r='',i;try{crypto.getRandomValues(a)}catch(e){for(i=0;i<n;i++)a[i]=Math.floor(Math.random()*256)}for(i=0;i<n;i++)r+=(a[i]%36).toString(36);return r}
 function qrFn(body,tok){
-  return fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/qr-auth',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+(tok||CONFIG.SUPA_KEY)},body:JSON.stringify(body)})
+  return fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/clever-function',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+(tok||CONFIG.SUPA_KEY)},body:JSON.stringify(body)})
     .then(function(r){return r.json().catch(function(){return {}}).then(function(j){j=j&&typeof j==='object'?j:{};j._st=r.status;return j})});
 }
 function qrLib(cb){
