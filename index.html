@@ -1150,6 +1150,7 @@ body:not(.hasTrack){padding-bottom:8px}
     <button class="nv" data-view="hist" type="button"><svg class="i"><use href="#i-moon"/></svg>История</button>
     <button class="nv" data-view="stats" type="button"><svg class="i"><use href="#i-chart"/></svg>Итоги</button>
     <button class="nv" data-view="queue" type="button"><svg class="i"><use href="#i-list"/></svg>Очередь<span class="c" id="cQ"></span></button>
+    <button class="nv" data-view="mine" type="button"><svg class="i"><use href="#i-disc"/></svg>Мои файлы<span class="c" id="cMine"></span></button>
   </div>
   <div class="mylib" id="mylib">
     <div class="nav-h">Моя медиатека</div>
@@ -1187,7 +1188,7 @@ body:not(.hasTrack){padding-bottom:8px}
     </div>
     <div class="head">
       <div style="display:flex;gap:16px;align-items:center;min-width:0"><span class="cv" id="hCv" hidden style="width:96px;height:96px;border-radius:10px;flex:none"></span><div style="min-width:0"><button class="back" id="backBtn" hidden title="Назад" aria-label="Назад" type="button"><svg class="i"><use href="#i-back"/></svg></button><h1 id="title">Каталог</h1><p id="sub"></p></div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ico" id="playAll" title="Слушать всё" aria-label="Слушать всё" type="button"><svg class="i f"><use href="#i-play"/></svg>Слушать всё</button><button class="btn ghost ico" id="shufAll" title="Вперемешку" aria-label="Вперемешку" type="button"><svg class="i"><use href="#i-shuf"/></svg>Вперемешку</button><button class="btn ghost ico" id="sortBtn2" title="Сортировка" aria-label="Сортировка" type="button"><svg class="i"><use href="#i-list"/></svg>Сортировка</button><button class="btn ghost ico" id="moreBtn" hidden title="Ещё" aria-label="Ещё" type="button"><svg class="i"><use href="#i-more"/></svg>Ещё</button><button class="btn ghost ico" id="subBtn" title="Сохранить в медиатеку" aria-label="Сохранить в медиатеку" hidden type="button"><svg class="i"><use href="#i-heart"/></svg><span id="subT">Подписаться</span></button><button class="btn ghost ico" id="shareBtn" hidden title="Поделиться" aria-label="Поделиться" type="button"><svg class="i"><use href="#i-share"/></svg></button><button class="btn ghost" id="xBtn" hidden type="button"></button><button class="btn ghost" id="xBtn2" hidden type="button"></button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="mineAdd" type="button" hidden>+ Добавить файлы</button><input type="file" id="mineIn" accept="audio/*,.mp3,.m4a,.flac,.ogg,.opus,.wav,.aac" multiple hidden><button class="btn ico" id="playAll" title="Слушать всё" aria-label="Слушать всё" type="button"><svg class="i f"><use href="#i-play"/></svg>Слушать всё</button><button class="btn ghost ico" id="shufAll" title="Вперемешку" aria-label="Вперемешку" type="button"><svg class="i"><use href="#i-shuf"/></svg>Вперемешку</button><button class="btn ghost ico" id="sortBtn2" title="Сортировка" aria-label="Сортировка" type="button"><svg class="i"><use href="#i-list"/></svg>Сортировка</button><button class="btn ghost ico" id="moreBtn" hidden title="Ещё" aria-label="Ещё" type="button"><svg class="i"><use href="#i-more"/></svg>Ещё</button><button class="btn ghost ico" id="subBtn" title="Сохранить в медиатеку" aria-label="Сохранить в медиатеку" hidden type="button"><svg class="i"><use href="#i-heart"/></svg><span id="subT">Подписаться</span></button><button class="btn ghost ico" id="shareBtn" hidden title="Поделиться" aria-label="Поделиться" type="button"><svg class="i"><use href="#i-share"/></svg></button><button class="btn ghost" id="xBtn" hidden type="button"></button><button class="btn ghost" id="xBtn2" hidden type="button"></button></div>
     </div>
     <p class="bio" id="bio" hidden></p>
     <div class="atabs" id="aTabs" hidden></div>
@@ -1304,6 +1305,7 @@ body:not(.hasTrack){padding-bottom:8px}
     <div class="fr"><div>Плавные переходы<small>затухание и нарастание на стыке треков</small></div><button class="tg" id="tFd" type="button" aria-label="Плавные переходы"></button></div>
     <div class="fr"><div>Предзагрузка следующих треков<small>когда играющий трек загрузился, заранее догружаются следующие 3: листаете, и всё играет сразу (тратит трафик)</small></div><button class="tg" id="tPre" type="button" aria-label="Предзагрузка"></button></div>
     <div class="sec">Офлайн и приложение</div>
+    <div class="fr"><div>Мои файлы<small>свои треки только для вас: хранятся на этом устройстве, никому не видны</small></div><button class="btn ghost" id="mineOpen" type="button">Открыть</button></div>
     <div class="fr"><div>Офлайн-память<small id="offInfo">Считаю…</small></div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="offFav" type="button">Сохранить избранное</button><button class="btn ghost" id="offClr" type="button">Очистить</button><button class="btn" id="pwaBtn" hidden type="button">Установить приложение</button></div>
     <small class="hint">На iPhone: «Поделиться» → «На экран Домой». На Android и компьютере: кнопка выше или меню браузера → «Установить». Отдельные треки сохраняются через «⋯» → «Сохранить офлайн».</small>
@@ -1451,7 +1453,7 @@ function dedupe(){
 var META={},GHI=null;
 function ad(t){return t.a+(t.fl&&t.fl.length?', '+t.fl.join(', '):'')}
 function applyMeta(t){var o=META[t.key];t.fl=[];if(!o||typeof o!=='object')return;if(o.f)t.fl=String(o.f).split(/\s*[,;]\s*/).filter(Boolean).slice(0,6);['t','a','al','aa','y','n'].forEach(function(k){if(o[k]!==undefined&&o[k]!==null&&o[k]!=='')t[k]=o[k]})}
-function finishTracks(arr){TRACKS=arr;TRACKS.forEach(function(x,i){x.id=i;x.key=x.key||'d:'+x.a+'-'+x.t;x.f=x.f||x.q.indexOf('FLAC')>-1;applyMeta(x)});dedupe()}
+function finishTracks(arr){TRACKS=arr;TRACKS.forEach(function(x,i){x.id=i;x.key=x.key||'d:'+x.a+'-'+x.t;x.f=x.f||x.q.indexOf('FLAC')>-1;applyMeta(x)});dedupe();try{myBoot()}catch(e){}}
 var HYB=false,RMAP={};
 /* несколько хранилищ GitHub: если путь совпал, берётся первое */
 function hybTree(gh){
@@ -1535,6 +1537,7 @@ function dur(t){return t.dur?fmt(t.dur):'–:––'}
 /* ===== список ===== */
 function visible(){
   var l;
+  if(view==='mine'){l=TRACKS.filter(function(t){return t.mine});if(query)l=l.filter(function(t){return (t.t+' '+t.a).toLowerCase().indexOf(query)>-1});return l}
   if(view==='fav')l=TRACKS.filter(function(t){return favs.indexOf(t.key)>-1});
   else if(view==='queue')l=queue.map(function(i){return TRACKS[i]});
   else if(view==='album'){var A=ALB.filter(function(x){return x.k===albK})[0];l=A?A.tr.slice():[]}
@@ -1550,7 +1553,7 @@ function visible(){
     if(sortV==='az')l.sort(function(a,b){return a.t.localeCompare(b.t,'ru')});
     if(sortV==='art')l.sort(function(a,b){return a.a.localeCompare(b.a,'ru')||a.t.localeCompare(b.t,'ru')});
   }
-  return l.filter(function(t){return !t.dup});
+  return l.filter(function(t){return !t.dup||(t.mine&&view!=='all')});
 }
 var agFor='';
 function albGrad(A){var s=$('scroll'),u=A.img||'';if(u===agFor)return;agFor=u;
@@ -1566,12 +1569,13 @@ function albGrad(A){var s=$('scroll'),u=A.img||'';if(u===agFor)return;agFor=u;
   im.src=u}
 function render(){
   var l=visible();VORD=l.map(function(t){return t.id});if(cur<0)ORDER=VORD.slice();
-  var titles={all:'Каталог',fav:'Избранное',queue:'Очередь',albums:'Альбомы',album:'Альбом',pls:'Плейлисты',pl:'Плейлист',hist:'История',artists:'Артисты',artist:'Артист',stats:'Итоги'},AR=view==='artist'?ARTS.filter(function(x){return x.k===artK})[0]:null,ab=view==='album'?ALB.filter(function(x){return x.k===albK})[0]:null,P=view==='pl'?curPl():null;
+  var titles={all:'Каталог',fav:'Избранное',queue:'Очередь',albums:'Альбомы',album:'Альбом',pls:'Плейлисты',pl:'Плейлист',hist:'История',artists:'Артисты',artist:'Артист',stats:'Итоги',mine:'Мои файлы'},AR=view==='artist'?ARTS.filter(function(x){return x.k===artK})[0]:null,ab=view==='album'?ALB.filter(function(x){return x.k===albK})[0]:null,P=view==='pl'?curPl():null;
   var nT=l.length+' '+plural(l.length,['трек','трека','треков']),tot=l.reduce(function(a,t){return a+(t.dur||0)},0),
       al=view==='albums'?ALB.filter(function(x){return !query||(x.t+' '+x.a).toLowerCase().indexOf(query)>-1}):[],
       ar2=view==='artists'?ARTS.filter(function(x){return !query||x.n.toLowerCase().indexOf(query)>-1}):[];
   $('title').textContent=ab?ab.t:AR?AR.n:P?P.n:genre&&view==='all'?genre:titles[view];
   $('sub').textContent=view==='pls'?PL.length+' '+plural(PL.length,['плейлист','плейлиста','плейлистов']):view==='albums'?al.length+' '+plural(al.length,['альбом','альбома','альбомов']):view==='stats'?'Ваша музыка в цифрах':view==='artists'?ar2.length+' '+plural(ar2.length,['артист','артиста','артистов']):AR?[nT,albN(AR),lfArtSub(AR.n)].filter(Boolean).join(' · '):ab?[ab.a,ab.y,nT,l.length&&l.every(function(t){return t.dur})?fmtLong(tot):''].filter(Boolean).join(' · '):nT;
+  $('mineAdd').hidden=view!=='mine';
   var RL=[],RS=null,aT=$('aTabs'),relView=false;
   if(view==='artist'&&AR){
     if(artTabFor!==artK){artTabFor=artK;artTab='tracks';artMore=false}
@@ -1617,7 +1621,7 @@ function render(){
       '</div></div>';
   }).join('');
   if(!l.length&&view!=='albums'&&view!=='pls'&&view!=='artists'&&view!=='stats'){
-    var msg={album:['Альбом пуст',''],artist:['Нет треков',''],pl:['Плейлист пуст','Добавьте треки через меню «⋯»'],hist:['История пуста','Здесь появятся треки, которые вы слушали'],all:TRACKS.length?['Ничего не найдено','Попробуйте изменить запрос или жанр']:loading?['Загружаю каталог…','']:['Каталог пуст','Загрузите mp3 или flac в папку music на GitHub'],fav:['В избранном пока пусто','Нажмите на сердечко рядом с треком'],queue:['Очередь пуста','Нажмите «+» рядом с треком, чтобы добавить']}[view];
+    var msg={mine:['Здесь будут ваши файлы','Нажмите «+ Добавить файлы» и выберите свои mp3. Они видны только вам и хранятся на этом устройстве'],album:['Альбом пуст',''],artist:['Нет треков',''],pl:['Плейлист пуст','Добавьте треки через меню «⋯»'],hist:['История пуста','Здесь появятся треки, которые вы слушали'],all:TRACKS.length?['Ничего не найдено','Попробуйте изменить запрос или жанр']:loading?['Загружаю каталог…','']:['Каталог пуст','Загрузите mp3 или flac в папку music на GitHub'],fav:['В избранном пока пусто','Нажмите на сердечко рядом с треком'],queue:['Очередь пуста','Нажмите «+» рядом с треком, чтобы добавить']}[view];
     html=loading&&view==='all'?SK:'<div class="empty"><b>'+msg[0]+'</b>'+msg[1]+(TRACKS.length&&(query||(genre&&view==='all'))?'<div style="margin-top:16px"><button class="btn ghost" data-reset type="button">Сбросить фильтры</button></div>':'')+'</div>';
   }
   if(view==='albums')html=al.length?'<div class="agrid">'+al.map(acard).join('')+'</div>':'<div class="empty"><b>Альбомов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
@@ -1779,7 +1783,7 @@ function favCount(){return TRACKS.filter(function(t){return !t.dup&&favs.indexOf
 function plural(n,f){n=Math.abs(n)%100;var m=n%10;return n>10&&n<20?f[2]:m>1&&m<5?f[1]:m===1?f[0]:f[2]}
 function renderNav(){
   setTimeout(function(){if(typeof qPaint==='function')qPaint()},0);
-  $('cAll').textContent=TRACKS.filter(function(t){return !t.dup}).length;$('cAlb').textContent=ALB.length||'';$('cAr').textContent=ARTS.length||'';$('cPl').textContent=PL.length||'';$('cFav').textContent=favCount()||'';$('cQ').textContent=queue.length||'';
+  $('cMine').textContent=TRACKS.filter(function(t){return t.mine}).length||'';$('cAll').textContent=TRACKS.filter(function(t){return !t.dup}).length;$('cAlb').textContent=ALB.length||'';$('cAr').textContent=ARTS.length||'';$('cPl').textContent=PL.length||'';$('cFav').textContent=favCount()||'';$('cQ').textContent=queue.length||'';
   document.querySelectorAll('.nv').forEach(function(b){b.classList.toggle('on',(b.dataset.view===view||(view==='album'&&b.dataset.view==='albums')||(view==='artist'&&b.dataset.view==='artists')||(view==='pl'&&b.dataset.view==='pls'))&&!genre)});
   var gs={};TRACKS.forEach(function(t){if(!t.dup)gs[t.g]=(gs[t.g]||0)+1});
   var h='',ch='<button class="hset" id="homeSet" type="button" aria-label="Настройки и профиль">'+($('profBtn').innerHTML||ic('user'))+'</button><button class="chip'+(!genre?' on':'')+'" data-g="" type="button">Все</button>';
@@ -2513,6 +2517,97 @@ if('mediaSession' in navigator){try{
   navigator.mediaSession.setActionHandler('seekbackward',function(){audio.currentTime=Math.max(0,audio.currentTime-10)});
   navigator.mediaSession.setActionHandler('seekforward',function(){audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10)});
 }catch(e){}}
+/* ===== Мои файлы: свои треки только для себя (хранятся в браузере этого устройства, IndexedDB) ===== */
+var MYU={},MYDB=null;
+function myOpen(cb){
+  if(MYDB)return cb(MYDB);
+  try{
+    var rq=indexedDB.open('sl_mine',1);
+    rq.onupgradeneeded=function(){rq.result.createObjectStore('f',{keyPath:'id'})};
+    rq.onsuccess=function(){MYDB=rq.result;cb(MYDB)};
+    rq.onerror=function(){cb(null)};
+  }catch(e){cb(null)}
+}
+function myAll(cb){
+  myOpen(function(db){
+    if(!db)return cb([]);
+    var out=[],rq=db.transaction('f','readonly').objectStore('f').openCursor();
+    rq.onsuccess=function(){var c=rq.result;if(c){out.push(c.value);c.continue()}else cb(out)};
+    rq.onerror=function(){cb(out)};
+  });
+}
+function myPut(rec,cb){
+  myOpen(function(db){
+    if(!db)return cb(false);
+    var tx=db.transaction('f','readwrite');tx.objectStore('f').put(rec);
+    tx.oncomplete=function(){cb(true)};tx.onerror=tx.onabort=function(){cb(false)};
+  });
+}
+function myDel(id,cb){
+  myOpen(function(db){
+    if(!db)return cb(false);
+    var tx=db.transaction('f','readwrite');tx.objectStore('f').delete(id);
+    tx.oncomplete=function(){cb(true)};tx.onerror=tx.onabort=function(){cb(false)};
+  });
+}
+function myAddTrack(r){
+  var key='my:'+r.id;
+  if(TRACKS.some(function(t){return t.key===key}))return;
+  if(!MYU[r.id])MYU[r.id]=URL.createObjectURL(r.blob);
+  TRACKS.push({id:TRACKS.length,key:key,t:r.t,a:r.a,al:'Мои файлы',aa:'',img:'',src:MYU[r.id],dur:r.dur||0,q:'Мой файл',g:'',y:'',n:0,f:false,mine:true,dup:true,fl:[],mid:r.id});
+}
+function myBoot(){
+  myAll(function(list){
+    if(!list.length)return;
+    list.sort(function(a,b){return (b.added||0)-(a.added||0)});
+    list.forEach(myAddTrack);
+    try{render();renderNav()}catch(e){}
+  });
+}
+function myRemove(t){
+  var id=t.mid;if(!id)return;
+  myDel(id,function(ok){
+    if(!ok)return toast('Не удалось удалить');
+    var i=TRACKS.indexOf(t);
+    if(cur===t.id){try{audio.pause()}catch(e){}}
+    t.dup=true;t.mine=false;t.key='del:'+id;t.t='';t.src='';
+    try{URL.revokeObjectURL(MYU[id])}catch(e){}delete MYU[id];
+    favs=favs.filter(function(k){return k!=='my:'+id});save('wl3_favs',favs);
+    PL.forEach(function(p){p.k=p.k.filter(function(k){return k!=='my:'+id})});savePL();
+    queue=queue.filter(function(q){return q!==t.id});
+    toast('Удалено из моих файлов');render();renderNav();
+  });
+}
+function myParse(name){
+  var n=name.replace(/\.[a-z0-9]{2,5}$/i,'').replace(/_/g,' ').trim(),m=n.match(/^(.+?)\s+[-–—]\s+(.+)$/);
+  return m?{a:m[1].trim(),t:m[2].trim()}:{a:'Я',t:n||'Без названия'};
+}
+function myDur(file,cb){
+  var u=URL.createObjectURL(file),au=new Audio(),done=false;
+  function fin(d){if(done)return;done=true;try{URL.revokeObjectURL(u)}catch(e){}cb(d)}
+  au.preload='metadata';au.onloadedmetadata=function(){fin(isFinite(au.duration)?Math.round(au.duration):0)};au.onerror=function(){fin(0)};
+  setTimeout(function(){fin(0)},4000);au.src=u;
+}
+function myAddFiles(files){
+  var arr=Array.prototype.slice.call(files||[]).filter(function(f){return /^audio\//.test(f.type)||/\.(mp3|m4a|flac|ogg|opus|wav|aac)$/i.test(f.name)});
+  if(!arr.length)return toast('Выберите аудиофайлы (mp3, m4a, flac, wav…)');
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  var ok=0,fail=0,i=0;
+  (function next(){
+    if(i>=arr.length){
+      toast(ok?('Добавлено: '+ok+(fail?', не удалось: '+fail:'')):'Не удалось сохранить: не хватает места на устройстве');
+      if(mlibOn)mlibShow(false);if(srchOn)srchShow(false);view='mine';genre='';query='';$('q').value='';$('qx').hidden=true;render();renderNav();return;
+    }
+    var f=arr[i++],p=myParse(f.name);
+    myDur(f,function(d){
+      var rec={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:p.t,a:p.a,dur:d,size:f.size,added:Date.now(),blob:f};
+      myPut(rec,function(good){if(good){ok++;myAddTrack(rec)}else fail++;setTimeout(next,0)});
+    });
+  })();
+}
+$('mineAdd').onclick=function(){$('mineIn').value='';$('mineIn').click()};
+$('mineIn').onchange=function(){myAddFiles(this.files)};
+$('mineOpen').onclick=function(){try{setOpen(false)}catch(e){}if(mlibOn)mlibShow(false);if(srchOn)srchShow(false);view='mine';genre='';query='';$('scroll').scrollTop=0;render();renderNav()};
 /* медиаклавиши и кнопки наушников на ПК: состояние плеера для системы + запасной перехват клавиш */
 (function(){
   if('mediaSession' in navigator){
@@ -3406,6 +3501,7 @@ function renderMenuX(mode){
 function renderMenu(mode){if(mnKind!=='tr')return renderMenuX(mode);var t=TRACKS[mnId];if(!t)return;
   var h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv(t)+'<div><div class="tt">'+esc(t.t)+'</div><div class="ar">'+esc(ad(t))+'</div></div></div>';
   if(mode==='pl')h+=mi('back','down','Назад')+mi('newpl','plus','Новый плейлист')+PL.map(function(p){var has=p.k.indexOf(t.key)>-1;return mi('addpl',has?'check':'list',esc(p.n)+(has?' — уже добавлен':''),p.id)}).join('');
+  else if(t.mine){var fv0=favs.indexOf(t.key)>-1;h+=mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+'<button class="mi'+(fv0?' on':'')+'" data-m="fav" type="button">'+(fv0?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv0?'Убрать из избранного':'В избранное')+'</button>'+mi('pl','plus','Добавить в плейлист')+mi('mydel','x','Удалить из моих файлов')}
   else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
   $('mnBody').innerHTML=h}
 function openMenuX(kind,key){mnKind=kind;mnKey=key;mnId=-1;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
@@ -3424,7 +3520,8 @@ $('mnBody').onclick=function(e){var b=e.target.closest('[data-m]');if(!b)return;
   if(m==='newpl'){newPl(function(n){n.k.push(t.key);savePL();toast('Добавлено в «'+n.n+'»');closeMenu();render()});return}
   if(m==='addpl'){var p=PL.filter(function(x){return x.id===b.dataset.x})[0];if(p&&p.k.indexOf(t.key)<0){p.k.push(t.key);savePL();toast('Добавлено в «'+p.n+'»')}closeMenu();return render()}
   closeMenu();
-  if(m==='next'){queue.unshift(mnId);toast('Сыграет следующим');renderNav()}
+  if(m==='mydel'){myRemove(t)}
+  else if(m==='next'){queue.unshift(mnId);toast('Сыграет следующим');renderNav()}
   else if(m==='q'){queue.push(mnId);toast('Добавлено в очередь');renderNav()}
   else if(m==='alb'){view='album';albK=((t.aa||t.a)+'|'+t.al).toLowerCase();genre='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
   else if(m==='art'){view='artist';artK=t.a.toLowerCase();genre='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
