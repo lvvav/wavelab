@@ -1678,7 +1678,7 @@ function render(){
   if(view==='albums')html=al.length?'<div class="agrid">'+al.map(acard).join('')+'</div>':'<div class="empty"><b>Альбомов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
   if(view==='artists')html=ar2.length?'<div class="agrid">'+ar2.map(rcard).join('')+'</div>':'<div class="empty"><b>Артистов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
   if(view==='stats')html=wrpBtn()+statsHtml();
-  if(view==='pls')html=PL.length?'<div class="agrid">'+PL.map(pcard).join('')+'</div>':'<div class="empty"><b>Плейлистов пока нет</b>Нажмите «Новый плейлист» или «⋯» у любого трека</div>';
+  if(view==='pls')html=autoCards()+(PL.length?'<div class="agrid">'+PL.map(pcard).join('')+'</div>':'<div class="empty"><b>Плейлистов пока нет</b>Нажмите «Новый плейлист» или «⋯» у любого трека</div>');
   if(relView)html=relScreen(RS);
   else if(view==='artist'&&AR&&l.length){
     html='<h3 class="sec-h">Популярное</h3>'+html+(popList(AR).length>5?'<button class="pbtn" data-armore type="button">'+(artMore?'Свернуть':'Еще')+'</button>':'');
@@ -3508,6 +3508,45 @@ function askName(title,def,cb,ok){
   i.onkeydown=function(e){if(e.key==='Enter')done();else if(e.key==='Escape')close()};
 }
 function newPl(cb){askName('Название плейлиста','Мой плейлист',function(n){var p={id:'p'+Date.now().toString(36),n:n,k:[]};PL.push(p);savePL();if(cb)cb(p)},'Создать')}
+/* ===== умные подборки по настроению ===== */
+var AUTO_G={calm:/ambient|chill|lo-?fi|acoustic|piano|jazz|classical|folk|soul|sleep|instrumental|new age|bossa|ballad|lounge|засып|тих|спокой|колыбел/i,
+  energy:/rock|punk|metal|dance|electro|house|techno|hip|rap|trap|phonk|dnb|drum|hardcore|edm|rave|grunge|рок|панк|рэп|реп|драйв/i,
+  sad:/sad|emo|blues|depress|dark|goth|slowcore|shoegaze|груст|тоск|слёз|слез|плак|одинок|дожд/i};
+function autoPool(){return TRACKS.filter(function(t){return !t.dup&&!t.mine&&!t.pv&&t.key})}
+function autoShuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+function autoDefs(){
+  var P=autoPool(),pl=function(t){return ST.pl[t.key]||0},fv=function(t){return favs.indexOf(t.key)>-1},D=[],dec={};
+  var gm=function(re){return P.filter(function(t){return re.test((t.g||'')+' '+(t.t||''))})};
+  D.push(['calm','🌙','Спокойно',autoShuf(gm(AUTO_G.calm))]);
+  D.push(['energy','⚡','Энергия',autoShuf(gm(AUTO_G.energy))]);
+  D.push(['sad','🌧️','Грустное',autoShuf(gm(AUTO_G.sad))]);
+  D.push(['fav','❤️','Любимое сейчас',P.filter(function(t){return fv(t)||pl(t)>2}).sort(function(a,b){return (fv(b)?3:0)+pl(b)-((fv(a)?3:0)+pl(a))})]);
+  D.push(['forgot','🕰️','Забытые лайки',autoShuf(P.filter(function(t){return fv(t)&&HIST.indexOf(t.key)<0}))]);
+  D.push(['new','🆕','Новое для вас',autoShuf(P.filter(function(t){return !pl(t)&&!CNT[t.key]}))]);
+  D.push(['short','⏱️','Быстрый заряд',autoShuf(P.filter(function(t){return t.dur&&t.dur<=180}))]);
+  D.push(['long','🌊','Погрузиться',autoShuf(P.filter(function(t){return t.dur&&t.dur>=330}))]);
+  P.forEach(function(t){var y=parseInt(t.y,10);if(y>=1960&&y<2100){var d=Math.floor(y/10)*10;(dec[d]=dec[d]||[]).push(t)}});
+  Object.keys(dec).sort().forEach(function(d){D.push(['d'+d,'📼','Из '+d+'-х',autoShuf(dec[d])])});
+  return D.filter(function(x){return x[3].length>=5}).map(function(x){x[3]=x[3].slice(0,50);return x})}
+function autoCards(){var D=autoDefs();if(!D.length)return '';
+  return '<h3 class="sec-h" style="margin:4px 2px 10px">Подборки для вас</h3><div class="agrid" style="margin-bottom:18px">'+D.map(function(x,i){var f=x[3].filter(function(t){return t.img})[0];
+    return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-auto="'+x[0]+'" type="button">'+cv({img:f?f.img:''})+'<div class="tt">'+x[1]+' '+esc(x[2])+'</div><div class="ar">'+x[3].length+' '+plural(x[3].length,['трек','трека','треков'])+'</div></button>'}).join('')+'</div>'+
+    (PL.length?'<h3 class="sec-h" style="margin:4px 2px 10px">Мои плейлисты</h3>':'')}
+function autoOpen(id){
+  var D=autoDefs().filter(function(x){return x[0]===id})[0];if(!D)return;
+  var o=document.createElement('div');o.className='ask';
+  o.innerHTML='<div class="ask-b"><h3></h3><div style="color:var(--mut);font-size:13px;margin:-4px 0 12px"></div><div class="ask-a"><button type="button" class="ask-c">Закрыть</button><button type="button" class="ask-c" data-as="save">Сохранить плейлистом</button><button type="button" class="ask-o" data-as="play"></button></div></div>';
+  o.querySelector('h3').textContent=D[1]+' '+D[2];o.querySelector('div[style]').textContent=D[3].length+' '+plural(D[3].length,['трек','трека','треков'])+' из вашей библиотеки';
+  o.querySelector('.ask-o').innerHTML=ic('play','f')+' Включить';
+  document.body.appendChild(o);requestAnimationFrame(function(){o.classList.add('on')});
+  function close(){o.classList.remove('on');setTimeout(function(){o.remove()},200)}
+  o.addEventListener('click',function(e){
+    var b=e.target.closest('button');
+    if(e.target===o||(b&&b.classList.contains('ask-c')&&!b.dataset.as)){close();return}
+    if(!b)return;
+    if(b.dataset.as==='play'){close();shuffle=false;try{paintModes()}catch(x){}var ids=D[3].map(function(t){return t.id});playId(ids[0],ids)}
+    else if(b.dataset.as==='save'){PL.push({id:'p'+Date.now().toString(36),n:D[1]+' '+D[2],k:D[3].map(function(t){return t.key})});savePL();close();toast('Плейлист сохранён: «'+D[2]+'»');if(view==='pls')render()}})}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-auto]');if(b)autoOpen(b.dataset.auto)});
 function pcard(p,i){var f=p.k.map(byKey).filter(function(t){return t&&t.img})[0];
   return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-pl="'+esc(p.id)+'" type="button">'+cv({img:f?f.img:''})+'<div class="tt">'+esc(p.n)+'</div><div class="ar">'+p.k.length+' '+plural(p.k.length,['трек','трека','треков'])+'</div></button>'}
 function mi(a,icon,label,x){return '<button class="mi" data-m="'+a+'"'+(x?' data-x="'+esc(x)+'"':'')+' type="button">'+ic(icon)+label+'</button>'}
