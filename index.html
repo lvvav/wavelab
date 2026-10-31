@@ -1181,6 +1181,8 @@ body.noanim .wc>*{opacity:1;transform:none}
 .nws-b ul{list-style:none;margin:12px 0 4px;display:flex;flex-direction:column;gap:8px}
 .nws-b li{display:flex;gap:10px;align-items:flex-start;font-size:15px}.nws-b li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-top:8px}
 .nws-a{display:flex;gap:10px;margin-top:16px}.nws-a .btn{flex:1;justify-content:center}
+.mood{flex:none;width:150px;height:112px;border-radius:18px;padding:14px;text-align:left;color:#fff;background:linear-gradient(135deg,var(--g1),var(--g2));display:flex;flex-direction:column;justify-content:space-between;scroll-snap-align:start;transition:transform .15s}
+.mood:active{transform:scale(.96)}.mood .me{font-size:32px;line-height:1}.mood b{display:block;font-size:17px;text-shadow:0 1px 8px rgba(0,0,0,.35)}.mood small{display:block;opacity:.9;font-size:12px}
 #list{position:relative}
 .swu{position:absolute;z-index:1;border-radius:var(--r,10px);display:flex;align-items:center;overflow:hidden;pointer-events:none;transition:opacity .22s}
 .swu[data-m=l]{background:#ff3d7f;justify-content:flex-end;color:#fff}
@@ -1851,7 +1853,7 @@ function homeN(){
 function histAlb(){var hist=[];HIST.forEach(function(k){var t=byKey(k);if(t&&t.al){var A=albOfTrack(t);if(A&&!hist.some(function(x){return x.k===A.k}))hist.push(A)}});return hist}
 function moreCard(v){return '<button class="acd more" data-more="'+v+'" type="button"><span class="mo-c">'+ic('next')+'</span><div class="tt">Показать всё</div></button>'}
 function homeRows(hist){
-  var h='',used={},N=homeN();
+  var h=moodTiles(),used={},N=homeN();
   if(hist.length){hist.slice(0,N).forEach(function(A){used[A.k]=1});h+='<h3 class="hs-t">Слушаем дальше?</h3><div class="hs">'+hist.slice(0,N).map(function(A,i){return acard(A,i)}).join('')+(hist.length>N?moreCard('hist'):'')+'</div>'}
   var rest=ALB.filter(function(A){return !used[A.k]});
   if(rest.length)h+='<h3 class="hs-t">Альбомы для тебя</h3><div class="hs">'+rest.slice(0,N).map(function(A,i){return acard(A,i)}).join('')+(rest.length>N?moreCard('albums'):'')+'</div>';
@@ -3601,12 +3603,31 @@ var AUTO_G={calm:/ambient|chill|lo-?fi|acoustic|piano|jazz|classical|folk|soul|s
   sad:/sad|emo|blues|depress|dark|goth|slowcore|shoegaze|груст|тоск|слёз|слез|плак|одинок|дожд/i};
 function autoPool(){return TRACKS.filter(function(t){return !t.dup&&!t.mine&&!t.pv&&t.key})}
 function autoShuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+/* ===== настроение по самому звуку: громкость, темп, яркость, мажор/минор (music/moods.json) ===== */
+var MOODS=null;
+function moodLoad(){try{if(!GHI)return;fetch(urlFor(CONFIG.FOLDER+'/moods.json',GHI)+'?v='+Math.floor(Date.now()/3600000)).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&typeof j==='object'&&!Array.isArray(j)){MOODS=j;render()}}).catch(function(){})}catch(e){}}
+function moodSets(P){
+  var F=P.filter(function(t){return MOODS&&MOODS[t.key]});if(F.length<12)return null;
+  var R={};['l','o','b','c','k'].forEach(function(f){var v=F.map(function(t){return MOODS[t.key][f]}).sort(function(a,b){return a-b}),n=v.length-1;
+    R[f]=function(x){var lo=0,hi=v.length,m;while(lo<hi){m=(lo+hi)>>1;if(v[m]<x)lo=m+1;else hi=m}return lo/n}});
+  var S=F.map(function(t){var m=MOODS[t.key],rl=R.l(m.l),ro=R.o(m.o),rb=R.b(m.b),rc=R.c(m.c),rk=R.k(m.k),E=.4*rl+.3*ro+.2*rb+.1*rc;
+    return {t:t,energy:.45*ro+.35*rb+.2*rl,power:rl>=.45?rl*.5+(1-rk)*.3+rc*.2:-1,calm:(1-E)*.7+(1-ro)*.3,sad:rl<=.6?(1-rk)*.45+(1-E)*.35+(1-rb)*.2:-1,happy:rl>=.3?rk*.4+E*.3+rb*.3:-1}});
+  var n=Math.min(50,Math.max(8,Math.round(F.length*.2)));
+  function pick(k){return S.filter(function(x){return x[k]>=0}).sort(function(a,b){return b[k]-a[k]}).slice(0,n).map(function(x){return x.t})}
+  return {energy:pick('energy'),power:pick('power'),calm:pick('calm'),sad:pick('sad'),happy:pick('happy')}}
+var MOOD_C={energy:['#ff8a4d','#ff4fa3'],power:['#ff3b30','#4a1218'],happy:['#ffd93d','#ff8a4d'],calm:['#4de0c0','#3b5bdb'],sad:['#5b7cff','#262a63']};
+function moodTiles(){var D=autoDefs().filter(function(x){return MOOD_C[x[0]]});if(!D.length)return '';
+  return '<h3 class="hs-t">Под настроение</h3><div class="hs">'+D.map(function(x){var c=MOOD_C[x[0]];
+    return '<button class="mood" data-auto="'+x[0]+'" type="button" style="--g1:'+c[0]+';--g2:'+c[1]+'"><span class="me">'+x[1]+'</span><span><b>'+esc(x[2])+'</b><small>'+x[3].length+' '+plural(x[3].length,['трек','трека','треков'])+'</small></span></button>'}).join('')+'</div>'}
 function autoDefs(){
   var P=autoPool(),pl=function(t){return ST.pl[t.key]||0},fv=function(t){return favs.indexOf(t.key)>-1},D=[],dec={};
   var gm=function(re){return P.filter(function(t){return re.test((t.g||'')+' '+(t.t||''))})};
+  var MS=moodSets(P);
+  if(MS){D.push(['energy','⚡','Энергия',autoShuf(MS.energy)],['power','🔥','Мощное',autoShuf(MS.power)],['happy','☀️','Весёлое',autoShuf(MS.happy)],['calm','🌙','Спокойно',autoShuf(MS.calm)],['sad','🌧️','Грустное',autoShuf(MS.sad)])}
+  else{
   D.push(['calm','🌙','Спокойно',autoShuf(gm(AUTO_G.calm))]);
   D.push(['energy','⚡','Энергия',autoShuf(gm(AUTO_G.energy))]);
-  D.push(['sad','🌧️','Грустное',autoShuf(gm(AUTO_G.sad))]);
+  D.push(['sad','🌧️','Грустное',autoShuf(gm(AUTO_G.sad))]);}
   D.push(['fav','❤️','Любимое сейчас',P.filter(function(t){return fv(t)||pl(t)>2}).sort(function(a,b){return (fv(b)?3:0)+pl(b)-((fv(a)?3:0)+pl(a))})]);
   D.push(['forgot','🕰️','Забытые лайки',autoShuf(P.filter(function(t){return fv(t)&&HIST.indexOf(t.key)<0}))]);
   D.push(['new','🆕','Новое для вас',autoShuf(P.filter(function(t){return !pl(t)&&!CNT[t.key]}))]);
@@ -4876,7 +4897,7 @@ var _chAccPaint=accPaint;
 accPaint=function(){_chAccPaint();var b=$('accBox');if(b&&USER&&SUPA_ON&&!b.querySelector('.chp'))b.insertAdjacentHTML('beforeend',pushRow()+'<div class="chp fr" style="margin-top:6px"><div>Сообщения<small>переписка с друзьями, можно отправлять треки</small></div><button class="btn ghost" data-ch="open" type="button">Открыть <i class="chbd nbd" '+(CH.unread?'':'hidden')+'>'+(CH.unread?chCap(CH.unread):'')+'</i></button></div>')};
 render();
 accInit();
-loadTracks(function(){loading=false;setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
+loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
 })();
 </script>
 </body>
