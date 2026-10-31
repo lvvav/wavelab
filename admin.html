@@ -319,6 +319,7 @@ body.noanim *,body.noanim *::before,body.noanim *::after{animation:none!importan
       <label class="f">Исполнитель альбома<input type="text" id="eAa" autocomplete="off"></label>
       <label class="f">Год<input type="text" id="eY" inputmode="numeric" maxlength="4" autocomplete="off"></label>
       <label class="f">Номер трека<input type="text" id="eN" inputmode="numeric" maxlength="3" autocomplete="off"></label>
+      <label class="f">Диск (если в альбоме несколько)<input type="text" id="eD" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="1"></label>
     </div>
     <details class="mini ly" id="lyBox">
       <summary>Текст песни и тайм-коды</summary>
@@ -937,7 +938,7 @@ $('mLfOut').addEventListener('click',function(e){
 });
 
 /* ===== редактор трека ===== */
-var ED=null,EDF={a:'eA',f:'eF',t:'eT',g:'eG',al:'eAl',aa:'eAa',y:'eY',n:'eN'};
+var ED=null,EDF={a:'eA',f:'eF',t:'eT',g:'eG',al:'eAl',aa:'eAa',y:'eY',n:'eN',d:'eD'};
 function edMsg(t,bad){$('mMsg').textContent=t||'';$('mMsg').className='msg'+(bad?' bad':'')}
 function encP(p){return p.split('/').map(encodeURIComponent).join('/')}
 function parsePath(p){
@@ -960,7 +961,7 @@ async function openEditor(paths){
   var items=paths.filter(function(p){return AUDIO.test(p)}).map(function(p){
     var it=parsePath(p),m=META[p]||{};
     it.node=EXIST.filter(function(n){return n.path===p})[0];
-    it.v={a:m.a!=null?String(m.a):it.a,f:m.f?String(m.f):'',t:m.t!=null?String(m.t):it.t,g:it.dir,al:m.al?String(m.al):'',aa:m.aa?String(m.aa):'',y:m.y?String(m.y):'',n:m.n?String(m.n):''};
+    it.v={a:m.a!=null?String(m.a):it.a,f:m.f?String(m.f):'',t:m.t!=null?String(m.t):it.t,g:it.dir,al:m.al?String(m.al):'',aa:m.aa?String(m.aa):'',y:m.y?String(m.y):'',n:m.n?String(m.n):'',d:m.d?String(m.d):''};
     return it;
   }).filter(function(it){return it.node});
   if(!items.length)return;
@@ -1018,13 +1019,14 @@ $('mSave').onclick=async function(){
   var F={};Object.keys(EDF).forEach(function(k){F[k]=$(EDF[k]).value.trim()});
   if(F.y&&!/^\d{4}$/.test(F.y)){edMsg('Год — четыре цифры, например 2019.',1);return}
   if(F.n&&!/^\d{1,3}$/.test(F.n)){edMsg('Номер трека — число.',1);return}
+  if(F.d&&!/^\d{1,2}$/.test(F.d)){edMsg('Диск — число.',1);return}
   if(ED.single&&!F.t){edMsg('Название не может быть пустым.',1);return}
   function dirty(k){return ED.single?F[k]!==ED.init[k]:(F[k]!==''&&F[k]!==ED.init[k])}
-  var metaKeys=['a','f','t','al','aa','y','n'],metaDirty=['f','al','aa','y','n'].some(dirty);
+  var metaKeys=['a','f','t','al','aa','y','n','d'],metaDirty=['f','al','aa','y','n','d'].some(dirty);
   if(METABAD&&(metaDirty||dirty('a')||dirty('t'))){edMsg('Файл meta.json повреждён — эти поля сохранить нельзя.',1);return}
   var lyNew=ED.single?$('eLy').value.replace(/\r/g,'').replace(/\s+$/,''):null,lyDirty=ED.single&&lyNew!==ED.lyInit;
   if(LYRBAD&&lyDirty){edMsg('Файл lyrics.json повреждён — текст сохранить нельзя.',1);return}
-  if(!['a','f','t','g','al','aa','y','n'].some(dirty)&&!lyDirty&&ED.cv.mode==='keep'){edMsg('Ничего не изменено.',1);return}
+  if(!['a','f','t','g','al','aa','y','n','d'].some(dirty)&&!lyDirty&&ED.cv.mode==='keep'){edMsg('Ничего не изменено.',1);return}
 
   var nl=JSON.parse(JSON.stringify(LYR)),nm=JSON.parse(JSON.stringify(META)),dels=[],adds=[],taken={},bad='',gnew=F.g.split('/').map(clean).filter(Boolean).join('/'),useCover=ED.cv.mode==='new';
   ED.items.forEach(function(it){
@@ -1054,7 +1056,7 @@ $('mSave').onclick=async function(){
     var m=Object.assign({},nm[it.path]||{});delete nm[it.path];
     metaKeys.forEach(function(k){
       if(!dirty(k))return;
-      if(F[k]==='')delete m[k];else m[k]=k==='n'?parseInt(F[k],10):F[k];
+      if(F[k]==='')delete m[k];else m[k]=(k==='n'||k==='d')?parseInt(F[k],10):F[k];
     });
     if(Object.keys(m).length)nm[np]=m;
     var lv=nl[it.path];delete nl[it.path];

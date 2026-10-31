@@ -1117,6 +1117,7 @@ body:not(.hasTrack){padding-bottom:8px}
 @media(prefers-reduced-motion:reduce){.wrp::before,.wrp::after{animation:none}.wc>*{opacity:1;transform:none}.wc.act>*{animation:none}}
 body.noanim .wc>*{opacity:1;transform:none}
 
+.dh{display:flex;align-items:center;gap:8px;padding:18px 16px 6px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.dh .i{width:16px;height:16px}
 #list{position:relative}
 .swu{position:absolute;z-index:1;border-radius:var(--r,10px);display:flex;align-items:center;overflow:hidden;pointer-events:none;transition:opacity .22s}
 .swu[data-m=l]{background:#ff3d7f;justify-content:flex-end;color:#fff}
@@ -1486,7 +1487,7 @@ function dedupe(){
 }
 var META={},GHI=null;
 function ad(t){return t.a+(t.fl&&t.fl.length?', '+t.fl.join(', '):'')}
-function applyMeta(t){var o=META[t.key];t.fl=[];if(!o||typeof o!=='object')return;if(o.f)t.fl=String(o.f).split(/\s*[,;]\s*/).filter(Boolean).slice(0,6);['t','a','al','aa','y','n'].forEach(function(k){if(o[k]!==undefined&&o[k]!==null&&o[k]!=='')t[k]=o[k]})}
+function applyMeta(t){var o=META[t.key];t.fl=[];if(!o||typeof o!=='object')return;if(o.f)t.fl=String(o.f).split(/\s*[,;]\s*/).filter(Boolean).slice(0,6);['t','a','al','aa','y','n','d'].forEach(function(k){if(o[k]!==undefined&&o[k]!==null&&o[k]!=='')t[k]=o[k]})}
 function finishTracks(arr){TRACKS=arr;TRACKS.forEach(function(x,i){x.id=i;x.key=x.key||'d:'+x.a+'-'+x.t;x.f=x.f||x.q.indexOf('FLAC')>-1;applyMeta(x)});dedupe();try{myBoot()}catch(e){}}
 var HYB=false,RMAP={};
 /* несколько хранилищ GitHub: если путь совпал, берётся первое */
@@ -1640,9 +1641,11 @@ function render(){
   if(view==='albums'||view==='pls'||view==='artists'||view==='stats')l=[];
   if(view==='artist'&&AR&&!relView){l=popList(AR);VORD=l.map(function(t){return t.id});if(cur<0)ORDER=VORD.slice();if(!artMore)l=l.slice(0,5)}
   paintBig();
+  var multiD=view==='album'&&l.some(function(t){return (t.d||1)>1});
   var html=l.map(function(t,n){
     var isCur=t.id===cur,fv=favs.indexOf(t.key)>-1,playing=isCur&&!audio.paused;
-    return '<div class="row'+(isCur?' cur':'')+(playing?' playing':'')+'" style="--i:'+Math.min(n,14)+'" data-id="'+t.id+'" data-n="'+n+'">'+
+    var dh=multiD&&(n===0||(t.d||1)!==(l[n-1].d||1))?'<div class="dh">'+ic('disc')+'Диск '+(t.d||1)+'</div>':'';
+    return dh+'<div class="row'+(isCur?' cur':'')+(playing?' playing':'')+'" style="--i:'+Math.min(n,14)+'" data-id="'+t.id+'" data-n="'+n+'">'+
       '<div class="idx"><span class="n num">'+(view==='album'&&t.n?t.n:n+1)+'</span><span class="pl">'+ic(playing?'pause':'play','f')+'</span><span class="eqw"><i></i><i></i><i></i></span></div>'+
       '<div class="who">'+cv(t)+'<div><div class="tt">'+esc(t.t)+(OFF[t.key]?'<span class="offb" title="Доступно офлайн">⤓</span>':'')+'</div><div class="ar">'+lfBadge(t)+esc(view==='artist'?(t.al||ad(t)):ad(t)+(t.al&&view!=='album'?' · '+t.al:''))+'</div></div></div>'+
       '<div class="gn">'+esc(t.g)+'</div>'+
@@ -3354,8 +3357,8 @@ function dec(b,e){try{
   if(e===3)return new TextDecoder().decode(b);
   try{return new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(x){return new TextDecoder('windows-1251').decode(b)}
 }catch(x){return ''}}
-var M={TIT2:'t',TT2:'t',TPE1:'a',TP1:'a',TALB:'al',TAL:'al',TPE2:'aa',TP2:'aa',TRCK:'n',TRK:'n',TYER:'y',TYE:'y',TDRC:'y',TCON:'g',TCO:'g'};
-var VC={TITLE:'t',ARTIST:'a',ALBUM:'al',ALBUMARTIST:'aa',DATE:'y',YEAR:'y',TRACKNUMBER:'n',GENRE:'g'};
+var M={TIT2:'t',TT2:'t',TPE1:'a',TP1:'a',TALB:'al',TAL:'al',TPE2:'aa',TP2:'aa',TRCK:'n',TRK:'n',TPOS:'d',TPA:'d',TYER:'y',TYE:'y',TDRC:'y',TCON:'g',TCO:'g'};
+var VC={TITLE:'t',ARTIST:'a',ALBUM:'al',ALBUMARTIST:'aa',DATE:'y',YEAR:'y',TRACKNUMBER:'n',DISCNUMBER:'d',GENRE:'g'};
 function id3Tags(get){var o={tags:{},pic:null};return get(0,10).then(function(h){
   if(h[0]!==73||h[1]!==68||h[2]!==51)return o;
   var ver=h[3],sz=((h[6]&127)<<21)|((h[7]&127)<<14)|((h[8]&127)<<7)|(h[9]&127);
@@ -3389,11 +3392,11 @@ function flacTags(get){var o={tags:{},pic:null};
       return next()})})}
 }
 function clean(r,o){var g={};['t','a','al','aa','g'].forEach(function(k){var v=String(r[k]||'').split('\0')[0].trim();if(v)g[k]=v});
-  var y=String(r.y||'').match(/\d{4}/);if(y)g.y=y[0];var n=parseInt(r.n,10);if(n)g.n=n;
+  var y=String(r.y||'').match(/\d{4}/);if(y)g.y=y[0];var n=parseInt(r.n,10);if(n)g.n=n;var dn=parseInt(r.d,10);if(dn>0)g.d=dn;
   if(/^\(?\d+\)?$/.test(g.g||''))delete g.g;
   if(o.dur){g.dur=o.dur;g.q='FLAC '+o.bps+'-bit';g.hz=o.hz}
   return g}
-function applyTags(t,g){['t','a','al','aa','y','n','g','dur','q','hz'].forEach(function(k){if(g[k])t[k]=g[k]});applyMeta(t)}
+function applyTags(t,g){['t','a','al','aa','y','n','d','g','dur','q','hz'].forEach(function(k){if(g[k])t[k]=g[k]});applyMeta(t)}
 function blobUrl(b){try{return URL.createObjectURL(b)}catch(e){return ''}}
 function thumb(bytes){return createImageBitmap(new Blob([bytes])).then(function(bm){var k=Math.min(1,320/Math.max(bm.width,bm.height)),c=document.createElement('canvas');
   c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);
@@ -3402,7 +3405,7 @@ function buildAlbums(){
   var m={};TRACKS.forEach(function(t){if(!t.al||t.dup)return;var ar=t.aa||t.a,k=(ar+'|'+t.al).toLowerCase();
     (m[k]=m[k]||{k:k,t:t.al,a:ar,y:t.y,tr:[]}).tr.push(t)});
   ALB=Object.keys(m).map(function(k){var x=m[k];
-    x.tr.sort(function(a,b){return (a.n||999)-(b.n||999)||a.t.localeCompare(b.t,'ru')});
+    x.tr.sort(function(a,b){return (a.d||1)-(b.d||1)||(a.n||999)-(b.n||999)||a.t.localeCompare(b.t,'ru')});
     x.img=(x.tr.filter(function(t){return t.img})[0]||{}).img||'';x.y=x.y||(x.tr.filter(function(t){return t.y})[0]||{}).y||'';return x});
   ALB.sort(function(a,b){return a.a.localeCompare(b.a,'ru')||(a.y||'').localeCompare(b.y||'')||a.t.localeCompare(b.t,'ru')});
   buildArtists();
