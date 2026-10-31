@@ -4732,9 +4732,14 @@ function chStop(){var c=CH.rt;CH.rt=null;CH.uid='';CH.busy=0;CH.unread=0;CH.peer
 setInterval(function(){
   if(USER&&SB){if(CH.rt&&CH.uid!==USER.id)chStop();if(CH.busy&&Date.now()-CH.busy>20000)CH.busy=0;if(!CH.rt&&!CH.busy&&!CH.nosql&&Date.now()-CH.fail>30000)chStart()}
   else if(CH.rt||CH.busy)chStop()},3000);
+function chNotify(title,body){
+  try{if(!('Notification' in window)||Notification.permission!=='granted')return;
+    var o={body:body,icon:'icon-192.png',tag:'sl-msg',renotify:true};
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(function(r){r.showNotification(title,o)}).catch(function(){try{new Notification(title,o)}catch(e){}});
+    else new Notification(title,o)}catch(e){}}
 function chIncoming(m){if(!m||!m.id)return;
   if(CH.peer===m.sender&&$('chat').classList.contains('on')){CH.msgs.push(m);chThread();chRead(m.sender)}
-  else{CH.unread++;chBadge();chPeople([m.sender]).then(function(){toast(chName(m.sender)+': '+(m.body||'отправил(а) трек').slice(0,60));if($('chat').classList.contains('on')&&!CH.peer)chInbox()})}}
+  else{CH.unread++;chBadge();chPeople([m.sender]).then(function(){var tx=(m.body||'отправил(а) трек').slice(0,100);if(document.hidden)chNotify(chName(m.sender),tx);else toast(chName(m.sender)+': '+tx.slice(0,60));if($('chat').classList.contains('on')&&!CH.peer)chInbox()})}}
 function chRead(peer){if(!USER)return;SB.from('messages').update({read_at:new Date().toISOString()}).eq('recipient',USER.id).eq('sender',peer).is('read_at',null).select('id').then(function(r){
   var n=(r&&r.data&&r.data.length)||0;if(n){CH.unread=Math.max(0,CH.unread-n);chBadge()}}).catch(function(){})}
 function chEl(){var c=$('chat');if(c)return c;c=document.createElement('div');c.id='chat';c.className='chat';document.body.appendChild(c);return c}
@@ -4743,6 +4748,7 @@ function chOpen(peer){
   if(!SB||!USER){needLogin();return}
   if(CH.nosql){toast('Чат не включён: выполните SQL из файла supabase_chat.sql');return}
   chEl().classList.add('on');
+  try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}
   if(peer)chPeer(peer);else chInbox()}
 function chInbox(){
   CH.peer='';var c=chEl();
