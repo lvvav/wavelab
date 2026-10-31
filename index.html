@@ -1124,6 +1124,14 @@ body.noanim .wc>*{opacity:1;transform:none}
 .rtb{flex:none;min-width:36px;height:36px;border-radius:99px;display:grid;place-items:center;color:var(--text);padding:0 4px}
 .rtb .i{width:18px;height:18px}.rtb.w{background:var(--acc);color:var(--on,#000);padding:0 14px;font-weight:700;font-size:13px}
 .rtp{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
+.ach{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid color-mix(in srgb,var(--text) 8%,transparent)}
+.ach:first-of-type{border-top:0}
+.ach .ai{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:color-mix(in srgb,var(--text) 8%,transparent);filter:grayscale(1);opacity:.55}
+.ach.ok .ai{filter:none;opacity:1;background:color-mix(in srgb,var(--acc) 22%,transparent);box-shadow:0 0 0 1px var(--acc)}
+.ach .am{flex:1;min-width:0}.ach .am b{display:block}.ach .am small{display:block;color:var(--mut);font-size:12px}
+.ach .sb{height:4px;border-radius:4px;background:color-mix(in srgb,var(--text) 10%,transparent);margin-top:6px;overflow:hidden}.ach .sb i{display:block;height:100%;background:var(--acc)}
+.ach .av{flex:none;font-size:12px;color:var(--mut);text-align:right;max-width:34%}
+.ach.ok .av{color:var(--acc);font-weight:700}
 #list{position:relative}
 .swu{position:absolute;z-index:1;border-radius:var(--r,10px);display:flex;align-items:center;overflow:hidden;pointer-events:none;transition:opacity .22s}
 .swu[data-m=l]{background:#ff3d7f;justify-content:flex-end;color:#fff}
@@ -4026,6 +4034,31 @@ $('wrpS').addEventListener('click',function(e){
   var sp=e.target.closest('[data-wspoil]');if(sp){if(sp.dataset.wspoil==='go')wrpOpen(true);else wrpClose();return}
   if(e.target.closest('[data-wplay]')){var l=$('wrp')._top||[];if(l.length){wrpClose();playId(l[0],l)}}});
 document.addEventListener('click',function(e){if(e.target.closest('[data-wrp]'))wrpOpen()});
+function achHtml(o){
+  var hr=ST.hr||[],hs=function(a,b){var x=0,i;for(i=a;i<b;i++)x+=hr[i]||0;return x},days=Object.keys(ST.day||{}),mxd=0,nArt=0,topA=0,k,nG=Object.keys(o.G).length,nLike=favs.filter(function(f){return f.indexOf('my:')!==0}).length;
+  days.forEach(function(d){if(ST.day[d]>mxd)mxd=ST.day[d]});
+  for(k in o.A){if(o.A[k]>=600)nArt++;if(o.A[k]>topA)topA=o.A[k]}
+  var L=[
+   ['🎧','Первые шаги','Послушать 10 минут',o.tot,600,'сек'],
+   ['⏱️','10 часов музыки','Набрать 10 часов прослушивания',o.tot,36000,'сек'],
+   ['💿','100 часов музыки','Набрать 100 часов прослушивания',o.tot,360000,'сек'],
+   ['🔥','Три дня подряд','Слушать музыку 3 дня подряд',o.streak,3],
+   ['🚀','Неделя подряд','Слушать музыку 7 дней подряд',o.streak,7],
+   ['🏆','Месяц подряд','Слушать музыку 30 дней подряд',o.streak,30],
+   ['🦉','Ночная сова','30 минут музыки между 0:00 и 5:00',hs(0,5),1800,'сек'],
+   ['🌅','Ранняя пташка','30 минут музыки между 5:00 и 8:00',hs(5,8),1800,'сек'],
+   ['🏃','Марафон','Слушать 4 часа за один день',mxd,14400,'сек'],
+   ['❤️','Коллекционер','25 треков в избранном',nLike,25],
+   ['💖','Фонотека','100 треков в избранном',nLike,100],
+   ['📂','Куратор','Создать 3 плейлиста',PL.length,3],
+   ['🎤','Верный фанат','5 часов одного артиста',topA,18000,'сек'],
+   ['🌍','Разносторонний','10 артистов, каждого хотя бы по 10 минут',nArt,10],
+   ['🎼','Знаток жанров','Слушать 5 разных жанров',nG,5],
+   ['🔁','500 прослушиваний','Включить треки 500 раз',o.plays,500]];
+  var done=L.filter(function(x){return x[3]>=x[4]}).length;
+  L.sort(function(a,b){var da=a[3]>=a[4],db=b[3]>=b[4];return da===db?(b[3]/b[4])-(a[3]/a[4]):da?-1:1});
+  return '<div class="stc"><h3>Достижения · '+done+' из '+L.length+'</h3>'+L.map(function(x){var ok=x[3]>=x[4],pc=Math.min(100,Math.round(x[3]/x[4]*100)),txt=ok?'Получено':(x[5]==='сек'?fmtDur(x[3])+' из '+fmtDur(x[4]):x[3]+' из '+x[4]);
+    return '<div class="ach'+(ok?' ok':'')+'"><span class="ai">'+x[0]+'</span><div class="am"><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small>'+(ok?'':'<div class="sb"><i style="width:'+Math.max(3,pc)+'%"></i></div>')+'</div><span class="av">'+esc(txt)+'</span></div>'}).join('')+'</div>'}
 function statsHtml(){
   var map={},tot=0,nT=0,plays=0,A={},G={},arr=[],i;
   TRACKS.forEach(function(t){map[t.key]=t});
@@ -4064,7 +4097,7 @@ function statsHtml(){
   if(vl.length>=5)vb='<div class="stc vb"><h3>Вайб года</h3><p>Треки, к которым вы возвращались чаще всего за год. Они же иногда появляются в «Моей волне».</p>'+
     vl.map(function(x){return '<div class="up" data-vid="'+x[0].id+'">'+cv(x[0])+'<div><div class="tt">'+esc(x[0].t)+'</div><div class="ar">'+esc(x[0].a)+'</div></div><span class="sv num">'+fmtMin(x[1])+' мин</span></div>'}).join('')+
     '<button class="btn" data-vibe type="button">'+ic('play','f')+'Включить вайб года</button></div>';
-  return '<div class="stx">'+per+pt+vb+
+  return '<div class="stx">'+per+pt+vb+achHtml({tot:tot,plays:plays,streak:streak,A:A,G:G})+
     '<div class="stc"><h3>Любимые артисты · всё время</h3>'+bars(ta)+'</div>'+
     '<div class="stc"><h3>Любимые треки · всё время</h3>'+bars(tt)+'</div>'+
     '<div class="stc"><h3>Жанры</h3><div class="gbar">'+tg.map(function(x,n){return '<i style="width:'+(x[1]/gsum*100).toFixed(1)+'%;background:'+COL[n]+'"></i>'}).join('')+'</div>'+tg.map(function(x,n){return '<div class="gl"><i style="background:'+COL[n]+'"></i><span>'+esc(x[0])+'</span><em>'+Math.round(x[1]/gsum*100)+'%</em></div>'}).join('')+'</div>'+
