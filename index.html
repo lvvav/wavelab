@@ -2390,21 +2390,22 @@ document.addEventListener('keydown',function(e){
 
 
 /* ===== данные Spotify (через функцию Supabase «spotify», ключи лежат только там) ===== */
-var SPC=load('wl_sp3',{}),SPQ={};
+var SPC=load('wl_sp3',{}),SPQ={},SPE={};
 if(!SPC||typeof SPC!=='object'||Array.isArray(SPC))SPC={};
 function spGet(t){
   if(!SUPA_ON||!t||t.mine||t.pv||!t.key||!t.t)return Promise.resolve(null);
   var c=SPC[t.key],now=Date.now();
-  if(c&&now-c.at<(c.d?30:0.04)*864e5)return Promise.resolve(c.d||null);
+  if(c&&c.d&&now-c.at<30*864e5)return Promise.resolve(c.d);
+  if(SPE[t.key]!==undefined)return Promise.resolve(null);
   if(navigator.onLine===false||!window.fetch)return Promise.resolve(c&&c.d||null);
   if(SPQ[t.key])return SPQ[t.key];
   SPQ[t.key]=fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/spotify',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:JSON.stringify({t:t.t,a:t.a})})
-    .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
-      var d=j&&j.found&&j.d?j.d:null;delete SPQ[t.key];
-      SPC[t.key]={at:now,d:d};
+    .then(function(r){if(!r.ok)throw r.status||0;return r.json()}).then(function(j){
+      var d=j&&j.found&&j.d?j.d:null;delete SPQ[t.key];SPE[t.key]=d?'':(j&&j.found===false?'трек не найден':'пустой ответ функции');
+      if(d)SPC[t.key]={at:now,d:d};
       var ks=Object.keys(SPC);if(ks.length>400)ks.sort(function(a,b){return SPC[a].at-SPC[b].at}).slice(0,100).forEach(function(k){delete SPC[k]});
       save('wl_sp3',SPC);return d;
-    }).catch(function(){delete SPQ[t.key];return null});
+    }).catch(function(e){delete SPQ[t.key];SPE[t.key]=typeof e==='number'?(e===401||e===403?'функция отклонила запрос (код '+e+'): выключите Verify JWT':e===404?'функция spotify не найдена (404)':'ошибка функции, код '+e):'нет связи с функцией (CORS или не задеплоена)';return null});
   return SPQ[t.key];
 }
 function spNum(n){return Number(n).toLocaleString('ru-RU')}
@@ -2432,13 +2433,15 @@ function npInfoPaint(t){
     if(sp.isrc)inf.push(['ISRC',sp.isrc]);
   }
   inf=inf.concat([['Формат',t.q+(t.hz?' · '+(t.hz/1000)+' кГц':'')],['Размер',t.sz?(t.sz/1048576).toFixed(1).replace('.',',')+' МБ':''],['Длительность',(t.dur||(sp&&sp.dur))?fmt(t.dur||sp.dur):''],['Файл',t.key]]);
+  if(!sp&&SPE[t.key])inf.push(['Deezer',SPE[t.key]]);
   if(src.length)inf.push(['Источники',src.join(', ')]);
   var h=inf.filter(function(r){return r[1]}).map(function(r){return '<div class="ifr"><span>'+r[0]+'</span><b>'+esc(String(r[1]))+'</b></div>'}).join('');
   $('npInfo').innerHTML=h;
 }
 function spShow(t){
   spGet(t).then(function(d){
-    if(!d||TRACKS[cur]!==t)return;
+    if(!d){if(TRACKS[cur]===t&&SPE[t.key])npInfoPaint(t);return}
+    if(TRACKS[cur]!==t)return;
     if(!t.dur&&d.dur)t.dur=d.dur;
     if(!t.img&&d.img&&/^https:\/\//.test(d.img)){t.img=d.img;setCv($('npCv'),t)}
     npInfoPaint(t);
