@@ -2103,7 +2103,7 @@ $('list').addEventListener('click',function(e){
   if(id===cur){if(e.target.closest('.idx'))toggle();else openNp();return}
   playId(id,VORD);
 });
-document.addEventListener('click',function(e){if(e.target.closest('#homeSet')){setOpen(true);return}var c=e.target.closest('.acd');if(!c)return;if(c.dataset.more!==undefined||c.dataset.hr!==undefined||c.dataset.ha!==undefined||c.dataset.hp!==undefined)return;if(c.dataset.pl){view='pl';plId=c.dataset.pl}else if(c.dataset.ar!==undefined){view='artist';artK=c.dataset.ar}else{
+document.addEventListener('click',function(e){if(e.target.closest('#homeSet')){drwOpen();return}var c=e.target.closest('.acd');if(!c)return;if(c.dataset.more!==undefined||c.dataset.hr!==undefined||c.dataset.ha!==undefined||c.dataset.hp!==undefined)return;if(c.dataset.pl){view='pl';plId=c.dataset.pl}else if(c.dataset.ar!==undefined){view='artist';artK=c.dataset.ar}else{
   if(view==='artist'){albFrom=artK;albFromFor=c.dataset.ak}else if(view==='album'&&albFrom&&albFromFor===albK)albFromFor=c.dataset.ak;
   view='album';albK=c.dataset.ak}genre='';$('scroll').scrollTop=0;render()});
 document.addEventListener('click',function(e){
