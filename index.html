@@ -222,6 +222,22 @@ body.noblur .np-bg{display:none}
 .set.on .sheet{transform:none}
 .sh-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .sh-h h2{font-size:22px;letter-spacing:-.02em}
+/* настройки как в Spotify: главный экран + подэкраны */
+.spg{display:none}.spg.on{display:block}
+.hub-t{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 8px}
+.hub-t button{text-align:left;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px;color:var(--text)}
+.hub-t button.on{border-color:var(--acc)}
+.hub-t b{font-size:14px;font-weight:600}.hub-t small{color:var(--mut);font-size:12px}
+.hub-r{display:flex;align-items:center;gap:14px;width:100%;padding:10px 2px;text-align:left;color:var(--text);border-radius:12px}
+.hub-r:hover{background:var(--hover)}
+.hub-r .ico{width:42px;height:42px;border-radius:12px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.hub-r .ico .i{width:20px;height:20px}
+.hub-r>div{min-width:0;flex:1}
+.hub-r b{display:block;font-size:15px;font-weight:600}
+.hub-r small{display:block;color:var(--mut);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-r .ch{color:var(--mut);transform:rotate(180deg);width:16px;height:16px;flex:none}
+.hub-out{margin-top:18px;width:100%;justify-content:center}
+@media(max-width:860px){#set .sheet{top:0;max-height:none;height:100%;border:0;border-radius:0}}
 .sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:22px 0 10px}
 .sw{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .sw button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--mut)}
@@ -1385,9 +1401,11 @@ body.noanim .wc>*{opacity:1;transform:none}
 
 <div class="set" id="set" aria-hidden="true" role="dialog" aria-label="Настройки">
   <div class="sheet">
-    <div class="sh-h"><h2>Настройки</h2><button class="ib" id="setX" type="button" aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></div>
-    <div class="sec">Аккаунт</div>
+    <div class="spg on" data-pg="hub"><div class="sh-h"><button class="ib" id="setX" type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Настройки</h2><span class="ib" style="visibility:hidden"></span></div><div id="hubBox"></div></div>
+    <div class="spg" data-pg="acc"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Аккаунт</h2><span class="ib" style="visibility:hidden"></span></div>
     <div id="accBox"></div>
+    </div>
+    <div class="spg" data-pg="look"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Контент и внешний вид</h2><span class="ib" style="visibility:hidden"></span></div>
     <div class="sec">Тема</div>
     <div class="sw" id="sw"></div>
     <div class="sec">Свои цвета</div>
@@ -1401,22 +1419,44 @@ body.noanim .wc>*{opacity:1;transform:none}
     <div class="fr"><div>Компактный список<small>больше треков на экране</small></div><button class="tg" id="tCo" type="button" aria-label="Компактный список"></button></div>
     <div class="fr"><div>Размытый фон плеера<small>цвет обложки за «Сейчас играет»</small></div><button class="tg" id="tBl" type="button" aria-label="Размытый фон"></button></div>
     <div class="fr"><div>Анимации<small>плавные появления и переходы</small></div><button class="tg" id="tAn" type="button" aria-label="Анимации"></button></div>
+    </div>
+    <div class="spg" data-pg="priv"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Конфиденциальность и приватность</h2><span class="ib" style="visibility:hidden"></span></div>
+    <div id="pvBox"></div>
+    </div>
+    <div class="spg" data-pg="play"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Воспроизведение</h2><span class="ib" style="visibility:hidden"></span></div>
     <div class="sec">Звук</div>
     <div class="fr"><div>Эквалайзер<small>10 полос и пресеты</small></div><button class="tg" id="tEq" type="button" aria-label="Эквалайзер"></button></div>
     <div id="eqWrap" hidden><div class="eqp" id="eqPre"></div><div class="eqs" id="eqUi"></div></div>
     <div class="fr"><div>Визуализатор<small>анимация звука на экране «Сейчас играет»</small></div><button class="tg" id="tViz" type="button" aria-label="Визуализатор"></button></div>
     <div class="fr"><div>Плавные переходы<small>затухание и нарастание на стыке треков</small></div><button class="tg" id="tFd" type="button" aria-label="Плавные переходы"></button></div>
+    </div>
+    <div class="spg" data-pg="ntf"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Уведомления</h2><span class="ib" style="visibility:hidden"></span></div>
+    <div id="ntfBox"></div>
+    </div>
+    <div class="spg" data-pg="dev"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Устройства</h2><span class="ib" style="visibility:hidden"></span></div>
+    <div id="devBox"></div>
+    </div>
+    <div class="spg" data-pg="off"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Трафик и офлайн-режим</h2><span class="ib" style="visibility:hidden"></span></div>
+    <div class="sec">Экономия трафика</div>
     <div class="fr"><div>Предзагрузка следующих треков<small>когда играющий трек загрузился, заранее догружаются следующие 3: листаете, и всё играет сразу (тратит трафик)</small></div><button class="tg" id="tPre" type="button" aria-label="Предзагрузка"></button></div>
     <div class="sec">Офлайн и приложение</div>
     <div class="fr"><div>Мои файлы<small>свои треки только для вас: хранятся на этом устройстве, никому не видны</small></div><button class="btn ghost" id="mineOpen" type="button">Открыть</button></div>
     <div class="fr"><div>Офлайн-память<small id="offInfo">Считаю…</small></div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="offFav" type="button">Сохранить избранное</button><button class="btn ghost" id="offClr" type="button">Очистить</button><button class="btn" id="pwaBtn" hidden type="button">Установить приложение</button></div>
     <small class="hint">На iPhone: «Поделиться» → «На экран Домой». На Android и компьютере: кнопка выше или меню браузера → «Установить». Отдельные треки сохраняются через «⋯» → «Сохранить офлайн».</small>
-    <div class="sec">Горячие клавиши</div>
-    <div class="keys"><kbd>Пробел</kbd><span>играть / пауза</span><kbd>← →</kbd><span>перемотка на 10 с</span><kbd>N / P</kbd><span>следующий / предыдущий</span><kbd>F</kbd><span>в избранное</span><kbd>M</kbd><span>выключить звук</span><kbd>↑ ↓</kbd><span>громкость</span><kbd>S / R</kbd><span>вперемешку / повтор</span><kbd>/</kbd><span>поиск</span><kbd>Esc</kbd><span>закрыть окно</span></div>
+    </div>
+    <div class="spg" data-pg="qual"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Качество медиафайлов</h2><span class="ib" style="visibility:hidden"></span></div>
+    <div class="fr"><div>Исходное качество<small>треки играют из файлов на сайте как есть, без сжатия: mp3, m4a или FLAC</small></div></div>
+    <div class="fr"><div>Текущий трек<small id="qualCur">ничего не играет</small></div></div>
+    <small class="hint">Чтобы тратить меньше трафика, включите «Экономия трафика» в разделе «Трафик и офлайн-режим»: следующие треки не будут догружаться заранее. Скачанные офлайн треки не используют интернет.</small>
+    </div>
+    <div class="spg" data-pg="info"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Информация и поддержка</h2><span class="ib" style="visibility:hidden"></span></div>
     <div class="sec">О проекте</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="aboutBtn" type="button">О сайте</button><a class="btn ghost" href="https://t.me/soundllf" target="_blank" rel="noopener">Мой ТГК</a></div>
     <div style="margin-top:24px"><button class="btn ghost" id="sRst" type="button">Сбросить настройки</button></div>
+    <div class="sec">Горячие клавиши</div>
+    <div class="keys"><kbd>Пробел</kbd><span>играть / пауза</span><kbd>← →</kbd><span>перемотка на 10 с</span><kbd>N / P</kbd><span>следующий / предыдущий</span><kbd>F</kbd><span>в избранное</span><kbd>M</kbd><span>выключить звук</span><kbd>↑ ↓</kbd><span>громкость</span><kbd>S / R</kbd><span>вперемешку / повтор</span><kbd>/</kbd><span>поиск</span><kbd>Esc</kbd><span>закрыть окно</span></div>
+    </div>
   </div>
 </div>
 
@@ -1447,7 +1487,7 @@ body.noanim .wc>*{opacity:1;transform:none}
 
 <div class="wrp" id="wrp" aria-hidden="true" role="dialog" aria-label="Итоги года"><div class="wrp-h"><b id="wrpT">Итоги года</b><button class="ib" id="wrpX" type="button" aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></div><div class="wrp-s" id="wrpS"></div><div class="wrp-d" id="wrpD"></div></div>
 <div class="toast" id="toast" role="status"></div>
-<audio id="audio" preload="none"></audio>
+<audio id="audio" preload="auto"></audio>
 
 <script>
 (function(){
@@ -2052,6 +2092,7 @@ audio.addEventListener('error',function(){
   if(OFF[t.key]&&!offBlob&&window.caches){fromCache(t,audio.currentTime||0,wantPlay);return}
   if(offBlob){toast('Не удалось проиграть сохранённый трек');return}
   if(!t.src){toast('У трека нет ссылки: обновите страницу');return}
+  if(cdnTry.k===t.key&&!cdnTry.ok&&audio.src===cdnTry.u){cdnFall(t);return}
   if(errTry.k!==t.key)errTry={k:t.key,n:0};
   /* 1) запрос с CORS мог не пройти — пробуем без него (эквалайзер тогда не работает) */
   if(errTry.n<1&&audio.crossOrigin&&!AC){errTry.n=1;retryAudio(t.src,true);return}
@@ -2570,7 +2611,7 @@ function closeTop(){
   if($('mn').classList.contains('on')){closeMenu();return true}
   if($('acc').classList.contains('on')){accClose();return true}
   if($('about').classList.contains('on')){aboutOpen(false);return true}
-  if($('set').classList.contains('on')){setOpen(false);return true}
+  if($('set').classList.contains('on')){if(setPg){setPage('');return true}setOpen(false);return true}
   if($('lyc').classList.contains('full')){lyFull(false);return true}
   if(npOn){hideNp();return true}
   return false}
@@ -2822,7 +2863,7 @@ function paintSet(){
   $('sw').innerHTML=Object.keys(THEMES).map(function(k){var t=THEMES[k],b=k==='custom'?S.bg:t[1],a=k==='custom'?S.acc:t[2];
     return '<button type="button" data-th="'+k+'" class="'+(S.theme===k?'on':'')+'"><i style="background:'+b+'"><b style="background:'+a+'"></b></i>'+t[0]+'</button>'}).join('');
   $('cBg').value=S.bg;$('cAcc').value=S.acc;$('cHue').value=hex2hue(S.acc);$('sR').value=S.r;
-  $('tRb').classList.toggle('on',S.rainbow);$('tCv').classList.toggle('on',S.cover);$('tCo').classList.toggle('on',S.compact);$('tBl').classList.toggle('on',S.blur);$('tAn').classList.toggle('on',S.anim);paintAudioSet();
+  $('tRb').classList.toggle('on',S.rainbow);$('tCv').classList.toggle('on',S.cover);$('tCo').classList.toggle('on',S.compact);$('tBl').classList.toggle('on',S.blur);$('tAn').classList.toggle('on',S.anim);paintAudioSet();paintHub();paintPriv();
 }
 function upd(){save('wl3_set',S);applyTheme();paintSet()}
 $('sw').onclick=function(e){var b=e.target.closest('[data-th]');if(!b)return;var k=b.dataset.th;S.theme=k;
@@ -2889,11 +2930,64 @@ $('tCo').onclick=function(){S.compact=!S.compact;upd()};
 $('tBl').onclick=function(){S.blur=!S.blur;upd();npContrast(TRACKS[cur])};
 $('tAn').onclick=function(){S.anim=!S.anim;upd()};
 $('sRst').onclick=function(){S=JSON.parse(JSON.stringify(DEF));eqApply();upd();toast('Настройки сброшены')};
-function setOpen(o){$('set').classList.toggle('on',o);$('set').setAttribute('aria-hidden',o?'false':'true');if(o){paintSet();offInfoUpdate()}}
+var setPg='';
+function setPage(k){
+  setPg=(k&&k!=='hub')?k:'';
+  var sh=$('set').querySelector('.sheet');
+  sh.querySelectorAll('.spg').forEach(function(x){x.classList.toggle('on',x.dataset.pg===(setPg||'hub'))});
+  sh.scrollTop=0;
+  if(setPg==='off')offInfoUpdate();
+  if(setPg==='qual'){var t=TRACKS[cur],q=$('qualCur');if(q)q.textContent=t&&t.q?(t.t+' · '+t.q):'ничего не играет'}
+  paintHub();paintPriv();
+}
+function setOpen(o){if(!o)setPg='';$('set').classList.toggle('on',o);$('set').setAttribute('aria-hidden',o?'false':'true');if(o){setPage('');paintSet();offInfoUpdate()}}
+var HUB=[['acc','user','Аккаунт'],['look','moon','Контент и внешний вид'],['priv','check','Конфиденциальность и приватность'],['play','play','Воспроизведение'],['ntf','msg','Уведомления'],['dev','vol','Устройства'],['off','dl','Трафик и офлайн-режим'],['qual','disc','Качество медиафайлов'],['info','news','Информация и поддержка']];
+function onoff(v){return v?'вкл':'выкл'}
+function hubSub(k){
+  try{
+    if(k==='acc')return USER?(accName(USER)+(PROF&&PROF.nick?' · @'+PROF.nick:'')):'Вход, ник, аватарка, синхронизация';
+    if(k==='look')return (THEMES[S.theme]?THEMES[S.theme][0]:'Тема')+(S.compact?', компактный список':'')+(S.anim?'':', без анимаций');
+    if(k==='priv')return 'Медиатека: '+onoff(SHARE_ON)+' · Что слушаю: '+onoff(NP_ON);
+    if(k==='play'){var a=[];if(S.eq)a.push('эквалайзер');if(S.fade)a.push('плавные переходы');if(S.viz)a.push('визуализатор');return a.length?a.join(', '):'Эквалайзер, плавные переходы, визуализатор'}
+    if(k==='ntf'){var st=pushState();return 'Push-уведомления: '+(st==='granted'?'включены':st==='denied'?'заблокированы':st==='no'?'недоступны':'выключены')}
+    if(k==='dev')return 'Передать звук, слушать вместе';
+    if(k==='off')return 'Предзагрузка: '+onoff(S.pre)+', офлайн-память, установка';
+    if(k==='qual')return 'Исходное качество без сжатия';
+    if(k==='info')return 'О сайте, горячие клавиши, сброс настроек';
+  }catch(e){}
+  return '';
+}
+function paintHub(){
+  var h=$('hubBox');if(!h)return;
+  var eco=!S.pre,pv=!SHARE_ON&&!NP_ON;
+  h.innerHTML='<div class="hub-t"><button type="button" id="hubEco" class="'+(eco?'on':'')+'"><b>Экономия трафика</b><small>'+(eco?'Включена':'Выключена')+'</small></button><button type="button" id="hubPv" class="'+(pv?'on':'')+'"><b>Приватный режим</b><small>'+(pv?'Включён':'Выключен')+'</small></button></div>'+
+    HUB.map(function(r){return '<button type="button" class="hub-r" data-pg="'+r[0]+'"><span class="ico">'+ic(r[1])+'</span><div><b>'+r[2]+'</b><small>'+esc(hubSub(r[0]))+'</small></div>'+ic('back','ch')+'</button>'}).join('')+
+    (USER?'<button type="button" class="btn ghost hub-out" id="hubOut">Выйти</button>':'');
+}
+function paintPriv(){
+  var b=$('pvBox');if(!b)return;
+  b.innerHTML='<div class="fr"><div>Показывать мою медиатеку<small>друзья видят мои альбомы, артистов и недавние лайки</small></div><button class="tg'+(SHARE_ON?' on':'')+'" id="pvShare" type="button" aria-label="Показывать медиатеку"></button></div>'+
+    '<div class="fr"><div>Показывать, что я слушаю<small>друзья видят трек, который играет у вас сейчас</small></div><button class="tg'+(NP_ON?' on':'')+'" id="pvNp" type="button" aria-label="Показывать, что слушаю"></button></div>'+
+    '<small class="hint">Если выключить оба пункта, включится приватный режим: друзья ничего не увидят о вашей музыке. Ник и аватарка остаются видны в поиске людей.</small>'+
+    (USER?'':'<small class="hint">Без входа в аккаунт друзья вас всё равно не видят: настройки применятся после входа.</small>');
+}
+function privSave(msg){try{localStorage.setItem('wl_shareon',SHARE_ON?'1':'0');localStorage.setItem('wl_npon',NP_ON?'1':'0')}catch(e){}accPaint();sharePush();if(msg)toast(msg)}
+$('pvBox').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  if(b.id==='pvShare'){SHARE_ON=!SHARE_ON;privSave(SHARE_ON?'Друзья видят вашу медиатеку':'Медиатека скрыта от других')}
+  else if(b.id==='pvNp'){NP_ON=!NP_ON;privSave(NP_ON?'Друзья видят, что вы слушаете':'Ваше прослушивание скрыто')}
+});
+$('set').addEventListener('click',function(e){
+  var r=e.target.closest('.hub-r');if(r){setPage(r.dataset.pg);return}
+  if(e.target.closest('[data-sb]')){setPage('');return}
+  var b=e.target.closest('button');if(!b)return;
+  if(b.id==='hubEco'){S.pre=!S.pre;if(!S.pre)pfClear();upd()}
+  else if(b.id==='hubPv'){var pv=!SHARE_ON&&!NP_ON;SHARE_ON=NP_ON=pv;privSave(pv?'Приватный режим выключен':'Приватный режим включён')}
+  else if(b.id==='hubOut'){var o=$('accOut');if(o)o.click()}
+});
 $('gear').onclick=function(){setOpen(true)};
 $('setX').onclick=function(){setOpen(false)};
 $('set').onclick=function(e){if(e.target===this)setOpen(false)};
-document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(setPg)setPage('');else setOpen(false)}});
 var NEWK=load('wl_newk',[]);if(!Array.isArray(NEWK))NEWK=[];
 var PROF=load('wl_prof',null),FOL=load('wl_fol',{u:[],p:[]}),RPL={},PEOPLE={},USR=null,pendPl='',askedNick=false;
 if(!FOL||!Array.isArray(FOL.u)||!Array.isArray(FOL.p))FOL={u:[],p:[]};
@@ -3276,8 +3370,6 @@ function shareLink(h,ti){var u=((window.SLN&&window.SLN.site)||(location.origin+
   else if(navigator.clipboard)navigator.clipboard.writeText(u).then(function(){toast('Ссылка скопирована')},function(){toast(u)});
   else toast(u)}
 function profRow(){return '<div class="fr"><div>'+(PROF&&PROF.nick?'@'+esc(PROF.nick):'Ник не выбран')+'<small>ник уникальный, по нему вас находят другие</small></div></div>'+
-  '<div class="fr"><div>Показывать мою медиатеку<small>друзья видят мои альбомы, артистов и недавние лайки</small></div><button class="btn ghost" id="pfShare" type="button">'+(SHARE_ON?'Включено':'Выключено')+'</button></div>'+
-  '<div class="fr"><div>Показывать, что я слушаю<small>друзья видят трек, который играет у вас сейчас</small></div><button class="btn ghost" id="pfNp" type="button">'+(NP_ON?'Включено':'Выключено')+'</button></div>'+
   '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="pfNick" type="button">'+(PROF&&PROF.nick?'Сменить ник':'Придумать ник')+'</button><button class="btn ghost" id="pfAva" type="button">Сменить аватарку</button><button class="btn ghost" id="pfFind" type="button">Найти человека</button></div>'}
 $('accBox').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
   if(b.id==='pfNick')nickAsk();else if(b.id==='pfAva')avaPick();else if(b.id==='pfShare'){SHARE_ON=!SHARE_ON;try{localStorage.setItem('wl_shareon',SHARE_ON?'1':'0')}catch(e){}accPaint();sharePush();toast(SHARE_ON?'Друзья видят вашу медиатеку':'Медиатека скрыта от других')}else if(b.id==='pfNp'){NP_ON=!NP_ON;try{localStorage.setItem('wl_npon',NP_ON?'1':'0')}catch(e){}accPaint();sharePush();toast(NP_ON?'Друзья видят, что вы слушаете':'Ваше прослушивание скрыто')}else if(b.id==='pfFind'){setOpen(false);findUser()}});
@@ -4405,8 +4497,30 @@ function setSrc(t){
   if(pe&&pe.url){preBlob=pe.url;delete PFM[t.key];audio.src=preBlob;return}
   Object.keys(PFM).forEach(function(k){if(PFM[k].busy)pfDrop(k)});
   if(OFF[t.key]&&navigator.onLine===false&&window.caches){fromCache(t,0,wantPlay);return}
-  audio.src=t.src;
+  var cu=cdnUrl(t);
+  if(cu){cdnTry={k:t.key,u:cu,ok:0};audio.src=cu;clearTimeout(cdnTm);
+    cdnTm=setTimeout(function(){if(cdnTry.k===t.key&&!cdnTry.ok&&audio.readyState<2&&TRACKS[cur]===t)cdnFall(t)},6000)}
+  else audio.src=t.src;
 }
+/* быстрый источник: jsDelivr (CDN с Range и CORS); при ошибке/задержке >6 с — исходный адрес */
+var cdnTry={k:'',u:'',ok:0},cdnTm=0,CDN_ON=true;
+function cdnUrl(t){
+  try{
+    if(!CDN_ON||CONFIG.API||!GHI||!t||!t.src||t.pv||/^(blob|data):/.test(t.src))return '';
+    if(location.hostname==='localhost'||location.hostname==='127.0.0.1')return '';
+    var rp=RMAP[t.key]||(GHI.u+'/'+GHI.r);
+    if(GHI.r===GHI.u+'.github.io')return '';
+    return 'https://cdn.jsdelivr.net/gh/'+rp+'@main/'+enc(t.key);
+  }catch(e){return ''}
+}
+function cdnFall(t){
+  clearTimeout(cdnTm);cdnTry.ok=1;
+  var pos=audio.currentTime||0,pl=wantPlay;
+  if(pos)resumePos=pos;
+  audio.src=t.src;
+  if(pl){var p=audio.play();if(p&&p.catch)p.catch(function(){})}
+}
+audio.addEventListener('loadeddata',function(){cdnTry.ok=1;clearTimeout(cdnTm)});
 function fromCache(t,pos,play){
   if(!window.caches)return;
   caches.open(OFFN).then(function(c){return c.match(t.src)}).then(function(r){if(!r)throw 0;return r.blob()}).then(function(b){
@@ -4895,6 +5009,18 @@ function pushRow(){var st=pushState(),t=st==='granted'?'Включены':st==='
   return '<div class="chp fr"><div>Уведомления<small>'+hint+'</small></div><button class="btn ghost" data-ch="push" type="button"'+(st==='granted'||st==='no'?' disabled':'')+'>'+(st==='default'?'Включить':t)+'</button></div>'}
 var _chAccPaint=accPaint;
 accPaint=function(){_chAccPaint();var b=$('accBox');if(b&&USER&&SUPA_ON&&!b.querySelector('.chp'))b.insertAdjacentHTML('beforeend',pushRow()+'<div class="chp fr" style="margin-top:6px"><div>Сообщения<small>переписка с друзьями, можно отправлять треки</small></div><button class="btn ghost" data-ch="open" type="button">Открыть <i class="chbd nbd" '+(CH.unread?'':'hidden')+'>'+(CH.unread?chCap(CH.unread):'')+'</i></button></div>')};
+/* комнаты/устройства и уведомления переезжают из блока аккаунта в свои разделы (обработчики кликов висят на document) */
+var _hubAcc=accPaint;
+accPaint=function(){
+  _hubAcc();
+  var a=$('accBox'),d=$('devBox'),n=$('ntfBox');if(!a||!d||!n)return;
+  d.innerHTML='';n.innerHTML='';
+  var r=a.querySelector('.rtp');if(r)d.appendChild(r);
+  a.querySelectorAll('.chp').forEach(function(x){n.appendChild(x)});
+  if(!d.firstChild)d.innerHTML='<small class="hint">Передача звука между устройствами и «Слушать вместе» доступны после входа в аккаунт.</small>';
+  if(!n.firstChild)n.innerHTML='<small class="hint">Push-уведомления о сообщениях доступны после входа в аккаунт.</small>';
+  paintHub();paintPriv();
+};
 render();
 accInit();
 loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
