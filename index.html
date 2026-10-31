@@ -1860,10 +1860,12 @@ document.addEventListener('click',function(e){
 });
 
 /* ===== воспроизведение ===== */
+var shufPlayed={},shufHist=[],shufBack=false;
 function playId(id,list,noplay){
   var t=TRACKS[id];if(!t)return;
   leave(false);if(list)waveOn=false;
-  if(list)ORDER=list.slice();
+  if(list){ORDER=list.slice();shufPlayed={};shufHist=[]}
+  if(cur>-1&&cur!==id&&!shufBack)shufHist.push(cur);shufBack=false;shufPlayed[id]=1;
   if(!ORDER.length)ORDER=TRACKS.map(function(x){return x.id});
   cur=id;document.body.classList.add('hasTrack');var pi=ORDER.indexOf(id);if(pi>-1)lastPos=pi;
   $('seek').value=0;$('npSeek').value=0;fill($('seek'));fill($('npSeek'));$('cur').textContent=$('npCur').textContent='0:00';$('dur').textContent=$('npDur').textContent=t.dur?fmt(t.dur):'0:00';$('player').style.setProperty('--pp','0%');
@@ -1888,7 +1890,11 @@ function step(dir,auto){
   if(dir>0&&queue.length){var qn=queue.shift();return playId(qn)}
   if(waveOn&&dir>0){var wi=ORDER.indexOf(cur);if(wi>-1&&wi>=ORDER.length-3)ORDER=ORDER.concat(waveList(waveMode,30,ORDER.slice(-25)))}
   var i=ORDER.indexOf(cur),n;if(i<0)i=lastPos;
-  if(shuffle&&ORDER.length>1){do{n=ORDER[Math.floor(Math.random()*ORDER.length)]}while(n===cur)}
+  if(shuffle&&ORDER.length>1){
+    if(dir<0){if(shufHist.length){shufBack=true;return playId(shufHist.pop())}audio.currentTime=0;return}
+    var rest=ORDER.filter(function(x){return x!==cur&&!shufPlayed[x]});
+    if(!rest.length){if(auto&&rep===0){audio.pause();return}shufPlayed={};shufPlayed[cur]=1;rest=ORDER.filter(function(x){return x!==cur})}
+    n=rest[Math.floor(Math.random()*rest.length)]}
   else{i+=dir;if(i>=ORDER.length){if(auto&&rep===0){audio.pause();return}i=0}if(i<0)i=ORDER.length-1;n=ORDER[i]}
   playId(n);
 }
@@ -2254,7 +2260,7 @@ $('shufAll').onclick=function(){var v=playIds();if(v.length){shuffle=true;playId
 $('bPlay').onclick=toggle;
 $('bNext').onclick=function(){step(1)};
 $('bPrev').onclick=prevTrack;
-function toggleShuf(){shuffle=!shuffle;toast(shuffle?'Вперемешку: вкл':'Вперемешку: выкл');paintModes();syncNp()}
+function toggleShuf(){shuffle=!shuffle;shufPlayed={};if(cur>-1)shufPlayed[cur]=1;toast(shuffle?'Вперемешку: вкл':'Вперемешку: выкл');paintModes();syncNp()}
 $('bShuf').onclick=$('npShuf').onclick=toggleShuf;
 function cycleRep(){rep=(rep+1)%3;toast(['Повтор выключен','Повтор списка','Повтор трека'][rep]);paintModes()}
 $('bRep').onclick=$('npRep').onclick=cycleRep;
