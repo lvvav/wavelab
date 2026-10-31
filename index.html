@@ -2390,12 +2390,12 @@ document.addEventListener('keydown',function(e){
 
 
 /* ===== данные Spotify (через функцию Supabase «spotify», ключи лежат только там) ===== */
-var SPC=load('wl_sp',{}),SPQ={};
+var SPC=load('wl_sp3',{}),SPQ={};
 if(!SPC||typeof SPC!=='object'||Array.isArray(SPC))SPC={};
 function spGet(t){
   if(!SUPA_ON||!t||t.mine||t.pv||!t.key||!t.t)return Promise.resolve(null);
   var c=SPC[t.key],now=Date.now();
-  if(c&&now-c.at<(c.d?30:2)*864e5)return Promise.resolve(c.d||null);
+  if(c&&now-c.at<(c.d?30:0.04)*864e5)return Promise.resolve(c.d||null);
   if(navigator.onLine===false||!window.fetch)return Promise.resolve(c&&c.d||null);
   if(SPQ[t.key])return SPQ[t.key];
   SPQ[t.key]=fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/spotify',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:JSON.stringify({t:t.t,a:t.a})})
@@ -2403,7 +2403,7 @@ function spGet(t){
       var d=j&&j.found&&j.d?j.d:null;delete SPQ[t.key];
       SPC[t.key]={at:now,d:d};
       var ks=Object.keys(SPC);if(ks.length>400)ks.sort(function(a,b){return SPC[a].at-SPC[b].at}).slice(0,100).forEach(function(k){delete SPC[k]});
-      save('wl_sp',SPC);return d;
+      save('wl_sp3',SPC);return d;
     }).catch(function(){delete SPQ[t.key];return null});
   return SPQ[t.key];
 }
@@ -2422,12 +2422,13 @@ function npInfoPaint(t){
   inf=inf.concat(lf);
   if(tags.length)inf.push(['Теги',tags.join(', ')]);
   if(sp){
-    src.push('Spotify');
-    if(sp.pop!=null)inf.push(['Популярность',sp.pop+' из 100']);
+    src.push('Deezer');
+    if(sp.rank)inf.push(['Рейтинг в Deezer',spNum(sp.rank)]);
     if(sp.rel)inf.push(['Дата выхода',sp.rel]);
+    if(sp.label)inf.push(['Лейбл',sp.label]);
+    if(sp.bpm)inf.push(['BPM',sp.bpm]);
     if(sp.expl)inf.push(['Возрастной маркер','Explicit']);
-    if(sp.fol)inf.push(['Подписчиков у исполнителя',spNum(sp.fol)]);
-    if(sp.apop)inf.push(['Популярность исполнителя',sp.apop+' из 100']);
+    if(sp.fol)inf.push(['Фанатов у исполнителя',spNum(sp.fol)]);
     if(sp.isrc)inf.push(['ISRC',sp.isrc]);
   }
   inf=inf.concat([['Формат',t.q+(t.hz?' · '+(t.hz/1000)+' кГц':'')],['Размер',t.sz?(t.sz/1048576).toFixed(1).replace('.',',')+' МБ':''],['Длительность',(t.dur||(sp&&sp.dur))?fmt(t.dur||sp.dur):''],['Файл',t.key]]);
