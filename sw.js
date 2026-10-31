@@ -1,6 +1,6 @@
 // Soundlife: сервис-воркер. Кэширует оболочку сайта и обложки, чтобы всё открывалось быстро и без сети.
 // Музыка сюда не попадает: треки хранятся отдельно (кнопка «Сохранить офлайн»).
-var V = 'sl-shell-v49';
+var V = 'sl-shell-v50';
 var IMG = 'sl-img-v1';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
@@ -73,5 +73,17 @@ self.addEventListener('notificationclick', function (e) {
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cs) {
     for (var i = 0; i < cs.length; i++) { if ('focus' in cs[i]) return cs[i].focus(); }
     return self.clients.openWindow('./');
+  }));
+});
+
+// Web Push: уведомление о сообщении, даже когда сайт закрыт
+self.addEventListener('push', function (e) {
+  var d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) {}
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cs) {
+    for (var i = 0; i < cs.length; i++) { if (cs[i].visibilityState === 'visible') return; }
+    return self.registration.showNotification(d.title || 'SoundLife', {
+      body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'sl-msg', renotify: true
+    });
   }));
 });

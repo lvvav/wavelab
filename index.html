@@ -4724,7 +4724,7 @@ function chStart(){
   SB.from('messages').select('id',{count:'exact',head:true}).eq('recipient',uid).is('read_at',null).then(function(r){
     if(!USER||USER.id!==uid){CH.busy=0;return}
     if(r.error){CH.busy=0;if(chNoSql(r.error))CH.nosql=true;else CH.fail=Date.now();return}
-    CH.unread=r.count||0;chBadge();
+    CH.unread=r.count||0;chBadge();pushSetup();
     var ch=SB.channel('sl-msg-'+uid);CH.rt=ch;CH.uid=uid;CH.busy=0;
     ch.on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'recipient=eq.'+uid},function(p){chIncoming(p&&p.new)}).subscribe();
   }).catch(function(){CH.busy=0;CH.fail=Date.now()})}
@@ -4732,6 +4732,13 @@ function chStop(){var c=CH.rt;CH.rt=null;CH.uid='';CH.busy=0;CH.unread=0;CH.peer
 setInterval(function(){
   if(USER&&SB){if(CH.rt&&CH.uid!==USER.id)chStop();if(CH.busy&&Date.now()-CH.busy>20000)CH.busy=0;if(!CH.rt&&!CH.busy&&!CH.nosql&&Date.now()-CH.fail>30000)chStart()}
   else if(CH.rt||CH.busy)chStop()},3000);
+var VAPID_PUB='BHiAo_X1qBg_mBmcPesG2XMI5uPFxTYuQPcX3YzUTj05sgjcrlALBxnU7Y5NOsAdohFIZUHIdzsIEcuCo0WXQMg';
+function pushB64(s){var p='='.repeat((4-s.length%4)%4),r=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),a=new Uint8Array(r.length),i;for(i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a}
+function pushSetup(){
+  if(!SB||!USER||!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)||Notification.permission!=='granted')return;
+  navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription().then(function(sub){return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pushB64(VAPID_PUB)})})}).then(function(sub){
+    var j=sub&&sub.toJSON();if(!j||!j.keys)return;var key=USER.id+'|'+j.endpoint;if(pushSetup.done===key)return;pushSetup.done=key;
+    return SB.from('push_subs').upsert({endpoint:j.endpoint,user_id:USER.id,p256dh:j.keys.p256dh,auth:j.keys.auth}).then(function(){})}).catch(function(){})}
 function chNotify(title,body){
   try{if(!('Notification' in window)||Notification.permission!=='granted')return;
     var o={body:body,icon:'icon-192.png',tag:'sl-msg',renotify:true};
@@ -4748,7 +4755,7 @@ function chOpen(peer){
   if(!SB||!USER){needLogin();return}
   if(CH.nosql){toast('Чат не включён: выполните SQL из файла supabase_chat.sql');return}
   chEl().classList.add('on');
-  try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}
+  try{if('Notification' in window&&Notification.permission==='default'){var rq=Notification.requestPermission(function(){pushSetup()});if(rq&&rq.then)rq.then(pushSetup)}else pushSetup()}catch(e){}
   if(peer)chPeer(peer);else chInbox()}
 function chInbox(){
   CH.peer='';var c=chEl();
