@@ -2392,6 +2392,13 @@ document.addEventListener('keydown',function(e){
 /* ===== данные Spotify (через функцию Supabase «spotify», ключи лежат только там) ===== */
 var SPC=load('wl_sp3',{}),SPQ={},SPE={};
 if(!SPC||typeof SPC!=='object'||Array.isArray(SPC))SPC={};
+function spFetch(body){
+  var names=['deezer','spotify'],i=0;
+  function go(){
+    return fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/'+names[i],{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:JSON.stringify(body)})
+      .then(function(r){if(!r.ok)throw r.status||0;return r.json()})
+      .catch(function(e){if(++i<names.length)return go();throw e})}
+  return go()}
 function spGet(t){
   if(!SUPA_ON||!t||t.mine||t.pv||!t.key||!t.t)return Promise.resolve(null);
   var c=SPC[t.key],now=Date.now();
@@ -2399,8 +2406,8 @@ function spGet(t){
   if(SPE[t.key]!==undefined)return Promise.resolve(null);
   if(navigator.onLine===false||!window.fetch)return Promise.resolve(c&&c.d||null);
   if(SPQ[t.key])return SPQ[t.key];
-  SPQ[t.key]=fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/deezer',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:JSON.stringify({t:t.t,a:t.a})})
-    .then(function(r){if(!r.ok)throw r.status||0;return r.json()}).then(function(j){
+  SPQ[t.key]=spFetch({t:t.t,a:t.a})
+    .then(function(j){
       var d=j&&j.found&&j.d?j.d:null;delete SPQ[t.key];SPE[t.key]=d?'':(j&&j.found===false?'трек не найден':'пустой ответ функции');
       if(d)SPC[t.key]={at:now,d:d};
       var ks=Object.keys(SPC);if(ks.length>400)ks.sort(function(a,b){return SPC[a].at-SPC[b].at}).slice(0,100).forEach(function(k){delete SPC[k]});
