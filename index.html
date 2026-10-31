@@ -4798,9 +4798,14 @@ document.addEventListener('click',function(e){
   else if(a==='att'){var t=TRACKS[cur];if(!t||t.mine||t.pv||!t.key){toast('Сначала включите трек, который хотите отправить');return}CH.att=t.key;chAtt()}
   else if(a==='unatt'){CH.att='';chAtt()}
   else if(a==='play'){var x=byKey(b.dataset.k);if(x){chClose();playId(x.id,[x.id])}else toast('Этого трека нет в вашей библиотеке')}
+  else if(a==='push'){try{var rq=Notification.requestPermission(function(){});var fin=function(p){pushSetup();accPaint();toast(p==='granted'?'Уведомления включены':'Уведомления не разрешены')};if(rq&&rq.then)rq.then(fin);else fin(Notification.permission)}catch(e){toast('Не удалось включить уведомления')}}
   else if(a==='open')chOpen()});
+function pushState(){if(!('Notification' in window)||!('serviceWorker' in navigator))return 'no';return Notification.permission}
+function pushRow(){var st=pushState(),t=st==='granted'?'Включены':st==='denied'?'Заблокированы':st==='no'?'Недоступны':'Выключены',
+  hint=st==='denied'?'разрешите уведомления для сайта в настройках браузера (значок замка рядом с адресом)':st==='no'?'этот браузер не поддерживает уведомления (на iPhone установите сайт на экран «Домой»)':'сообщения придут, даже когда сайт закрыт';
+  return '<div class="chp fr"><div>Уведомления<small>'+hint+'</small></div><button class="btn ghost" data-ch="push" type="button"'+(st==='granted'||st==='no'?' disabled':'')+'>'+(st==='default'?'Включить':t)+'</button></div>'}
 var _chAccPaint=accPaint;
-accPaint=function(){_chAccPaint();var b=$('accBox');if(b&&USER&&SUPA_ON&&!b.querySelector('.chp'))b.insertAdjacentHTML('beforeend','<div class="chp fr" style="margin-top:6px"><div>Сообщения<small>переписка с друзьями, можно отправлять треки</small></div><button class="btn ghost" data-ch="open" type="button">Открыть <i class="chbd ch-u" '+(CH.unread?'':'hidden')+'>'+(CH.unread||'')+'</i></button></div>')};
+accPaint=function(){_chAccPaint();var b=$('accBox');if(b&&USER&&SUPA_ON&&!b.querySelector('.chp'))b.insertAdjacentHTML('beforeend',pushRow()+'<div class="chp fr" style="margin-top:6px"><div>Сообщения<small>переписка с друзьями, можно отправлять треки</small></div><button class="btn ghost" data-ch="open" type="button">Открыть <i class="chbd ch-u" '+(CH.unread?'':'hidden')+'>'+(CH.unread||'')+'</i></button></div>')};
 render();
 accInit();
 loadTracks(function(){loading=false;newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
