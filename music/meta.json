@@ -15,6 +15,9 @@
   },
   "cupsize": {
    "img": "music/_artists/cupsize-mvwsztg3.jpg"
+  },
+  "валентин стрыкало": {
+   "img": "music/_artists/валентин-стрыкало-mvwtgfe7.jpg"
   }
  },
  "music/пошлаямолли/Пошлая Молли - Райские цветы.mp3": {
@@ -349,9 +352,6 @@
   "aa": "CUPSIZE"
  },
  "music/CUPSIZE - Моя мама пьет.mp3": {
-  "a": "CUPSIZE"
- },
- "music/CUPSIZE - Ты любишь травку.mp3": {
   "a": "CUPSIZE"
  }
 }
