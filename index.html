@@ -1170,6 +1170,17 @@ body.noanim .wc>*{opacity:1;transform:none}
 .drw-n{min-width:0}.drw-n b{display:block;font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.drw-n small{display:block;color:var(--mut);font-size:14px}
 .drw-i{display:flex;align-items:center;gap:16px;width:100%;padding:15px 8px;font-size:17px;font-weight:600;text-align:left;border-radius:12px}
 .drw-i:active{background:var(--hover)}.drw-i .i{width:24px;height:24px}.drw-i .nbd{margin-left:auto}
+.nws{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .25s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.nws.on{opacity:1}
+.nws-b{width:100%;max-width:400px;max-height:100%;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px 20px 18px;transform:translateY(16px) scale(.97);transition:transform .35s cubic-bezier(.2,.9,.25,1)}
+.nws.on .nws-b{transform:none}
+.nws-i{display:block;width:min(70%,240px);aspect-ratio:1;object-fit:cover;border-radius:28px;margin:0 auto 14px;box-shadow:0 18px 50px -12px var(--acc)}
+.nws-t{text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);font-weight:800}
+.nws-b h2{text-align:center;font-size:26px;margin:4px 0 8px}
+.nws-b p{color:var(--mut);text-align:center;font-size:14px}
+.nws-b ul{list-style:none;margin:12px 0 4px;display:flex;flex-direction:column;gap:8px}
+.nws-b li{display:flex;gap:10px;align-items:flex-start;font-size:15px}.nws-b li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-top:8px}
+.nws-a{display:flex;gap:10px;margin-top:16px}.nws-a .btn{flex:1;justify-content:center}
 #list{position:relative}
 .swu{position:absolute;z-index:1;border-radius:var(--r,10px);display:flex;align-items:center;overflow:hidden;pointer-events:none;transition:opacity .22s}
 .swu[data-m=l]{background:#ff3d7f;justify-content:flex-end;color:#fff}
@@ -2549,6 +2560,7 @@ function navBack(){
 /* ===== системная «назад»: в истории две записи — страж {g:1} и сайт {a:1} ===== */
 try{if(!(history.state&&history.state.a)){history.replaceState({g:1},'');history.pushState({a:1},'')}}catch(e){}
 function closeTop(){
+  if(document.querySelector('.nws.on')){nwsClose();return true}
   if($('drw')&&$('drw').classList.contains('on')){drwClose();return true}
   if($('chat')&&$('chat').classList.contains('on')){if(CH.peer)chInbox();else chClose();return true}
   var ask=document.querySelector('.ask.on');if(ask){var c=ask.querySelector('.ask-c');if(c)c.click();return true}
@@ -2964,6 +2976,20 @@ $('accBox').addEventListener('click',function(e){
     SB.auth.signOut().catch(function(){}).then(function(){USER=null;PROF=null;save('wl_prof',null);accPaint();toast('Вы вышли из аккаунта. Данные остались на этом устройстве')});
   }
 });
+/* ===== новость: скоро SoundLife v7.0 ===== */
+function nwsOpen(auto){
+  if(auto){try{if(localStorage.getItem('wl_news7'))return}catch(e){}}
+  try{localStorage.setItem('wl_news7','1')}catch(e){}
+  if(document.querySelector('.nws'))return;
+  var o=document.createElement('div');o.className='nws';
+  o.innerHTML='<div class="nws-b"><img src="news-v7.png" alt="SoundLife 7.0" class="nws-i"><div class="nws-t">Скоро</div><h2>SoundLife v7.0</h2><p>Готовим большое обновление. Совсем скоро на сайте появится:</p>'+
+    '<ul><li>личные сообщения и уведомления</li><li>слушать вместе с друзьями на расстоянии</li><li>переключение звука между устройствами</li><li>достижения и подборки по настроению</li><li>альбомы по дискам и красивые итоги года</li></ul>'+
+    '<div class="nws-a">'+(NEWK.length?'<button type="button" class="btn ghost" data-nw="new">Новые треки · '+NEWK.length+'</button>':'')+'<button type="button" class="btn" data-nw="ok">Понятно</button></div></div>';
+  document.body.appendChild(o);requestAnimationFrame(function(){o.classList.add('on')});
+  o.addEventListener('click',function(e){var b=e.target.closest('[data-nw]');
+    if(e.target===o||(b&&b.dataset.nw==='ok')){nwsClose();return}
+    if(b&&b.dataset.nw==='new'){nwsClose();openSheetX('new')}})}
+function nwsClose(){var o=document.querySelector('.nws');if(!o)return;o.classList.remove('on');setTimeout(function(){o.remove()},250)}
 /* ===== боковое меню по нажатию на аватарку ===== */
 function drwEl(){var d=$('drw');if(d)return d;d=document.createElement('div');d.id='drw';d.className='drw';d.setAttribute('aria-hidden','true');d.innerHTML='<div class="drw-b" id="drwB"></div>';document.body.appendChild(d);
   d.addEventListener('click',function(e){if(e.target===d){drwClose();return}var b=e.target.closest('[data-dr]');if(b)drwGo(b.dataset.dr)});return d}
@@ -2980,7 +3006,7 @@ function drwGo(a){drwClose();
   else if(a==='login')accOpen('login');
   else if(a==='msg')chOpen();
   else if(a==='stats'||a==='hist')drwView(a);
-  else if(a==='news'){if(NEWK.length)openSheetX('new');else toast('Новых треков пока нет')}
+  else if(a==='news')nwsOpen()
   else if(a==='set')setOpen(true)}
 $('profBtn').onclick=function(){drwOpen()};
 $('accSw').onclick=function(){accOpen(accMode==='reg'?'login':'reg')};
@@ -4850,7 +4876,7 @@ var _chAccPaint=accPaint;
 accPaint=function(){_chAccPaint();var b=$('accBox');if(b&&USER&&SUPA_ON&&!b.querySelector('.chp'))b.insertAdjacentHTML('beforeend',pushRow()+'<div class="chp fr" style="margin-top:6px"><div>Сообщения<small>переписка с друзьями, можно отправлять треки</small></div><button class="btn ghost" data-ch="open" type="button">Открыть <i class="chbd nbd" '+(CH.unread?'':'hidden')+'>'+(CH.unread?chCap(CH.unread):'')+'</i></button></div>')};
 render();
 accInit();
-loadTracks(function(){loading=false;newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
+loadTracks(function(){loading=false;setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
 })();
 </script>
 </body>
