@@ -1118,6 +1118,12 @@ body:not(.hasTrack){padding-bottom:8px}
 body.noanim .wc>*{opacity:1;transform:none}
 
 .dh{display:flex;align-items:center;gap:8px;padding:18px 16px 6px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.dh .i{width:16px;height:16px}
+.rtbn{position:fixed;left:8px;right:8px;bottom:calc(98px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;z-index:31;display:none;align-items:center;gap:6px;padding:10px 10px 10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 40px -10px rgba(0,0,0,.6)}
+.rtbn.on{display:flex}
+.rtt{flex:1;min-width:0}.rtt b,.rtt span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rtt span{font-size:12px;color:var(--mut)}
+.rtb{flex:none;min-width:36px;height:36px;border-radius:99px;display:grid;place-items:center;color:var(--text);padding:0 4px}
+.rtb .i{width:18px;height:18px}.rtb.w{background:var(--acc);color:var(--on,#000);padding:0 14px;font-weight:700;font-size:13px}
+.rtp{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
 #list{position:relative}
 .swu{position:absolute;z-index:1;border-radius:var(--r,10px);display:flex;align-items:center;overflow:hidden;pointer-events:none;transition:opacity .22s}
 .swu[data-m=l]{background:#ff3d7f;justify-content:flex-end;color:#fff}
@@ -4481,6 +4487,135 @@ $('scroll').addEventListener('scroll',function(){document.querySelector('.top').
 
 audio.addEventListener('play',function(){document.body.classList.add('playing')});audio.addEventListener('pause',function(){document.body.classList.remove('playing')});
 audio.volume=vol;$('vol').value=vol;fill($('vol'));fill($('seek'));
+/* ===== Устройства (как Spotify Connect) и «слушать вместе»: Supabase Realtime, таблицы не нужны ===== */
+var RT_ID=(function(){try{var d=localStorage.getItem('wl_devid');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem('wl_devid',d)}return d}catch(e){return Math.random().toString(36).slice(2,10)}})(),
+  RT_NAME=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)?'Телефон':'Компьютер',
+  RT_MUTE=0,DV={ch:null,pend:null,uid:'',busy:0,fail:0,act:'',st:null,rcv:0,peers:[]},JM={ch:null,code:'',host:false,n:1,pend:''};
+function rtRnd(n,al){var s='',i;al=al||'abcdefghijklmnopqrstuvwxyz0123456789';for(i=0;i<n;i++)s+=al.charAt(Math.floor(Math.random()*al.length));return s}
+function rtMuted(){return Date.now()<RT_MUTE}
+function rtSend(ch,ev,p){try{ch.send({type:'broadcast',event:ev,payload:p})}catch(e){}}
+function rtCur(hb){var t=TRACKS[cur];if(!t||t.mine||t.pv||!t.key)return null;
+  var st={k:t.key,t:t.t,a:ad(t),pos:audio.currentTime||0,pl:!audio.paused,f:RT_ID};
+  if(hb)st.hb=1;
+  else{var i=ORDER.indexOf(cur);if(i<0)i=0;st.q=ORDER.slice(i,i+60).map(function(id){var x=TRACKS[id];return x&&!x.mine&&!x.pv&&x.key?x.key:null}).filter(Boolean)}
+  return st}
+function rtSeek(pos){
+  if(audio.readyState>=1&&!rtSeek.w){try{audio.currentTime=pos}catch(e){}return}
+  var f=function(){audio.removeEventListener('loadedmetadata',f);try{audio.currentTime=pos}catch(e){}};
+  audio.addEventListener('loadedmetadata',f)}
+function rtPlay(){var p=audio.play();if(p&&p.catch)p.catch(function(){toast('Нажмите Play ещё раз')})}
+function rtApply(st,hb){
+  if(!st||!st.k)return false;var t=byKey(st.k);if(!t)return false;
+  var pos=(st.pos||0)+(st.pl?0.3:0);
+  if(cur!==t.id){
+    RT_MUTE=Date.now()+4000;
+    var ids=(st.q||[]).map(byKey).filter(Boolean).map(function(x){return x.id});if(ids.indexOf(t.id)<0)ids.unshift(t.id);
+    rtSeek.w=1;playId(t.id,ids,!st.pl);rtSeek.w=0;rtSeek(pos);
+  }else{
+    RT_MUTE=Date.now()+1500;
+    if(Math.abs((audio.currentTime||0)-pos)>(hb?2.5:1.2))rtSeek(pos);
+    if(st.pl&&audio.paused)rtPlay();else if(!st.pl&&!audio.paused)audio.pause();
+  }
+  return true}
+function rtLocal(ev){
+  if(rtMuted())return;
+  clearTimeout(rtLocal.t);
+  rtLocal.t=setTimeout(function(){
+    var st=rtCur();if(!st)return;
+    if(JM.ch){rtSend(JM.ch,'st',st);return}
+    if(DV.ch&&(ev==='play'||DV.act===RT_ID)){DV.act=RT_ID;DV.st=st;DV.rcv=Date.now();rtSend(DV.ch,'st',st)}
+    rtBanner()},ev==='seeked'?300:120)}
+['play','pause','seeked'].forEach(function(ev){audio.addEventListener(ev,function(){rtLocal(ev)})});
+setInterval(function(){
+  if(audio.paused)return;
+  if(JM.ch){if(JM.host){var s=rtCur(true);if(s)rtSend(JM.ch,'st',s)}}
+  else if(DV.ch&&DV.act===RT_ID){var s2=rtCur(true);if(s2)rtSend(DV.ch,'st',s2)}
+},8000);
+/* --- устройства --- */
+function devPeer(id){var p=DV.peers.filter(function(x){return x.id===id})[0];return p?p.n:'другом устройстве'}
+function devStart(){
+  if(DV.ch||DV.busy||!SB||!USER||!SB.channel)return;DV.busy=Date.now();var uid=USER.id;
+  SB.auth.getUser().then(function(r){var u=r&&r.data&&r.data.user;if(!u)throw 0;var k=u.user_metadata&&u.user_metadata.devkey;if(k)return k;
+    k=rtRnd(16);return SB.auth.updateUser({data:{devkey:k}}).then(function(r2){var u2=r2&&r2.data&&r2.data.user;return (u2&&u2.user_metadata&&u2.user_metadata.devkey)||k})})
+  .then(function(k){
+    if(!USER||USER.id!==uid){DV.busy=0;return}
+    var ch=SB.channel('sl-dev-'+uid.slice(0,8)+k,{config:{broadcast:{self:false},presence:{key:RT_ID}}});DV.pend=ch;
+    ch.on('broadcast',{event:'st'},function(m){var st=m.payload;if(!st||st.f===RT_ID||JM.ch)return;
+        DV.act=st.f;DV.st=st;DV.rcv=Date.now();
+        if(st.pl&&!audio.paused){RT_MUTE=Date.now()+1000;audio.pause()}
+        rtBanner()})
+      .on('broadcast',{event:'hi'},function(){if(DV.act===RT_ID){var st=rtCur();if(st)rtSend(ch,'st',st)}})
+      .on('broadcast',{event:'cmd'},function(m){var c=m.payload;if(!c||c.to!==RT_ID||JM.ch)return;
+        if(c.c==='toggle')toggle();else if(c.c==='next')step(1);else if(c.c==='prev')prevTrack();else if(c.c==='take'&&c.st)devTake(c.st)})
+      .on('presence',{event:'sync'},function(){var s=ch.presenceState(),a=[];Object.keys(s).forEach(function(k){var p=s[k]&&s[k][0];if(p&&p.id)a.push({id:p.id,n:p.n||'Устройство'})});DV.peers=a;accPaint();rtBanner()})
+      .subscribe(function(s){
+        if(s==='SUBSCRIBED'){DV.ch=ch;DV.pend=null;DV.uid=uid;DV.busy=0;try{ch.track({id:RT_ID,n:RT_NAME})}catch(e){}rtSend(ch,'hi',{f:RT_ID});accPaint()}
+        else if(DV.ch===ch||DV.pend===ch){devStop();DV.fail=Date.now()}});
+  }).catch(function(){DV.busy=0;DV.fail=Date.now()})}
+function devStop(){var c=DV.ch||DV.pend;DV.ch=null;DV.pend=null;DV.busy=0;DV.act='';DV.st=null;DV.peers=[];
+  if(c){try{c.untrack()}catch(e){}try{SB.removeChannel(c)}catch(e){}}rtBanner()}
+setInterval(function(){
+  if(USER&&SB){if(DV.ch&&DV.uid!==USER.id)devStop();if(DV.busy&&Date.now()-DV.busy>20000)DV.busy=0;if(!DV.ch&&!DV.busy&&Date.now()-DV.fail>30000)devStart()}
+  else if(DV.ch||DV.busy)devStop()},3000);
+function devTake(st){
+  var s=Object.assign({},st,{pl:true});if(!rtApply(s)){toast('Этого трека нет на этом устройстве');return}
+  setTimeout(function(){var n=rtCur();if(n&&DV.ch){n.pl=true;DV.act=RT_ID;DV.st=n;DV.rcv=Date.now();rtSend(DV.ch,'st',n);rtBanner()}},700)}
+/* --- слушать вместе --- */
+function jamLeave(quiet){var c=JM.ch;JM={ch:null,code:'',host:false,n:1,pend:''};
+  if(c){try{c.untrack()}catch(e){}try{SB.removeChannel(c)}catch(e){}if(!quiet)toast('Вы вышли из комнаты')}accPaint();rtBanner()}
+function jamJoin(code,host){
+  code=String(code||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8);
+  if(code.length<4){toast('Код комнаты — 6 символов');return}
+  if(!SB||!SB.channel){toast('Сервис недоступен');return}
+  jamLeave(true);
+  var ch=SB.channel('sl-jam-'+code,{config:{broadcast:{self:false},presence:{key:RT_ID}}});
+  JM={ch:ch,code:code,host:!!host,n:1,pend:''};
+  shuffle=false;try{paintModes()}catch(e){}
+  ch.on('broadcast',{event:'st'},function(m){var p=m.payload;if(p&&p.f!==RT_ID)rtApply(p,!!p.hb)})
+    .on('broadcast',{event:'hi'},function(){var st=rtCur();if(st)rtSend(ch,'st',st)})
+    .on('presence',{event:'join'},function(){if(JM.host){var st=rtCur();if(st)rtSend(ch,'st',st)}})
+    .on('presence',{event:'sync'},function(){JM.n=Object.keys(ch.presenceState()).length||1;accPaint()})
+    .subscribe(function(s){
+      if(s==='SUBSCRIBED'){try{ch.track({id:RT_ID,n:RT_NAME})}catch(e){}rtSend(ch,'hi',{f:RT_ID});toast(host?'Комната создана: '+code.toUpperCase():'Вы в комнате '+code.toUpperCase());accPaint();rtBanner()}
+      else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'){if(JM.ch===ch){jamLeave(true);toast('Не удалось подключиться к комнате')}}});
+  accPaint();rtBanner()}
+function jamLink(){return ((window.SLN&&window.SLN.site)||(location.origin+location.pathname))+'?jam='+JM.code}
+function jamInvite(){var u=jamLink();
+  if(navigator.share){navigator.share({title:'Слушаем вместе в SoundLife',text:'Заходи слушать музыку вместе. Код комнаты: '+JM.code.toUpperCase(),url:u}).catch(function(){});return}
+  try{navigator.clipboard.writeText(u).then(function(){toast('Ссылка скопирована')},function(){toast(u)})}catch(e){toast(u)}}
+(function(){var m=(location.search||'').match(/[?&]jam=([a-z0-9]{4,8})/i);if(m){JM.pend=m[1].toLowerCase();try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}}})();
+/* --- плашка и панель --- */
+function rtBanner(){
+  var el=$('rtBn');if(!el){el=document.createElement('div');el.id='rtBn';el.className='rtbn';document.body.appendChild(el)}
+  var h='';
+  if(JM.pend&&!JM.ch){h='<div class="rtt"><b>Зовут слушать вместе</b><span>комната '+esc(JM.pend.toUpperCase())+'</span></div><button class="rtb w" data-rt="jjoin" type="button">Войти</button><button class="rtb" data-rt="jno" type="button" aria-label="Закрыть">'+ic('x')+'</button>'}
+  else if(!JM.ch&&DV.ch&&DV.act&&DV.act!==RT_ID&&DV.st&&audio.paused&&(DV.st.pl||Date.now()-DV.rcv<600000)){
+    h='<div class="rtt"><b>'+esc(DV.st.t||'')+'</b><span>'+esc(DV.st.a||'')+' · '+(DV.st.pl?'играет':'пауза')+' на «'+esc(devPeer(DV.act))+'»</span></div>'+
+      '<button class="rtb" data-rt="prev" type="button" aria-label="Назад">'+ic('prev','f')+'</button><button class="rtb" data-rt="tog" type="button" aria-label="Пауза/играть">'+ic(DV.st.pl?'pause':'play','f')+'</button><button class="rtb" data-rt="next" type="button" aria-label="Дальше">'+ic('next','f')+'</button><button class="rtb w" data-rt="here" type="button">Звук сюда</button>'}
+  el.innerHTML=h;el.classList.toggle('on',!!h)}
+function rtHtml(){
+  var h='';
+  if(USER&&DV.ch){var o=DV.peers.filter(function(p){return p.id!==RT_ID});
+    h+='<div class="fr"><div>Устройства<small>'+(o.length?'играйте на одном, слушайте на другом':'других устройств онлайн нет: откройте SoundLife с этим аккаунтом на другом устройстве')+'</small></div></div>';
+    o.forEach(function(p){h+='<div class="fr"><div>'+esc(p.n)+(DV.act===p.id?'<small>играет сейчас</small>':'')+'</div><button class="btn ghost" data-rt="xfer" data-id="'+esc(p.id)+'" type="button">Передать звук туда</button></div>'})}
+  if(JM.ch)h+='<div class="fr"><div>Слушаете вместе<small>комната '+esc(JM.code.toUpperCase())+' · участников: '+JM.n+'</small></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" data-rt="jinv" type="button">Позвать друга</button><button class="btn ghost" data-rt="jleave" type="button">Выйти из комнаты</button></div>';
+  else h+='<div class="fr"><div>Слушать вместе<small>музыка играет одновременно у всех в комнате, паузу и треки может менять любой</small></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" data-rt="jnew" type="button">Создать комнату</button><button class="btn ghost" data-rt="jenter" type="button">Войти по коду</button></div>';
+  return '<div class="rtp">'+h+'</div>'}
+var _rtAccPaint=accPaint;
+accPaint=function(){_rtAccPaint();var b=$('accBox');if(b&&SUPA_ON&&!b.querySelector('.rtp'))b.insertAdjacentHTML('beforeend',rtHtml())};
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-rt]');if(!b)return;var a=b.dataset.rt;
+  if(a==='jjoin')jamJoin(JM.pend);
+  else if(a==='jno'){JM.pend='';rtBanner()}
+  else if(a==='prev'||a==='next'||a==='tog'){if(DV.ch&&DV.act)rtSend(DV.ch,'cmd',{to:DV.act,c:a==='tog'?'toggle':a})}
+  else if(a==='here'){if(DV.st){var s=Object.assign({},DV.st);if(s.pl)s.pos+=(Date.now()-DV.rcv)/1000;devTake(s)}}
+  else if(a==='xfer'){var st=rtCur();if(!st||!DV.ch){toast('Сначала включите трек');return}st.pl=true;rtSend(DV.ch,'cmd',{to:b.dataset.id,c:'take',st:st});toast('Передаём звук…')}
+  else if(a==='jnew')jamJoin(rtRnd(6,'abcdefghjkmnpqrstuvwxyz23456789'),true);
+  else if(a==='jenter')askName('Код комнаты','',function(v){jamJoin(v)},'Войти');
+  else if(a==='jinv')jamInvite();
+  else if(a==='jleave')jamLeave();
+});
+rtBanner();
 render();
 accInit();
 loadTracks(function(){loading=false;newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
