@@ -2399,13 +2399,13 @@ function spGet(t){
   if(SPE[t.key]!==undefined)return Promise.resolve(null);
   if(navigator.onLine===false||!window.fetch)return Promise.resolve(c&&c.d||null);
   if(SPQ[t.key])return SPQ[t.key];
-  SPQ[t.key]=fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/spotify',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:JSON.stringify({t:t.t,a:t.a})})
+  SPQ[t.key]=fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/deezer',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:JSON.stringify({t:t.t,a:t.a})})
     .then(function(r){if(!r.ok)throw r.status||0;return r.json()}).then(function(j){
       var d=j&&j.found&&j.d?j.d:null;delete SPQ[t.key];SPE[t.key]=d?'':(j&&j.found===false?'трек не найден':'пустой ответ функции');
       if(d)SPC[t.key]={at:now,d:d};
       var ks=Object.keys(SPC);if(ks.length>400)ks.sort(function(a,b){return SPC[a].at-SPC[b].at}).slice(0,100).forEach(function(k){delete SPC[k]});
       save('wl_sp3',SPC);return d;
-    }).catch(function(e){delete SPQ[t.key];SPE[t.key]=typeof e==='number'?(e===401||e===403?'функция отклонила запрос (код '+e+'): выключите Verify JWT':e===404?'функция spotify не найдена (404)':'ошибка функции, код '+e):'нет связи с функцией (CORS или не задеплоена)';return null});
+    }).catch(function(e){delete SPQ[t.key];SPE[t.key]=typeof e==='number'?(e===401||e===403?'функция отклонила запрос (код '+e+'): выключите Verify JWT':e===404?'функция deezer не найдена (404)':'ошибка функции, код '+e):'нет связи с функцией (CORS или не задеплоена)';return null});
   return SPQ[t.key];
 }
 function spNum(n){return Number(n).toLocaleString('ru-RU')}
