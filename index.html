@@ -236,7 +236,7 @@ body.noblur .np-bg{display:none}
 .hub-r b{display:block;font-size:15px;font-weight:600}
 .hub-r small{display:block;color:var(--mut);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hub-r .ch{color:var(--mut);transform:rotate(180deg);width:16px;height:16px;flex:none}
-.hub-out{margin-top:18px;width:100%;justify-content:center}
+.hub-out{margin-top:18px;width:100%;justify-content:center}.hub-ver{display:block;width:100%;margin:26px 0 8px;padding:8px;font-size:11px;letter-spacing:.02em;text-align:center;color:inherit;opacity:.32;background:none;border:0}
 @media(max-width:860px){#set .sheet{top:0;max-height:none;height:100%;border:0;border-radius:0}}
 .sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:22px 0 10px}
 .sw{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -3046,8 +3046,18 @@ function paintHub(){
   var eco=!S.pre,pv=!SHARE_ON&&!NP_ON;
   h.innerHTML='<div class="hub-t"><button type="button" id="hubEco" class="'+(eco?'on':'')+'"><b>Экономия трафика</b><small>'+(eco?'Включена':'Выключена')+'</small></button><button type="button" id="hubPv" class="'+(pv?'on':'')+'"><b>Приватный режим</b><small>'+(pv?'Включён':'Выключен')+'</small></button></div>'+
     HUB.map(function(r){return '<button type="button" class="hub-r" data-pg="'+r[0]+'"><span class="ico">'+ic(r[1])+'</span><div><b>'+r[2]+'</b><small>'+esc(hubSub(r[0]))+'</small></div>'+ic('back','ch')+'</button>'}).join('')+
-    (USER?'<button type="button" class="btn ghost hub-out" id="hubOut">Выйти</button>':'');
+    (USER?'<button type="button" class="btn ghost hub-out" id="hubOut">Выйти</button>':'')+
+    '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
+/* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
+var APP_VER='7.0',APP_BUILD=58;
+function verCheck(){
+  toast('Проверяю обновления…');
+  fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
+    var m=/sl-shell-v(\d+)/.exec(t),n=m?+m[1]:0;
+    if(n>APP_BUILD){toast('Найдена новая версия, обновляю…');var go=function(){location.reload()};
+      Promise.all([(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations?navigator.serviceWorker.getRegistrations().then(function(a){return Promise.all(a.map(function(x){return x.unregister()}))}):Promise.resolve()),(window.caches?caches.keys().then(function(a){return Promise.all(a.map(function(k){return caches.delete(k)}))}):Promise.resolve())]).then(function(){setTimeout(go,600)},function(){setTimeout(go,600)})}
+    else toast('У вас последняя версия ('+APP_VER+', сборка '+APP_BUILD+')')}).catch(function(){toast('Не удалось проверить обновления')})}
 function paintPriv(){
   var b=$('pvBox');if(!b)return;
   b.innerHTML='<div class="fr"><div>Показывать мою медиатеку<small>друзья видят мои альбомы, артистов и недавние лайки</small></div><button class="tg'+(SHARE_ON?' on':'')+'" id="pvShare" type="button" aria-label="Показывать медиатеку"></button></div>'+
@@ -3067,6 +3077,7 @@ $('set').addEventListener('click',function(e){
   if(b.id==='hubEco'){S.pre=!S.pre;if(!S.pre)pfClear();upd()}
   else if(b.id==='hubPv'){var pv=!SHARE_ON&&!NP_ON;SHARE_ON=NP_ON=pv;privSave(pv?'Приватный режим выключен':'Приватный режим включён')}
   else if(b.id==='hubOut'){var o=$('accOut');if(o)o.click()}
+  else if(b.id==='hubVer')verCheck();
 });
 $('gear').onclick=function(){setOpen(true)};
 $('setX').onclick=function(){setOpen(false)};
