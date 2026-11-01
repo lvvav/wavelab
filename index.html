@@ -236,6 +236,19 @@ body.noblur .np-bg{display:none}
 .hub-r b{display:block;font-size:15px;font-weight:600}
 .hub-r small{display:block;color:var(--mut);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hub-r .ch{color:var(--mut);transform:rotate(180deg);width:16px;height:16px;flex:none}
+
+.stu,.stu *{box-sizing:border-box}.stu{position:fixed;inset:0;z-index:140;background:var(--bg);color:var(--text);display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}.stu.on{display:flex}
+.stu-h{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:2}.stu-h b{flex:1;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stu-h button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--text)}
+.stu-b{padding:18px 16px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:18px;max-width:520px;width:100%;margin:0 auto}
+.stu-n{padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:14px;line-height:1.4}.stu-n b{display:block;margin-bottom:2px}
+.stu-big{align-self:center;width:112px;height:112px;border-radius:50%;background:#e5484d;color:#fff;display:grid;place-items:center;box-shadow:0 0 0 8px rgba(229,72,77,.18);transition:transform .15s}.stu-big:active{transform:scale(.94)}.stu-big .i{width:44px;height:44px}.stu-big.rec{animation:stupl 1.3s infinite}@keyframes stupl{50%{box-shadow:0 0 0 18px rgba(229,72,77,.06)}}
+.stu-t{text-align:center;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}.stu-m{height:10px;border-radius:99px;background:var(--panel);border:1px solid var(--line);overflow:hidden}.stu-m i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4de0c0,#ffd93d,#ff3b30);transition:width .06s}
+.stu-r{display:flex;align-items:center;gap:12px;font-size:14px}.stu-r span{flex:none;min-width:116px}.stu-r input[type=range]{flex:1;accent-color:var(--acc)}.stu-r em{font-style:normal;opacity:.6;min-width:46px;text-align:right;font-size:12px}
+.stu-ks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kn{display:flex;flex-direction:column;align-items:center;gap:6px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:ns-resize}.kd{width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#444,#16161b 70%);border:2px solid var(--line);position:relative;box-shadow:0 4px 12px rgba(0,0,0,.4)}.kd i{position:absolute;left:50%;top:5px;width:4px;height:20px;margin-left:-2px;border-radius:2px;background:var(--acc);transform-origin:50% 26px}.kn b{font-size:12px}.kn span{font-size:11px;opacity:.6;margin-top:-4px}
+.stu-tg{display:flex;gap:10px}.stu-tg button{flex:1;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:14px;font-weight:600}.stu-tg button.on{background:var(--acc);color:var(--on);border-color:transparent}
+.stu-pb{display:flex;align-items:center;gap:12px}.stu-pb button{flex:none;width:52px;height:52px;border-radius:50%;background:var(--acc);color:var(--on);display:grid;place-items:center}.stu-pb .i{width:22px;height:22px}.stu-pr{flex:1;height:8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);overflow:hidden}.stu-pr i{display:block;height:100%;width:0;background:var(--acc)}
+.stu-bt{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stu-bt button{padding:13px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;font-weight:600}.stu-bt button.pri{background:var(--acc);color:var(--on);border-color:transparent}.stu-bt button[disabled]{opacity:.5}
+.stu-lk{align-self:center;color:var(--text);opacity:.7;font-size:14px;text-decoration:underline;padding:6px}
 .np-up[hidden]{display:none}.cov-r{position:relative}.cov-x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--text);opacity:.55}.cov-add{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;margin-top:6px;border-radius:12px;border:1px dashed var(--line);color:var(--text);font-size:14px;opacity:.85}.cov-add .i{width:18px;height:18px}
 .hub-out{margin-top:18px;width:100%;justify-content:center}.hub-ver{display:block;width:100%;margin:26px 0 8px;padding:8px;font-size:11px;letter-spacing:.02em;text-align:center;color:inherit;opacity:.32;background:none;border:0}
 @media(max-width:860px){#set .sheet{top:0;max-height:none;height:100%;border:0;border-radius:0}}
@@ -2688,6 +2701,7 @@ function navBack(){
 /* ===== системная «назад»: в истории две записи — страж {g:1} и сайт {a:1} ===== */
 try{if(!(history.state&&history.state.a)){history.replaceState({g:1},'');history.pushState({a:1},'')}}catch(e){}
 function closeTop(){
+  if(document.querySelector('.stu.on')){stuClose();return true}
   if(document.querySelector('.nws.on')){nwsClose();return true}
   if($('drw')&&$('drw').classList.contains('on')){drwClose();return true}
   if($('chat')&&$('chat').classList.contains('on')){if(CH.peer)chInbox();else chClose();return true}
@@ -3051,7 +3065,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=60;
+var APP_VER='7.0',APP_BUILD=61;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3944,7 +3958,7 @@ function renderMenu(mode){if(mnKind!=='tr')return renderMenuX(mode);var t=TRACKS
   var h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv(t)+'<div><div class="tt">'+esc(t.t)+'</div><div class="ar">'+esc(ad(t))+'</div></div></div>';
   if(mode==='pl')h+=mi('back','down','Назад')+mi('newpl','plus','Новый плейлист')+PL.map(function(p){var has=p.k.indexOf(t.key)>-1;return mi('addpl',has?'check':'list',esc(p.n)+(has?' — уже добавлен':''),p.id)}).join('');
   else if(t.mine){var fv0=favs.indexOf(t.key)>-1;h+=mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+'<button class="mi'+(fv0?' on':'')+'" data-m="fav" type="button">'+(fv0?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv0?'Убрать из избранного':'В избранное')+'</button>'+mi('pl','plus','Добавить в плейлист')+mi('mydel','x','Удалить из моих файлов')}
-  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(SB&&!t.pv?mi('cover','mic','Выложить кавер'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
+  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(!t.pv?mi('studio','mic','Записать кавер в студии'):'')+(SB&&!t.pv?mi('cover','plus','Выложить кавер (файл)'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
   $('mnBody').innerHTML=h}
 function openMenuX(kind,key){mnKind=kind;mnKey=key;mnId=-1;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
 function openMenu(id){mnKind='tr';mnId=id;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
@@ -3965,6 +3979,7 @@ $('mnBody').onclick=function(e){var b=e.target.closest('[data-m]');if(!b)return;
   if(m==='mydel'){myRemove(t)}
   else if(m==='radio'){radioStart(t)}
   else if(m==='cover'){covPick(t)}
+  else if(m==='studio'){stuOpen(t)}
   else if(m==='next'){queue.unshift(mnId);toast('Сыграет следующим');renderNav()}
   else if(m==='q'){queue.push(mnId);toast('Добавлено в очередь');renderNav()}
   else if(m==='alb'){view='album';albK=((t.aa||t.a)+'|'+t.al).toLowerCase();genre='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
@@ -4555,7 +4570,7 @@ function covRender(){
   var t=TRACKS[cur],box=$('npCovBox');if(!box)return;
   if(!covOk(t)||COV.nosql){box.hidden=true;return}
   box.hidden=false;var tok=++COV.tok;COV.key=t.key;
-  var add='<button class="cov-add" data-cov="add" type="button">'+ic('plus')+'Выложить свой кавер на этот трек</button>';
+  var add='<button class="cov-add" data-cov="studio" type="button">'+ic('mic')+'Записать кавер в студии</button><button class="cov-add" data-cov="add" type="button">'+ic('plus')+'Загрузить готовый кавер (файл)</button>';
   $('npCov').innerHTML='<div class="np-empty">Загрузка…</div>'+add;
   SB.from('covers').select('id,user_id,orig_key,title,path,dur,created_at').eq('orig_key',t.key).order('created_at',{ascending:false}).limit(20).then(function(r){
     if(tok!==COV.tok)return;
@@ -4591,10 +4606,144 @@ document.addEventListener('click',function(e){
   var r=e.target.closest('#npCov [data-cov],#npCov .up');if(!r)return;
   var a=r.dataset&&r.dataset.cov;
   if(a==='add'){covPick(byKey(COV.key));return}
+  if(a==='studio'){stuOpen(byKey(COV.key));return}
   if(a==='del'){e.stopPropagation();var id=r.dataset.id,c=COV.list.filter(function(x){return String(x.id)===String(id)})[0];if(!c||!confirm('Удалить кавер «'+c.title+'»?'))return;
     SB.from('covers').delete().eq('id',c.id).then(function(q){if(q.error){toast('Не удалось удалить');return}try{SB.storage.from('covers').remove([c.path])}catch(x){}toast('Кавер удалён');covRender()});return}
   var row=e.target.closest('#npCov .up');if(row&&row.dataset.cv)covPlay(row.dataset.cv)});
 var _covSim=renderSim;renderSim=function(){_covSim();covRender()};
+
+/* ===== студия каверов: запись голоса поверх песни, эффекты, сохранить / скачать / выложить ===== */
+var STU=null,STUP={rev:.25,dist:0,echo:0,back:.6,radio:0,bass:0,sync:0},STU_KN=[['rev','Реверб'],['dist','Дисторшн'],['echo','Эхо'],['back','Оригинал']];
+function stuFmt(t){t=Math.max(0,Math.round(t));return Math.floor(t/60)+':'+('0'+t%60).slice(-2)}
+function stuIR(ctx){var r=ctx.sampleRate,n=Math.floor(r*2.2),b=ctx.createBuffer(2,n,r),c,i;for(c=0;c<2;c++){var d=b.getChannelData(c);for(i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}return b}
+function stuCurve(){var n=44100,c=new Float32Array(n),i;for(i=0;i<n;i++){var x=i*2/n-1;c[i]=Math.tanh(x*4)}return c}
+/* граф: голос → тон (радио / бас) → дисторшн → эхо + реверб; оригинал идёт рядом без эффектов. Тот же граф для прослушивания и для итогового файла */
+function stuGraph(ctx,dest,vb,bb){
+  var G={},master=ctx.createGain();master.gain.value=.9;master.connect(dest);
+  var vs=ctx.createBufferSource();vs.buffer=vb;var vg=ctx.createGain();vg.gain.value=1.4;
+  var hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=10;
+  var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;
+  var bs=ctx.createBiquadFilter();bs.type='lowshelf';bs.frequency.value=220;
+  vs.connect(vg);vg.connect(hp);hp.connect(lp);lp.connect(bs);
+  var dd=ctx.createGain(),dw=ctx.createGain(),pre=ctx.createGain(),ws=ctx.createWaveShaper(),mix=ctx.createGain();ws.curve=stuCurve();ws.oversample='4x';
+  bs.connect(dd);bs.connect(pre);pre.connect(ws);ws.connect(dw);dd.connect(mix);dw.connect(mix);mix.connect(master);
+  var dl=ctx.createDelay(1),fb=ctx.createGain(),eg=ctx.createGain();dl.delayTime.value=.3;fb.gain.value=.38;mix.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(eg);eg.connect(master);
+  var cv=ctx.createConvolver(),rg=ctx.createGain();cv.buffer=stuIR(ctx);mix.connect(cv);cv.connect(rg);rg.connect(master);
+  var bg=ctx.createGain(),bsr=null;if(bb){bsr=ctx.createBufferSource();bsr.buffer=bb;bsr.connect(bg);bg.connect(master)}
+  G.set=function(P){dd.gain.value=1-P.dist*.75;dw.gain.value=P.dist*.9;pre.gain.value=1+P.dist*14;eg.gain.value=P.echo*.85;rg.gain.value=P.rev*1.3;
+    hp.frequency.value=P.radio?450:10;lp.frequency.value=P.radio?3200:20000;bs.gain.value=P.bass?9:0;bg.gain.value=P.back*1.1};
+  G.start=function(P,off){var sy=(P.sync||0)/1000,t0=(off||0);vs.start(ctx.currentTime+Math.max(0,sy),t0>0?Math.max(0,t0-Math.max(0,sy)):0);if(bsr)bsr.start(ctx.currentTime+Math.max(0,-sy),t0);};
+  G.vs=vs;G.bsr=bsr;G.set(STUP);return G}
+function stuOpen(t){
+  if(!t||t.pv||t.mine){toast('Кавер можно записать на трек из каталога');return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Этот браузер не умеет записывать звук');return}
+  try{audio.pause()}catch(e){}
+  stuClose(true);
+  STU={t:t,st:'idle',vb:null,bb:null,ctx:null,G:null,rec:null,play:null,mp3:null};STUP.sync=0;
+  var el=document.getElementById('stu');if(!el){el=document.createElement('div');el.id='stu';el.className='stu';document.body.appendChild(el)}
+  el.classList.add('on');stuPaint();
+  /* оригинал заранее скачиваем в память, чтобы смешать с голосом */
+  STU.bbP=fetch(t.src).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(a){var C=window.AudioContext||window.webkitAudioContext,c=new C();return c.decodeAudioData(a).then(function(b){try{c.close()}catch(e){}return b})}).then(function(b){if(STU&&STU.t===t)STU.bb=b;return b}).catch(function(){return null})}
+function stuCtx(){if(!STU.ctx){var C=window.AudioContext||window.webkitAudioContext;STU.ctx=new C()}if(STU.ctx.state==='suspended')STU.ctx.resume();return STU.ctx}
+function stuClose(quiet){
+  var el=document.getElementById('stu');
+  if(STU){stuStopPlay();if(STU.rec){try{STU.rec.cancel=true;STU.rec.mr.state!=='inactive'&&STU.rec.mr.stop()}catch(e){}try{STU.rec.st.getTracks().forEach(function(x){x.stop()})}catch(e){}clearInterval(STU.rec.iv);if(STU.rec.back){try{STU.rec.back.pause()}catch(e){}}}
+    try{STU.ctx&&STU.ctx.close()}catch(e){}STU=null}
+  if(el){el.classList.remove('on');if(!quiet)el.innerHTML=''}}
+function stuKnob(k,l){var v=STUP[k];return '<div class="kn" data-k="'+k+'"><div class="kd"><i style="transform:rotate('+(-135+v*270)+'deg)"></i></div><b>'+l+'</b><span>'+Math.round(v*100)+'%</span></div>'}
+function stuPaint(){
+  var el=document.getElementById('stu');if(!el||!STU)return;var t=STU.t,h='<div class="stu-h"><button type="button" data-stu="x" aria-label="Закрыть">'+ic('back')+'</button><b>Студия: '+esc(t.t)+'</b></div><div class="stu-b">';
+  if(STU.st==='idle'){
+    h+='<div class="stu-n"><b>🎧 Наденьте наушники</b>Оригинал песни будет играть, пока вы поёте. Без наушников микрофон запишет музыку из динамика.</div>'+
+      '<div class="stu-r"><span>Громкость оригинала</span><input type="range" min="0" max="100" value="'+Math.round(STUP.back*100)+'" data-stu="bk"><em>'+Math.round(STUP.back*100)+'%</em></div>'+
+      '<button class="stu-big" type="button" data-stu="rec" aria-label="Начать запись">'+ic('mic')+'</button><div style="text-align:center;opacity:.65;font-size:14px">Нажмите, чтобы начать запись</div>'+
+      '<button class="stu-lk" type="button" data-stu="file">Загрузить своё (готовый файл)</button>'}
+  else if(STU.st==='rec'){
+    h+='<div class="stu-t" id="stuT">0:00</div><div class="stu-m"><i id="stuM"></i></div><button class="stu-big rec" type="button" data-stu="stop" aria-label="Остановить"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg></button><div style="text-align:center;opacity:.65;font-size:14px">Идёт запись. Нажмите, чтобы закончить</div>'}
+  else{
+    h+='<div class="stu-pb"><button type="button" data-stu="pl" id="stuPl" aria-label="Слушать">'+ic('play','f')+'</button><div class="stu-pr"><i id="stuPr"></i></div><span id="stuPt" style="font-size:13px;opacity:.7;min-width:78px;text-align:right">0:00 / '+stuFmt(STU.vb.duration)+'</span></div>'+
+      '<div class="stu-ks">'+STU_KN.map(function(x){return stuKnob(x[0],x[1])}).join('')+'</div>'+
+      '<div class="stu-tg"><button type="button" data-tg="radio" class="'+(STUP.radio?'on':'')+'">📻 Радио</button><button type="button" data-tg="bass" class="'+(STUP.bass?'on':'')+'">🔊 Бас+</button></div>'+
+      '<div class="stu-r"><span>Синхрон голоса</span><input type="range" min="-300" max="300" step="10" value="'+STUP.sync+'" data-stu="sy"><em id="stuSy">'+(STUP.sync>0?'+':'')+STUP.sync+' мс</em></div>'+
+      (STU.bb?'':'<div class="stu-n">Оригинал не удалось загрузить, кавер будет только с голосом.</div>')+
+      '<div class="stu-bt"><button type="button" data-stu="again">Записать заново</button><button type="button" data-stu="dl">Скачать</button><button type="button" class="pri" data-stu="up" style="grid-column:1/3">Выложить кавер на сайт</button></div>'+
+      '<button class="stu-lk" type="button" data-stu="file">Загрузить своё (готовый файл)</button>'}
+  h+='</div>';el.innerHTML=h}
+function stuKnobPaint(k){var e=document.querySelector('.stu .kn[data-k="'+k+'"]');if(!e)return;e.querySelector('i').style.transform='rotate('+(-135+STUP[k]*270)+'deg)';e.querySelector('span').textContent=Math.round(STUP[k]*100)+'%'}
+function stuRecStart(){
+  var t=STU.t;
+  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(st){
+    if(!STU||STU.t!==t){st.getTracks().forEach(function(x){x.stop()});return}
+    var mt=['audio/webm;codecs=opus','audio/webm','audio/mp4'].filter(function(m){return MediaRecorder.isTypeSupported(m)})[0]||'',mr;
+    try{mr=new MediaRecorder(st,mt?{mimeType:mt,audioBitsPerSecond:128000}:undefined)}catch(e){st.getTracks().forEach(function(x){x.stop()});toast('Не удалось начать запись');return}
+    var R={mr:mr,st:st,ch:[],t0:0,iv:0,cancel:false,back:null,an:null,ctx:null};STU.rec=R;STU.st='rec';stuPaint();
+    mr.ondataavailable=function(e){if(e.data&&e.data.size)R.ch.push(e.data)};
+    mr.onstop=function(){clearInterval(R.iv);st.getTracks().forEach(function(x){x.stop()});try{R.ctx&&R.ctx.close()}catch(e){}if(R.back){try{R.back.pause()}catch(e){}}if(R.cancel||!STU)return;stuDecode(R)};
+    try{var C=window.AudioContext||window.webkitAudioContext,c=new C(),an=c.createAnalyser(),buf=new Uint8Array(512);an.fftSize=512;c.createMediaStreamSource(st).connect(an);R.ctx=c;R.an=an;R.buf=buf}catch(e){}
+    var b=new Audio(t.src);b.volume=Math.min(1,STUP.back);R.back=b;
+    R.t0=Date.now();mr.start();b.play().catch(function(){});
+    R.iv=setInterval(function(){var s=(Date.now()-R.t0)/1000,e=document.getElementById('stuT');if(e)e.textContent=stuFmt(s);
+      if(R.an){R.an.getByteTimeDomainData(R.buf);var m=0,i;for(i=0;i<R.buf.length;i++)m+=Math.pow((R.buf[i]-128)/128,2);var lv=Math.min(1,Math.sqrt(m/R.buf.length)*4),me=document.getElementById('stuM');if(me)me.style.width=Math.round(lv*100)+'%'}
+      if(s>=600)stuRecStop()},60);
+    b.onended=function(){stuRecStop()}
+  }).catch(function(){toast('Нет доступа к микрофону. Разрешите его для сайта')})}
+function stuRecStop(){var R=STU&&STU.rec;if(!R||R.mr.state==='inactive')return;if(Date.now()-R.t0<1500){toast('Слишком коротко: спойте хотя бы пару секунд');R.cancel=true;try{R.mr.stop()}catch(e){}STU.rec=null;STU.st='idle';stuPaint();return}
+  try{R.mr.stop()}catch(e){}}
+function stuDecode(R){
+  var blob=new Blob(R.ch,{type:(R.mr.mimeType||'audio/webm').split(';')[0]});toast('Обрабатываю запись…');
+  blob.arrayBuffer().then(function(a){return stuCtx().decodeAudioData(a)}).then(function(vb){
+    if(!STU)return;STU.vb=vb;STU.st='rev';STU.rec=null;return STU.bbP.then(function(){if(STU)stuPaint()})
+  }).catch(function(){toast('Не удалось обработать запись');if(STU){STU.st='idle';STU.rec=null;stuPaint()}})}
+function stuStopPlay(){var P=STU&&STU.play;if(!P)return;STU.play=null;cancelAnimationFrame(P.raf);try{P.G.vs.onended=null;P.G.vs.stop()}catch(e){}try{P.G.bsr&&P.G.bsr.stop()}catch(e){}
+  var b=document.getElementById('stuPl');if(b)b.innerHTML=ic('play','f')}
+function stuTogglePlay(){
+  if(!STU||!STU.vb)return;if(STU.play){stuStopPlay();return}
+  var ctx=stuCtx(),G=stuGraph(ctx,ctx.destination,STU.vb,STU.bb);G.start(STUP,0);var st=ctx.currentTime,dur=STU.vb.duration,P={G:G,st:st,raf:0};STU.play=P;
+  G.vs.onended=function(){if(STU&&STU.play===P){stuStopPlay();var pr=document.getElementById('stuPr');if(pr)pr.style.width='0%';var pt=document.getElementById('stuPt');if(pt)pt.textContent='0:00 / '+stuFmt(dur)}};
+  var b=document.getElementById('stuPl');if(b)b.innerHTML=ic('pause','f');
+  (function tick(){if(!STU||STU.play!==P)return;var x=ctx.currentTime-st,pr=document.getElementById('stuPr'),pt=document.getElementById('stuPt');if(pr)pr.style.width=Math.min(100,x/dur*100)+'%';if(pt)pt.textContent=stuFmt(x)+' / '+stuFmt(dur);P.raf=requestAnimationFrame(tick)})()}
+/* итоговый файл: тот же граф в OfflineAudioContext → нормализация → mp3 (lamejs), запасной вариант wav */
+function stuRender(){
+  var vb=STU.vb,bb=STU.bb,len=Math.ceil((vb.duration+2.6)*44100),OC=window.OfflineAudioContext||window.webkitOfflineAudioContext,oc=new OC(2,len,44100),G=stuGraph(oc,oc.destination,vb,bb);
+  G.start(STUP,0);return oc.startRendering().then(function(buf){
+    var pk=0,c,i;for(c=0;c<buf.numberOfChannels;c++){var d=buf.getChannelData(c);for(i=0;i<d.length;i++){var a=Math.abs(d[i]);if(a>pk)pk=a}}
+    var g=pk>0?.95/pk:1;if(g!==1)for(c=0;c<buf.numberOfChannels;c++){var d2=buf.getChannelData(c);for(i=0;i<d2.length;i++)d2[i]*=g}
+    return buf})}
+function stuLame(){return new Promise(function(res){if(window.lamejs)return res(true);var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js';sc.onload=function(){res(!!window.lamejs)};sc.onerror=function(){res(false)};document.head.appendChild(sc);setTimeout(function(){res(!!window.lamejs)},9000)})}
+function stuI16(f){var o=new Int16Array(f.length),i;for(i=0;i<f.length;i++){var v=Math.max(-1,Math.min(1,f[i]));o[i]=v<0?v*32768:v*32767}return o}
+function stuMp3(buf){return new Promise(function(res){
+  var enc=new lamejs.Mp3Encoder(2,buf.sampleRate,128),L=stuI16(buf.getChannelData(0)),R=stuI16(buf.getChannelData(buf.numberOfChannels>1?1:0)),out=[],i=0,B=1152*20;
+  (function next(){var e=Math.min(L.length,i+B);for(;i<e;i+=1152){var a=enc.encodeBuffer(L.subarray(i,Math.min(i+1152,L.length)),R.subarray(i,Math.min(i+1152,R.length)));if(a.length)out.push(new Uint8Array(a))}
+    if(i<L.length)setTimeout(next,0);else{var f=enc.flush();if(f.length)out.push(new Uint8Array(f));res(new Blob(out,{type:'audio/mpeg'}))}})()})}
+function stuWav(buf){var n=buf.length,ch=buf.numberOfChannels,o=new DataView(new ArrayBuffer(44+n*2));
+  function w(p,s){for(var i=0;i<s.length;i++)o.setUint8(p+i,s.charCodeAt(i))}
+  w(0,'RIFF');o.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');o.setUint32(16,16,true);o.setUint16(20,1,true);o.setUint16(22,1,true);o.setUint32(24,buf.sampleRate,true);o.setUint32(28,buf.sampleRate*2,true);o.setUint16(32,2,true);o.setUint16(34,16,true);w(36,'data');o.setUint32(40,n*2,true);
+  var d=[],c,i,p=44;for(c=0;c<ch;c++)d.push(buf.getChannelData(c));for(i=0;i<n;i++){var m=0;for(c=0;c<ch;c++)m+=d[c][i];m/=ch;var v=Math.max(-1,Math.min(1,m));o.setInt16(p,v<0?v*32768:v*32767,true);p+=2}
+  return new Blob([o],{type:'audio/wav'})}
+function stuMake(){
+  if(STU.mp3&&STU.mp3.sig===JSON.stringify(STUP))return Promise.resolve(STU.mp3);
+  stuStopPlay();toast('Собираю файл…');var sig=JSON.stringify(STUP);
+  return stuRender().then(function(buf){return stuLame().then(function(ok){return ok?stuMp3(buf):stuWav(buf)})}).then(function(b){STU.mp3={blob:b,sig:sig,ext:b.type==='audio/mpeg'?'mp3':'wav'};return STU.mp3})}
+function stuName(){return 'Кавер на '+STU.t.t}
+function stuDownload(){stuMake().then(function(m){var a=document.createElement('a');a.href=URL.createObjectURL(m.blob);a.download=stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);toast('Файл сохранён')}).catch(function(){toast('Не удалось собрать файл')})}
+function stuUpload(){
+  if(!SB||!USER){needLogin();return}
+  stuMake().then(function(m){var f=new File([m.blob],stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext,{type:m.blob.type});covUpload(STU.t,f)}).catch(function(){toast('Не удалось собрать файл')})}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-stu],[data-tg]');if(!b||!STU)return;
+  if(b.dataset.tg){STUP[b.dataset.tg]=STUP[b.dataset.tg]?0:1;b.classList.toggle('on',!!STUP[b.dataset.tg]);if(STU.play)STU.play.G.set(STUP);return}
+  var a=b.dataset.stu;
+  if(a==='x')stuClose();else if(a==='rec')stuRecStart();else if(a==='stop')stuRecStop();else if(a==='pl')stuTogglePlay();
+  else if(a==='again'){stuStopPlay();STU.st='idle';STU.vb=null;STU.mp3=null;stuPaint()}
+  else if(a==='dl')stuDownload();else if(a==='up')stuUpload();else if(a==='file')covPick(STU.t)});
+document.addEventListener('input',function(e){var b=e.target;if(!STU||!b.dataset||!b.dataset.stu)return;
+  if(b.dataset.stu==='bk'){STUP.back=b.value/100;b.nextElementSibling.textContent=b.value+'%'}
+  else if(b.dataset.stu==='sy'){STUP.sync=+b.value;var s=document.getElementById('stuSy');if(s)s.textContent=(STUP.sync>0?'+':'')+STUP.sync+' мс'}});
+(function(){var d=null;
+  document.addEventListener('pointerdown',function(e){var k=e.target.closest('.stu .kn');if(!k||!STU)return;e.preventDefault();d={k:k.dataset.k,y:e.clientY,v:STUP[k.dataset.k]};try{k.setPointerCapture(e.pointerId)}catch(x){}});
+  document.addEventListener('pointermove',function(e){if(!d)return;var v=Math.max(0,Math.min(1,d.v+(d.y-e.clientY)/150));STUP[d.k]=v;stuKnobPaint(d.k);if(STU&&STU.play)STU.play.G.set(STUP)});
+  ['pointerup','pointercancel'].forEach(function(n){document.addEventListener(n,function(){if(d&&STU)STU.mp3=null;d=null})})})();
+
 
 /* ===== офлайн и приложение ===== */
 var OFFN='sl-audio',offBusy=false,deferredPrompt=null;
