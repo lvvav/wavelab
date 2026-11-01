@@ -2471,7 +2471,6 @@ function spShow(t){
     if(!d){if(TRACKS[cur]===t&&SPE[t.key])npInfoPaint(t);return}
     if(TRACKS[cur]!==t)return;
     if(!t.dur&&d.dur)t.dur=d.dur;
-    if(!t.img&&d.img&&/^https:\/\//.test(d.img)){t.img=d.img;setCv($('npCv'),t)}
     npInfoPaint(t);
   });
 }
@@ -3052,7 +3051,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=59;
+var APP_VER='7.0',APP_BUILD=60;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
