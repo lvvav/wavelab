@@ -1170,6 +1170,9 @@ body.noanim .wc>*{opacity:1;transform:none}
 .cb audio{display:block;width:210px;max-width:100%;height:36px;margin:2px 0}.ch-rec{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px}.ch-rec i{width:10px;height:10px;border-radius:50%;background:#e5484d;animation:chrec 1s infinite}.ch-rec b{flex:1;font-variant-numeric:tabular-nums}.ch-rec button{padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--text)}.ch-rec button.ok{background:var(--acc);color:var(--on);border-color:transparent}@keyframes chrec{50%{opacity:.25}}
 .cb .ch-ph{display:block;max-width:100%;max-height:260px;border-radius:12px;margin:2px 0;cursor:zoom-in;object-fit:cover}.cb video{display:block;max-width:100%;max-height:300px;border-radius:12px;margin:2px 0;background:#000}.ch-zoom{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.92);display:grid;place-items:center;cursor:zoom-out}.ch-zoom img{max-width:100%;max-height:100%}
 .cb video.ch-cr{width:200px;height:200px;max-height:none;max-width:100%;border-radius:50%;object-fit:cover;cursor:pointer;margin:2px 0}.ch-cir{position:fixed;inset:0;z-index:125;background:rgba(0,0,0,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#fff}.ch-cir video{width:min(78vw,320px);height:min(78vw,320px);border-radius:50%;object-fit:cover;background:#222;transform:scaleX(-1)}.ch-cir b{font-size:20px;font-variant-numeric:tabular-nums}.ch-cir .row2{display:flex;gap:28px;align-items:center}.ch-cir button{color:#fff}.ch-cir .rc{width:72px;height:72px;border-radius:50%;border:4px solid #fff;display:grid;place-items:center}.ch-cir .rc i{width:48px;height:48px;border-radius:50%;background:#e5484d;transition:.15s}.ch-cir .rc.on i{width:26px;height:26px;border-radius:7px}.ch-cir .cx{padding:10px 18px;border-radius:99px;background:rgba(255,255,255,.15)}
+.vm{display:flex;align-items:center;gap:10px;min-width:230px;max-width:100%;padding:2px 0}.vp{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:var(--on);transition:transform .12s}.vp:active{transform:scale(.9)}.vp .i{width:18px;height:18px}.cb.me .vp{background:var(--on);color:var(--acc)}
+.vw{flex:1;min-width:90px;height:32px;display:flex;align-items:center;gap:2px;cursor:pointer}.vw i{flex:1;min-width:2px;border-radius:2px;background:currentColor;opacity:.3;transition:opacity .15s,transform .15s}.vw i.on{opacity:1}.vm.pl .vw i.on:last-of-type{transform:scaleY(1.15)}
+.vt{flex:none;min-width:34px;font-size:12px;font-variant-numeric:tabular-nums;opacity:.75;text-align:right}.vs{flex:none;font-size:11px;font-weight:700;padding:3px 6px;border-radius:99px;background:rgba(128,128,128,.28);color:inherit;display:none}.vm.pl .vs{display:block}.vm.pl .vp{animation:vpl 1.6s infinite}@keyframes vpl{50%{box-shadow:0 0 0 6px rgba(128,128,128,.18)}}
 .ch-f:not(.has) .ch-s{display:none}.ch-f.has .ch-rb{display:none}.ch-rb{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative;z-index:6}.ch-rb.flip .i{animation:chflip .35s}.ch-rb.hot{background:#e5484d;color:#fff;border-color:transparent;transform:scale(1.55);transform-origin:right center;transition:transform .18s cubic-bezier(.3,1.6,.5,1);box-shadow:0 0 0 0 rgba(229,72,77,.5);animation:chpulse 1.2s infinite}
 @keyframes chflip{0%{transform:rotateY(90deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}@keyframes chpulse{70%{box-shadow:0 0 0 14px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
 .ch-hb{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 70px 10px 16px;background:var(--bg);border-top:1px solid var(--line);height:calc(62px + env(safe-area-inset-bottom));padding-bottom:calc(10px + env(safe-area-inset-bottom));animation:chin .2s}.ch-hb i.dot{width:12px;height:12px;border-radius:50%;background:#e5484d;animation:chrec 1s infinite;flex:none}.ch-hb b{font-variant-numeric:tabular-nums;min-width:42px}.ch-hb .sl{flex:1;text-align:center;font-size:14px;opacity:.7;white-space:nowrap;transition:opacity .1s}.ch-hb button.bx{padding:8px 14px;border-radius:99px;border:1px solid var(--line);color:var(--text)}.ch-hb button.bs{padding:8px 16px;border-radius:99px;background:var(--acc);color:var(--on);font-weight:600}
@@ -5085,8 +5088,8 @@ function chThread(){var b=$('chB');if(!b)return;var me=USER.id,last='';
   b.innerHTML=CH.msgs.length?CH.msgs.map(function(m){var t=m.track?byKey(m.track):null,mine=m.sender===me,d=new Date(m.created_at).toDateString(),sep=d!==last?'<div class="ch-d">'+esc(new Date(m.created_at).toLocaleDateString('ru-RU',{day:'numeric',month:'long'}))+'</div>':'';last=d;
     var vk=m.track&&m.track.indexOf('voice/')===0?m.track:'',mk=m.track&&m.track.indexOf('media/')===0?m.track:'',ck=m.track&&m.track.indexOf('circle/')===0?m.track:'';
     var jk=m.track&&m.track.indexOf('jam/')===0?m.track.slice(4):'',old=Date.now()-new Date(m.created_at).getTime()>6*3600000;
-    return sep+'<div class="cb'+(mine?' me':'')+'" data-mid="'+esc(m.id)+'">'+(jk?'<div class="ch-jm"><b>🎧 Слушаем вместе</b><span>'+(mine?'Вы зовёте в комнату':'Вас зовут в комнату')+' '+esc(jk.toUpperCase())+'</span><button type="button" data-ch="jamgo" data-code="'+esc(jk)+'"'+(old?' disabled':'')+'>'+(old?'Комната закрыта':(JM.code===jk?'Вы уже здесь':'Зайти'))+'</button></div>':'')+(vk?'<audio controls preload="none" src="'+esc(chVoiceUrl(vk))+'"></audio>':'')+(ck?'<video class="ch-cr" data-ch="cirp" playsinline loop preload="metadata" src="'+esc(chVoiceUrl(ck))+'#t=0.1"></video>':'')+(mk?(/\.(mp4|webm|mov|m4v)$/i.test(mk)?'<video controls playsinline preload="metadata" src="'+esc(chVoiceUrl(mk))+'"></video>':'<img class="ch-ph" data-ch="zoom" loading="lazy" alt="Фото" src="'+esc(chVoiceUrl(mk))+'">'):'')+(t?'<button class="ch-tk" data-ch="play" data-k="'+esc(t.key)+'" type="button">'+cv(t)+'<span><b>'+esc(t.t)+'</b><small>'+esc(ad(t))+'</small></span></button>':'')+(m.body&&!vk&&!jk&&!(mk&&/^(📷 Фото|🎬 Видео)$/.test(m.body))&&!ck?'<div>'+esc(m.body)+'</div>':'')+chRxHtml(m.id)+'<small>'+chTime(m.created_at)+'</small></div>'}).join(''):'<div class="empty">Напишите первое сообщение</div>';
-  b.scrollTop=b.scrollHeight}
+    return sep+'<div class="cb'+(mine?' me':'')+'" data-mid="'+esc(m.id)+'">'+(jk?'<div class="ch-jm"><b>🎧 Слушаем вместе</b><span>'+(mine?'Вы зовёте в комнату':'Вас зовут в комнату')+' '+esc(jk.toUpperCase())+'</span><button type="button" data-ch="jamgo" data-code="'+esc(jk)+'"'+(old?' disabled':'')+'>'+(old?'Комната закрыта':(JM.code===jk?'Вы уже здесь':'Зайти'))+'</button></div>':'')+(vk?vmHtml(vk):'')+(ck?'<video class="ch-cr" data-ch="cirp" playsinline loop preload="metadata" src="'+esc(chVoiceUrl(ck))+'#t=0.1"></video>':'')+(mk?(/\.(mp4|webm|mov|m4v)$/i.test(mk)?'<video controls playsinline preload="metadata" src="'+esc(chVoiceUrl(mk))+'"></video>':'<img class="ch-ph" data-ch="zoom" loading="lazy" alt="Фото" src="'+esc(chVoiceUrl(mk))+'">'):'')+(t?'<button class="ch-tk" data-ch="play" data-k="'+esc(t.key)+'" type="button">'+cv(t)+'<span><b>'+esc(t.t)+'</b><small>'+esc(ad(t))+'</small></span></button>':'')+(m.body&&!vk&&!jk&&!(mk&&/^(📷 Фото|🎬 Видео)$/.test(m.body))&&!ck?'<div>'+esc(m.body)+'</div>':'')+chRxHtml(m.id)+'<small>'+chTime(m.created_at)+'</small></div>'}).join(''):'<div class="empty">Напишите первое сообщение</div>';
+  b.scrollTop=b.scrollHeight;vmSync()}
 function chAtt(){var a=$('chA');if(!a)return;var t=CH.att?byKey(CH.att):null;a.innerHTML=t?'<span class="ch-chip">🎵 '+esc(t.t)+' · '+esc(ad(t))+'<button type="button" data-ch="unatt" aria-label="Убрать">'+ic('x')+'</button></span>':''}
 function chSend(){
   var i=$('chI'),v=i.value.trim();if(!v&&!CH.att)return;var row={recipient:CH.peer,body:v};if(CH.att)row.track=CH.att;
@@ -5100,7 +5103,8 @@ function chVoiceUrl(k){try{return SB.storage.from('voice').getPublicUrl(k.replac
 function chVoiceSend(v){
   var ms=Date.now()-v.t0;if(ms<1000){toast('Слишком короткое сообщение');return}
   var ext=/mp4/.test(v.mime)?'m4a':/ogg/.test(v.mime)?'ogg':'webm',blob=new Blob(v.ch,{type:v.mime.split(';')[0]}),
-      path='voice/'+USER.id+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.'+ext;
+      pk=vmLevelEnd(v.lvl),sec=Math.max(1,Math.round(ms/1000)),
+      path='voice/'+USER.id+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'-d'+sec+(pk?'-p'+pk:'')+'.'+ext;
   toast('Отправляю голосовое…');
   SB.storage.from('voice').upload(USER.id+'/'+path.split('/').pop(),blob,{contentType:blob.type,cacheControl:'31536000'}).then(function(r){
     if(r.error){toast(/not found|bucket/i.test(r.error.message||'')?'Голосовые не включены: выполните SQL для голосовых':'Не удалось загрузить голосовое');return}
@@ -5244,9 +5248,10 @@ function holdStart(h){
     try{mr=new MediaRecorder(st,mt?(video?{mimeType:mt,videoBitsPerSecond:700000,audioBitsPerSecond:48000}:{mimeType:mt,audioBitsPerSecond:32000}):undefined)}catch(e){st.getTracks().forEach(function(t){t.stop()});holdUiOff();HOLD=null;toast('Не удалось начать запись');return}
     var R=h.R={mr:mr,st:st,ch:[],t0:Date.now(),peer:h.peer,mime:mr.mimeType||mt||(video?'video/webm':'audio/webm'),send:false,done:false};
     mr.ondataavailable=function(e){if(e.data&&e.data.size)R.ch.push(e.data)};
-    mr.onstop=function(){clearInterval(h.iv);st.getTracks().forEach(function(t){t.stop()});R.done=true;if(R.send){if(video)chCirSend(R);else chVoiceSend(R)}};
+    mr.onstop=function(){clearInterval(h.iv);st.getTracks().forEach(function(t){t.stop()});R.done=true;if(!R.send&&R.lvl)vmLevelEnd(R.lvl);if(R.send){if(video)chCirSend(R);else chVoiceSend(R)}};
     if(video){var pv=document.querySelector('.ch-cpv video');if(pv){pv.muted=true;pv.srcObject=st;pv.play().catch(function(){})}}
     h.iv=setInterval(function(){var s=Math.floor((Date.now()-R.t0)/1000),e=document.getElementById('chHt');if(e)e.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s>=60)holdFinish(true)},250);
+    if(!video)R.lvl=vmLevelStart(st);
     mr.start();
   }).catch(function(){HOLD=null;holdUiOff();toast(video?'Нет доступа к камере или микрофону. Разрешите их для сайта':'Нет доступа к микрофону. Разрешите его для сайта')})}
 function holdUi(h){
@@ -5268,6 +5273,48 @@ function holdFinish(send,swipe){
   R.send=!!send;if(!send)holdVib(15);
   try{if(R.mr.state!=='inactive')R.mr.stop()}catch(e){}}
 function holdAbort(){if(HOLD&&HOLD.R)holdFinish(false);else if(HOLD){clearTimeout(HOLD.tm);HOLD=null}holdUiOff()}
+
+/* ===== плеер голосовых: волна звука, время, скорость ===== */
+var VA=null,VK='',VSP=1,VSPD=[1,1.5,2];
+function vmFmt(t){t=Math.max(0,Math.round(t||0));return Math.floor(t/60)+':'+('0'+t%60).slice(-2)}
+function vmParse(k){var m=/-d(\d+)(?:-p([0-9a-z]+))?\.\w+$/.exec(k)||[];return {d:+m[1]||0,p:m[2]||''}}
+function vmBars(k,p){var n=40,h=[],i;
+  if(p&&p.length>=20){for(i=0;i<p.length;i++)h.push(Math.max(.12,parseInt(p[i],36)/35));return h}
+  var x=0;for(i=0;i<k.length;i++)x=(x*31+k.charCodeAt(i))>>>0;
+  var v=.5;for(i=0;i<n;i++){x=(x*1664525+1013904223)>>>0;v=Math.max(.15,Math.min(1,v+((x/4294967296)-.5)*.7));h.push(v)}return h}
+function vmHtml(k){var q=vmParse(k),h=vmBars(k,q.p);
+  return '<div class="vm" data-vk="'+esc(k)+'" data-d="'+q.d+'"><button class="vp" type="button" data-ch="vplay" aria-label="Слушать">'+ic('play','f')+'</button><div class="vw" data-ch="vseek">'+h.map(function(x){return '<i style="height:'+Math.round(5+x*24)+'px"></i>'}).join('')+'</div><span class="vt">'+(q.d?vmFmt(q.d):'')+'</span><button class="vs" type="button" data-ch="vspd">'+VSP+'×</button></div>'}
+function vmEl(){var a=document.querySelectorAll('.vm'),i;for(i=0;i<a.length;i++)if(a[i].dataset.vk===VK)return a[i];return null}
+function vmPaint(){
+  document.querySelectorAll('.vm').forEach(function(m){
+    var on=m.dataset.vk===VK&&VA,bars=m.querySelectorAll('.vw i'),d=+m.dataset.d||0,pl=on&&!VA.paused,btn=m.querySelector('.vp'),t=m.querySelector('.vt');
+    var dur=on&&isFinite(VA.duration)&&VA.duration>0?VA.duration:d,r=on&&dur?Math.min(1,VA.currentTime/dur):0,k=Math.round(r*bars.length);
+    bars.forEach(function(b,i){b.classList.toggle('on',i<k)});
+    m.classList.toggle('pl',!!pl);
+    var want=pl?'pause':'play';if(btn.dataset.ic!==want){btn.dataset.ic=want;btn.innerHTML=ic(want,'f')}
+    if(t)t.textContent=on&&VA.currentTime>0?vmFmt(VA.currentTime):(d?vmFmt(d):(on&&dur?vmFmt(dur):''));
+    var sp=m.querySelector('.vs');if(sp)sp.textContent=VSP+'×'})}
+function vmSync(){vmPaint()}
+function vmPlay(m){
+  var k=m.dataset.vk;if(!k)return;
+  if(!VA){VA=new Audio();VA.preload='auto';['timeupdate','play','pause','ended','loadedmetadata'].forEach(function(n){VA.addEventListener(n,function(){if(n==='ended'){VA.currentTime=0;VK=VK}vmPaint()})})}
+  if(VK===k){if(VA.paused){VA.play().catch(function(){})}else VA.pause();return}
+  try{if(!audio.paused)audio.pause()}catch(e){}
+  VK=k;VA.src=chVoiceUrl(k);VA.playbackRate=VSP;VA.currentTime=0;VA.play().catch(function(){toast('Не удалось воспроизвести')});vmPaint()}
+function vmSeek(w,e){var m=w.closest('.vm');if(!m||m.dataset.vk!==VK||!VA)return false;
+  var r=w.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),dur=isFinite(VA.duration)&&VA.duration>0?VA.duration:(+m.dataset.d||0);
+  if(!dur)return false;try{VA.currentTime=x*dur}catch(er){}vmPaint();return true}
+function vmSpeed(){VSP=VSPD[(VSPD.indexOf(VSP)+1)%VSPD.length];if(VA)VA.playbackRate=VSP;vmPaint()}
+/* огибающая громкости при записи → 40 столбиков в имя файла */
+function vmLevelStart(st){var o={lv:[],ctx:null,iv:0};
+  try{var AC=window.AudioContext||window.webkitAudioContext,c=new AC(),src=c.createMediaStreamSource(st),an=c.createAnalyser();an.fftSize=512;src.connect(an);o.ctx=c;var buf=new Uint8Array(an.fftSize);
+    o.iv=setInterval(function(){an.getByteTimeDomainData(buf);var s=0,i;for(i=0;i<buf.length;i++){var d=(buf[i]-128)/128;s+=d*d}o.lv.push(Math.sqrt(s/buf.length))},80)}catch(e){}
+  return o}
+function vmLevelEnd(o){if(!o)return '';clearInterval(o.iv);try{o.ctx&&o.ctx.close()}catch(e){}
+  var a=o.lv,n=40,i,j,out='';if(a.length<4)return '';var mx=Math.max.apply(null,a)||1;
+  for(i=0;i<n;i++){var from=Math.floor(i*a.length/n),to=Math.max(from+1,Math.floor((i+1)*a.length/n)),m=0;for(j=from;j<to&&j<a.length;j++)m=Math.max(m,a[j]);
+    out+=Math.max(2,Math.min(35,Math.round(Math.sqrt(m/mx)*35))).toString(36)}
+  return out}
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-ch],[data-chat]');if(!b)return;
   if(b.dataset.chat){chOpen(b.dataset.chat);return}
@@ -5280,6 +5327,7 @@ document.addEventListener('click',function(e){
   else if(a==='jamgo'){var jc=b.dataset.code;if(JM.code===jc){toast('Вы уже в этой комнате');return}jamJoin(jc,false);setTimeout(chThread,300)}
   else if(a==='rx'){chReact(b.dataset.mid,b.dataset.e)}
   else if(a==='zoom'){var z=document.createElement('div');z.className='ch-zoom';z.innerHTML='<img src="'+esc(b.src)+'" alt="">';z.onclick=function(){z.remove()};document.body.appendChild(z)}
+  else if(a==='vplay')vmPlay(b.closest('.vm'));else if(a==='vseek'){if(!vmSeek(b,e))vmPlay(b.closest('.vm'))}else if(a==='vspd')vmSpeed();
   else if(a==='hsend')holdFinish(true);else if(a==='hcancel')holdFinish(false)
   else if(a==='play'){var x=byKey(b.dataset.k);if(x){chClose();playId(x.id,[x.id])}else toast('Этого трека нет в вашей библиотеке')}
   else if(a==='push'){try{var rq=Notification.requestPermission(function(){});var fin=function(p){pushSetup();accPaint();toast(p==='granted'?'Уведомления включены':'Уведомления не разрешены')};if(rq&&rq.then)rq.then(fin);else fin(Notification.permission)}catch(e){toast('Не удалось включить уведомления')}}
