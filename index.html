@@ -1220,7 +1220,8 @@ body.noanim .wc>*{opacity:1;transform:none}
 @keyframes chflip{0%{transform:rotateY(90deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}@keyframes chpulse{70%{box-shadow:0 0 0 14px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
 .ch-hb{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 70px 10px 16px;background:var(--bg);border-top:1px solid var(--line);height:calc(62px + env(safe-area-inset-bottom));padding-bottom:calc(10px + env(safe-area-inset-bottom));animation:chin .2s}.ch-hb i.dot{width:12px;height:12px;border-radius:50%;background:#e5484d;animation:chrec 1s infinite;flex:none}.ch-hb b{font-variant-numeric:tabular-nums;min-width:42px}.ch-hb .sl{flex:1;text-align:center;font-size:14px;opacity:.7;white-space:nowrap;transition:opacity .1s}.ch-hb button.bx{padding:8px 14px;border-radius:99px;border:1px solid var(--line);color:var(--text)}.ch-hb button.bs{padding:8px 16px;border-radius:99px;background:var(--acc);color:var(--on);font-weight:600}
 .ch-lk{position:absolute;right:6px;bottom:calc(100% + 14px);width:44px;padding:10px 0 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:16px;z-index:6;animation:chin .25s;transition:transform .08s}.ch-lk small{font-size:11px;opacity:.6;animation:chup 1s infinite}
-.ch-cpv{position:fixed;left:50%;top:38%;width:min(64vw,260px);height:min(64vw,260px);margin:calc(min(64vw,260px)/-2) 0 0 calc(min(64vw,260px)/-2);z-index:118;border-radius:50%;overflow:hidden;box-shadow:0 0 0 4px #e5484d,0 12px 50px rgba(0,0,0,.6);background:#222;animation:chpop .25s cubic-bezier(.3,1.5,.5,1)}.ch-cpv video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.ch-dim{position:fixed;inset:0;z-index:117;background:rgba(0,0,0,.55);animation:chfade .2s}
+.ch-cpv{pointer-events:none;position:fixed;left:50%;top:38%;width:min(64vw,260px);height:min(64vw,260px);margin:calc(min(64vw,260px)/-2) 0 0 calc(min(64vw,260px)/-2);z-index:118;border-radius:50%;overflow:hidden;box-shadow:0 0 0 4px #e5484d,0 12px 50px rgba(0,0,0,.6);background:#222;animation:chpop .25s cubic-bezier(.3,1.5,.5,1)}.ch-cpv video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.ch-dim{position:fixed;inset:0;z-index:117;background:rgba(0,0,0,.55);animation:chfade .2s;pointer-events:none;transition:background .2s}.ch-dim.sf{background:#fff}
+.ch-cpv.bk video{transform:none}.ch-cpc{position:fixed;left:0;right:0;top:calc(38% + min(32vw,130px) + 20px);z-index:119;display:flex;gap:18px;justify-content:center}.ch-cpc button{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}.ch-cpc button.on{background:#fff;color:#111}.ch-cpc .i{width:24px;height:24px}
 @keyframes chin{from{opacity:0;transform:translateY(12px)}}@keyframes chup{50%{transform:translateY(-4px)}}@keyframes chpop{from{transform:scale(.3);opacity:0}}@keyframes chfade{from{opacity:0}}@keyframes chcancel{to{transform:translateX(-60px) scale(.2);opacity:0}}
 .ch-f{position:relative}.ch-pm{position:absolute;left:12px;bottom:calc(100% + 6px);z-index:3;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;flex-direction:column;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,.35)}.ch-pm button{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;text-align:left;color:var(--text);font-size:15px}.ch-pm button:active{background:var(--line)}.ch-pm .i{width:18px;height:18px}
 .cb{position:relative}.ch-jm{display:flex;flex-direction:column;gap:8px;min-width:190px}.ch-jm b{font-size:15px}.ch-jm button{padding:9px 14px;border-radius:99px;background:var(--text);color:var(--bg);font-weight:600}.ch-jm button[disabled]{opacity:.45}.cb.me .ch-jm button{background:var(--on);color:var(--acc)}
@@ -1299,6 +1300,7 @@ body.noanim .wc>*{opacity:1;transform:none}
 <symbol id="i-img" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9h.01"/></symbol>
 <symbol id="i-cam" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></symbol>
 <symbol id="i-video" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
 <symbol id="i-flip" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></symbol>
 <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
 <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
@@ -3098,7 +3100,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=69;
+var APP_VER='7.0',APP_BUILD=70;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -5497,26 +5499,51 @@ function holdStart(h){
   var video=h.kind==='circle';
   if(!navigator.mediaDevices||!window.MediaRecorder){HOLD=null;toast('Этот браузер не умеет записывать звук и видео');return}
   holdUi(h);holdVib(25);
-  navigator.mediaDevices.getUserMedia(video?{video:{facingMode:'user',width:{ideal:480},height:{ideal:480}},audio:true}:{audio:true}).then(function(st){
-    if(HOLD!==h){st.getTracks().forEach(function(t){t.stop()});return}
+  navigator.mediaDevices.getUserMedia(video?{video:{facingMode:'user',width:{ideal:480},height:{ideal:480}},audio:true}:{audio:true}).then(function(cam){
+    if(HOLD!==h){cam.getTracks().forEach(function(t){t.stop()});return}
+    var st=cam;if(video){var cs=holdCanvas(h,cam);if(cs)st=cs}
     var pri=video?['video/webm;codecs=vp8,opus','video/webm','video/mp4']:['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'],
         mt=pri.filter(function(m){return MediaRecorder.isTypeSupported(m)})[0]||'',mr;
-    try{mr=new MediaRecorder(st,mt?(video?{mimeType:mt,videoBitsPerSecond:700000,audioBitsPerSecond:48000}:{mimeType:mt,audioBitsPerSecond:32000}):undefined)}catch(e){st.getTracks().forEach(function(t){t.stop()});holdUiOff();HOLD=null;toast('Не удалось начать запись');return}
+    try{mr=new MediaRecorder(st,mt?(video?{mimeType:mt,videoBitsPerSecond:700000,audioBitsPerSecond:48000}:{mimeType:mt,audioBitsPerSecond:32000}):undefined)}catch(e){st.getTracks().forEach(function(t){t.stop()});holdCamOff(h);holdUiOff();HOLD=null;toast('Не удалось начать запись');return}
     var R=h.R={mr:mr,st:st,ch:[],t0:Date.now(),peer:h.peer,mime:mr.mimeType||mt||(video?'video/webm':'audio/webm'),send:false,done:false};
     mr.ondataavailable=function(e){if(e.data&&e.data.size)R.ch.push(e.data)};
-    mr.onstop=function(){clearInterval(h.iv);st.getTracks().forEach(function(t){t.stop()});R.done=true;if(!R.send&&R.lvl)vmLevelEnd(R.lvl);if(R.send){if(video)chCirSend(R);else chVoiceSend(R)}};
+    mr.onstop=function(){clearInterval(h.iv);st.getTracks().forEach(function(t){t.stop()});holdCamOff(h);R.done=true;if(!R.send&&R.lvl)vmLevelEnd(R.lvl);if(R.send){if(video)chCirSend(R);else chVoiceSend(R)}};
     if(video){var pv=document.querySelector('.ch-cpv video');if(pv){pv.muted=true;pv.srcObject=st;pv.play().catch(function(){})}}
     h.iv=setInterval(function(){var s=Math.floor((Date.now()-R.t0)/1000),e=document.getElementById('chHt');if(e)e.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s>=60)holdFinish(true)},250);
     if(!video)R.lvl=vmLevelStart(st);
     mr.start();
   }).catch(function(){HOLD=null;holdUiOff();toast(video?'Нет доступа к камере или микрофону. Разрешите их для сайта':'Нет доступа к микрофону. Разрешите его для сайта')})}
+/* кружок пишем через canvas: так камеру можно переключать прямо во время записи, а запись не прерывается */
+function holdCanvas(h,cam){
+  var cv=document.createElement('canvas');cv.width=cv.height=480;if(!cv.captureStream)return null;
+  var cx=cv.getContext('2d'),src=document.createElement('video');src.muted=true;src.setAttribute('playsinline','');src.srcObject=new MediaStream(cam.getVideoTracks());src.play().catch(function(){});
+  var c=h.cam={st:cam,src:src,facing:'user',torch:false,busy:0,dead:0,raf:0};
+  (function dr(){if(c.dead)return;var w=src.videoWidth,hh=src.videoHeight;if(w&&hh){var m=Math.min(w,hh);cx.drawImage(src,(w-m)/2,(hh-m)/2,m,m,0,0,480,480)}c.raf=requestAnimationFrame(dr)})();
+  var out=cv.captureStream(30);cam.getAudioTracks().forEach(function(t){out.addTrack(t)});return out}
+function holdCamOff(h){var c=h&&h.cam;if(!c)return;c.dead=1;cancelAnimationFrame(c.raf);try{c.st.getTracks().forEach(function(t){t.stop()})}catch(e){}try{c.src.srcObject=null}catch(e){}h.cam=null}
+function holdCtlPaint(){var c=HOLD&&HOLD.cam,f=document.querySelector('.ch-cpc [data-ch="hflash"]'),pv=document.querySelector('.ch-cpv'),d=document.querySelector('.ch-dim');if(!c)return;
+  if(pv)pv.classList.toggle('bk',c.facing==='environment');if(f)f.classList.toggle('on',!!c.torch);if(d)d.classList.toggle('sf',c.facing==='user'&&!!c.torch)}
+function holdFlip(){var h=HOLD,c=h&&h.cam;if(!c||c.busy)return;c.busy=1;
+  var old=c.st.getVideoTracks()[0],nf=c.facing==='user'?'environment':'user',cur=c.facing;
+  c.torch=false;if(old){try{old.applyConstraints({advanced:[{torch:false}]}).catch(function(){})}catch(e){}old.stop()}
+  var get=function(f){return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:f},width:{ideal:480},height:{ideal:480}}})};
+  get(nf).catch(function(){nf=cur;return get(nf)}).then(function(s){
+    var nt=s.getVideoTracks()[0];if(HOLD!==h||!h.cam){nt.stop();return}
+    try{if(old)c.st.removeTrack(old)}catch(e){}c.st.addTrack(nt);c.src.srcObject=new MediaStream([nt]);c.src.play().catch(function(){});c.facing=nf;holdCtlPaint()
+  }).catch(function(){toast('Не удалось переключить камеру')}).then(function(){c.busy=0})}
+function holdFlash(){var h=HOLD,c=h&&h.cam;if(!c)return;
+  if(c.facing==='user'){c.torch=!c.torch;holdCtlPaint();return}
+  var t=c.st.getVideoTracks()[0],caps=t&&t.getCapabilities?t.getCapabilities():{};
+  if(!caps||!caps.torch){toast('На этом телефоне вспышка недоступна');return}
+  var on=!c.torch;t.applyConstraints({advanced:[{torch:on}]}).then(function(){c.torch=on;holdCtlPaint()}).catch(function(){toast('Не удалось включить вспышку')})}
 function holdUi(h){
   var f=$('chF');if(!f)return;var b=$('chRb');if(b)b.classList.add('hot');
   var bar=document.createElement('div');bar.className='ch-hb';bar.innerHTML='<i class="dot"></i><b id="chHt">0:00</b><span class="sl">‹ Влево — отмена</span>';f.appendChild(bar);
   var lk=document.createElement('div');lk.className='ch-lk';lk.innerHTML='<span>🔒</span><small>▲</small>';f.appendChild(lk);
   if(h.kind==='circle'){var d=document.createElement('div');d.className='ch-dim';document.body.appendChild(d);var c=document.createElement('div');c.className='ch-cpv';c.innerHTML='<video playsinline muted></video>';document.body.appendChild(c)}}
-function holdUiOff(){['.ch-hb','.ch-lk','.ch-cpv','.ch-dim'].forEach(function(q){document.querySelectorAll(q).forEach(function(x){x.remove()})});var b=$('chRb');if(b){b.classList.remove('hot');b.style.translate='';b.style.visibility=''}}
+function holdUiOff(){['.ch-hb','.ch-lk','.ch-cpv','.ch-dim','.ch-cpc'].forEach(function(q){document.querySelectorAll(q).forEach(function(x){x.remove()})});var b=$('chRb');if(b){b.classList.remove('hot');b.style.translate='';b.style.visibility=''}}
 function holdLockUi(){
+  if(HOLD&&HOLD.kind==='circle'&&!document.querySelector('.ch-cpc'))document.body.insertAdjacentHTML('beforeend','<div class="ch-cpc"><button type="button" data-ch="hflip" aria-label="Переключить камеру">'+ic('flip')+'</button><button type="button" data-ch="hflash" aria-label="Вспышка">'+ic('bolt')+'</button></div>');
   var bar=document.querySelector('.ch-hb'),lk=document.querySelector('.ch-lk');if(lk)lk.remove();
   var b=$('chRb');if(b){b.classList.remove('hot');b.style.translate='';b.style.visibility='hidden'}
   if(bar){var t=document.getElementById('chHt').textContent;bar.style.paddingRight='16px';bar.innerHTML='<button class="bx" type="button" data-ch="hcancel">Отмена</button><i class="dot"></i><b id="chHt">'+t+'</b><span class="sl"></span><button class="bs" type="button" data-ch="hsend">Отправить</button>'}}
@@ -5585,6 +5612,8 @@ document.addEventListener('click',function(e){
   else if(a==='zoom'){var z=document.createElement('div');z.className='ch-zoom';z.innerHTML='<img src="'+esc(b.src)+'" alt="">';z.onclick=function(){z.remove()};document.body.appendChild(z)}
   else if(a==='vplay')vmPlay(b.closest('.vm'));else if(a==='vseek'){if(!vmSeek(b,e))vmPlay(b.closest('.vm'))}else if(a==='vspd')vmSpeed();
   else if(a==='hsend')holdFinish(true);else if(a==='hcancel')holdFinish(false)
+  else if(a==='hflip')holdFlip()
+  else if(a==='hflash')holdFlash()
   else if(a==='play'){var x=byKey(b.dataset.k);if(x){chClose();playId(x.id,[x.id])}else toast('Этого трека нет в вашей библиотеке')}
   else if(a==='push'){try{var rq=Notification.requestPermission(function(){});var fin=function(p){pushSetup();accPaint();toast(p==='granted'?'Уведомления включены':'Уведомления не разрешены')};if(rq&&rq.then)rq.then(fin);else fin(Notification.permission)}catch(e){toast('Не удалось включить уведомления')}}
   else if(a==='open')chOpen()});
