@@ -1175,7 +1175,8 @@ body.noanim .wc>*{opacity:1;transform:none}
 .cl-bt button.end .i{background:#e5484d;color:#fff;transform:rotate(135deg)}
 .cl-bt button.ok .i{background:#30a46c;color:#fff}
 .cl-bt small{opacity:.85}
-.callui:not(.vid) [data-cl="cam"],.callui:not(.vid) [data-cl="flip"]{display:none}
+.callui:not(.vid) [data-cl="flip"]{display:none}
+.callui:not(.vid) .cl-bt{gap:22px}
 .callui:not(.spk) [data-cl="spk"]{display:none}
 .callui.vid .cl-bt{gap:8px}.callui.vid .cl-bt button .i{padding:14px}
 #clRv,#clLv{position:absolute;object-fit:cover;background:#000;display:none}
@@ -3097,7 +3098,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=67;
+var APP_VER='7.0',APP_BUILD=68;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -5597,7 +5598,7 @@ function callTx(uid){var o=CALL.tx[uid];if(o)return o.p;
 function callSend(uid,ev,pl){if(!SB||!uid)return;callTx(uid).then(function(ch){ch.send({type:'broadcast',event:ev,payload:pl})}).catch(function(){})}
 function callRxStart(){if(!SB||!USER||!SB.channel)return;if(CALL.rt&&CALL.rtUid===USER.id)return;callRxStop();
   var uid=USER.id,ch=SB.channel('sl-call-'+uid);
-  ['offer','answer','ice','hangup','busy','decline','poll','cam'].forEach(function(ev){ch.on('broadcast',{event:ev},function(m){callOn(ev,(m&&m.payload)||{})})});
+  ['offer','answer','ice','hangup','busy','decline','poll','cam','reoffer','reanswer'].forEach(function(ev){ch.on('broadcast',{event:ev},function(m){callOn(ev,(m&&m.payload)||{})})});
   CALL.rt=ch;CALL.rtUid=uid;ch.subscribe(function(s){if(s==='SUBSCRIBED')callPoll(uid)})}
 function callRxStop(){var c=CALL.rt;CALL.rt=null;CALL.rtUid='';CALL.polled='';if(c){try{SB.removeChannel(c)}catch(e){}}
   Object.keys(CALL.tx).forEach(function(k){try{SB.removeChannel(CALL.tx[k].ch)}catch(e){}});CALL.tx={}}
@@ -5618,6 +5619,8 @@ function callOn(ev,p){
     CALL.pc.setRemoteDescription({type:'answer',sdp:p.sdp}).then(callFlush).catch(function(){toast('Не удалось соединиться');callHang('fail',true)})}
   else if(ev==='ice'){if(CALL.pc&&CALL.pc.remoteDescription)CALL.pc.addIceCandidate(p.c).catch(function(){});else CALL.iceQ.push(p.c)}
   else if(ev==='cam'){CALL.rcam=!!p.on;callUiPaint()}
+  else if(ev==='reoffer')callReOffer(p);
+  else if(ev==='reanswer'){var q=CALL.pc;if(q&&q.signalingState==='have-local-offer')q.setRemoteDescription({type:'answer',sdp:p.sdp}).catch(function(){})}
   else if(ev==='hangup'){if(CALL.dir==='in'&&CALL.st==='in'){toast('Пропущенный звонок');callFinish('miss')}else callFinish(CALL.t0?'ok':'miss')}
   else if(ev==='busy')callFinish('busy','Занято');
   else if(ev==='decline')callFinish('decline','Отклонил(а) звонок')}
@@ -5629,7 +5632,7 @@ function callMedia(video){var au={echoCancellation:true,noiseSuppression:true,au
 function callPause(){try{if(!audio.paused)audio.pause()}catch(e){}}
 function callPc(){var pc=new RTCPeerConnection({iceServers:CALL_ICE});CALL.pc=pc;
   pc.onicecandidate=function(e){if(!e.candidate||CALL.pc!==pc)return;var c=e.candidate.toJSON?e.candidate.toJSON():e.candidate;CALL.iceOut.push(c);callSend(CALL.peer,'ice',{cid:CALL.cid,from:CALL.me,c:c})};
-  pc.ontrack=function(e){CALL.rs=(e.streams&&e.streams[0])||new MediaStream([e.track]);var a=$('callAud'),v=$('clRv');
+  pc.ontrack=function(e){CALL.rs=(e.streams&&e.streams[0])||new MediaStream([e.track]);if(e.track.kind==='video')CALL.video=true;var a=$('callAud'),v=$('clRv');
     if(a){if(a.srcObject!==CALL.rs)a.srcObject=CALL.rs;var pr=a.play();if(pr&&pr.catch)pr.catch(function(){})}
     if(v){v.muted=true;if(v.srcObject!==CALL.rs)v.srcObject=CALL.rs;var p2=v.play();if(p2&&p2.catch)p2.catch(function(){})}
     callUiPaint()};
@@ -5730,7 +5733,20 @@ function callSpk(){var on=!CALL.spkOn,a=$('callAud'),bad=function(){toast('На 
         er=o.filter(function(d){return ear.test(d.label)})[0],sp=o.filter(function(d){return !ear.test(d.label)&&d.deviceId!=='communications'})[0];
     var t=on?sp:er;if(!t||o.length<2){bad();return}
     return a.setSinkId(t.deviceId).then(function(){CALL.spkOn=on;callUiPaint()})}).catch(bad)}
-function callCam(){if(!CALL.ls)return;if(!CALL.hasCam){toast('Камера недоступна');return}
+/* видео посреди голосового звонка: добавляем видеотрек и пересогласовываем соединение (reoffer/reanswer), новый звонок не нужен */
+function callAddVideo(){if(CALL.addCam||!CALL.pc||!CALL.ls||CALL.st!=='live')return;
+  var pc=CALL.pc,cid=CALL.cid;CALL.addCam=1;
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}}}).then(function(s){
+    var t=s.getVideoTracks()[0];if(CALL.cid!==cid||CALL.pc!==pc||!CALL.ls){t.stop();return}
+    CALL.ls.addTrack(t);pc.addTrack(t,CALL.ls);CALL.hasCam=true;CALL.camOff=false;CALL.video=true;CALL.facing='user';callUiPaint();
+    return pc.createOffer().then(function(o){return pc.setLocalDescription(o)}).then(function(){callSend(CALL.peer,'reoffer',{cid:cid,from:CALL.me,sdp:pc.localDescription.sdp})})
+  }).catch(function(e){var d=e&&/denied|permission|notallowed/i.test((e.name||'')+(e.message||''));toast(d?'Разрешите камеру для сайта':'Не удалось включить камеру')}).then(function(){CALL.addCam=0})}
+/* пришло предложение с видео. Если оба включили камеру одновременно, уступает тот, кто отвечал на звонок */
+function callReOffer(p){var pc=CALL.pc;if(!pc||!p.sdp)return;
+  if(pc.signalingState!=='stable'&&CALL.dir==='out')return;
+  pc.setRemoteDescription({type:'offer',sdp:p.sdp}).then(function(){return pc.createAnswer()}).then(function(a){return pc.setLocalDescription(a)}).then(function(){
+    callSend(CALL.peer,'reanswer',{cid:CALL.cid,from:CALL.me,sdp:pc.localDescription.sdp});callUiPaint()}).catch(function(){})}
+function callCam(){if(!CALL.ls)return;if(!CALL.hasCam){if(CALL.st==='live')callAddVideo();else toast('Камера включится, когда соединимся');return}
   CALL.camOff=!CALL.camOff;CALL.ls.getVideoTracks().forEach(function(t){t.enabled=!CALL.camOff});callSend(CALL.peer,'cam',{cid:CALL.cid,from:CALL.me,on:!CALL.camOff});callUiPaint()}
 /* фронтальная/тыловая камера: новый трек подставляем в идущее соединение (replaceTrack), звонок не прерывается */
 function callFlip(){if(!CALL.ls||!CALL.pc||!CALL.hasCam||CALL.flipping)return;
