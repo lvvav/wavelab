@@ -3065,7 +3065,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=61;
+var APP_VER='7.0',APP_BUILD=62;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -4639,11 +4639,12 @@ function stuOpen(t){
   if(!navigator.mediaDevices||!window.MediaRecorder){toast('Этот браузер не умеет записывать звук');return}
   try{audio.pause()}catch(e){}
   stuClose(true);
-  STU={t:t,st:'idle',vb:null,bb:null,ctx:null,G:null,rec:null,play:null,mp3:null};STUP.sync=0;
+  STU={t:t,st:'idle',vb:null,bb:null,bbS:'load',ctx:null,G:null,rec:null,play:null,mp3:null};STUP.sync=0;
   var el=document.getElementById('stu');if(!el){el=document.createElement('div');el.id='stu';el.className='stu';document.body.appendChild(el)}
   el.classList.add('on');stuPaint();
   /* оригинал заранее скачиваем в память, чтобы смешать с голосом */
-  STU.bbP=fetch(t.src).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(a){var C=window.AudioContext||window.webkitAudioContext,c=new C();return c.decodeAudioData(a).then(function(b){try{c.close()}catch(e){}return b})}).then(function(b){if(STU&&STU.t===t)STU.bb=b;return b}).catch(function(){return null})}
+  var ab=window.AbortController?new AbortController():null;if(ab)setTimeout(function(){ab.abort()},90000);
+  STU.bbP=fetch(t.src,ab?{signal:ab.signal}:undefined).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(a){var C=window.AudioContext||window.webkitAudioContext,c=new C();return c.decodeAudioData(a).then(function(b){try{c.close()}catch(e){}return b})}).then(function(b){if(STU&&STU.t===t){STU.bb=b;STU.bbS='ok';if(STU.st==='rev'&&!STU.play)stuPaint()}return b}).catch(function(){if(STU&&STU.t===t){STU.bbS='fail';if(STU.st==='rev'&&!STU.play)stuPaint()}return null})}
 function stuCtx(){if(!STU.ctx){var C=window.AudioContext||window.webkitAudioContext;STU.ctx=new C()}if(STU.ctx.state==='suspended')STU.ctx.resume();return STU.ctx}
 function stuClose(quiet){
   var el=document.getElementById('stu');
@@ -4658,6 +4659,7 @@ function stuPaint(){
       '<div class="stu-r"><span>Громкость оригинала</span><input type="range" min="0" max="100" value="'+Math.round(STUP.back*100)+'" data-stu="bk"><em>'+Math.round(STUP.back*100)+'%</em></div>'+
       '<button class="stu-big" type="button" data-stu="rec" aria-label="Начать запись">'+ic('mic')+'</button><div style="text-align:center;opacity:.65;font-size:14px">Нажмите, чтобы начать запись</div>'+
       '<button class="stu-lk" type="button" data-stu="file">Загрузить своё (готовый файл)</button>'}
+  else if(STU.st==='proc'){h+='<div class="stu-n" style="text-align:center"><b>⏳ Обработка записи…</b>Секунду, готовлю звук</div>'}
   else if(STU.st==='rec'){
     h+='<div class="stu-t" id="stuT">0:00</div><div class="stu-m"><i id="stuM"></i></div><button class="stu-big rec" type="button" data-stu="stop" aria-label="Остановить"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg></button><div style="text-align:center;opacity:.65;font-size:14px">Идёт запись. Нажмите, чтобы закончить</div>'}
   else{
@@ -4665,8 +4667,8 @@ function stuPaint(){
       '<div class="stu-ks">'+STU_KN.map(function(x){return stuKnob(x[0],x[1])}).join('')+'</div>'+
       '<div class="stu-tg"><button type="button" data-tg="radio" class="'+(STUP.radio?'on':'')+'">📻 Радио</button><button type="button" data-tg="bass" class="'+(STUP.bass?'on':'')+'">🔊 Бас+</button></div>'+
       '<div class="stu-r"><span>Синхрон голоса</span><input type="range" min="-300" max="300" step="10" value="'+STUP.sync+'" data-stu="sy"><em id="stuSy">'+(STUP.sync>0?'+':'')+STUP.sync+' мс</em></div>'+
-      (STU.bb?'':'<div class="stu-n">Оригинал не удалось загрузить, кавер будет только с голосом.</div>')+
-      '<div class="stu-bt"><button type="button" data-stu="again">Записать заново</button><button type="button" data-stu="dl">Скачать</button><button type="button" class="pri" data-stu="up" style="grid-column:1/3">Выложить кавер на сайт</button></div>'+
+      (STU.bbS==='load'?'<div class="stu-n"><b>⏳ Загружаю оригинал…</b>Пока он не загрузился, прослушивание и сохранение недоступны. Можно настроить эффекты.</div>':STU.bb?'':'<div class="stu-n">Оригинал не удалось загрузить, кавер будет только с голосом.</div>')+
+      '<div class="stu-bt"><button type="button" data-stu="again">Записать заново</button><button type="button" data-stu="dl"'+(STU.bbS==='load'?' disabled':'')+'>Скачать</button><button type="button" class="pri" data-stu="up" style="grid-column:1/3"'+(STU.bbS==='load'?' disabled':'')+'>Выложить кавер на сайт</button></div>'+
       '<button class="stu-lk" type="button" data-stu="file">Загрузить своё (готовый файл)</button>'}
   h+='</div>';el.innerHTML=h}
 function stuKnobPaint(k){var e=document.querySelector('.stu .kn[data-k="'+k+'"]');if(!e)return;e.querySelector('i').style.transform='rotate('+(-135+STUP[k]*270)+'deg)';e.querySelector('span').textContent=Math.round(STUP[k]*100)+'%'}
@@ -4690,14 +4692,14 @@ function stuRecStart(){
 function stuRecStop(){var R=STU&&STU.rec;if(!R||R.mr.state==='inactive')return;if(Date.now()-R.t0<1500){toast('Слишком коротко: спойте хотя бы пару секунд');R.cancel=true;try{R.mr.stop()}catch(e){}STU.rec=null;STU.st='idle';stuPaint();return}
   try{R.mr.stop()}catch(e){}}
 function stuDecode(R){
-  var blob=new Blob(R.ch,{type:(R.mr.mimeType||'audio/webm').split(';')[0]});toast('Обрабатываю запись…');
+  var blob=new Blob(R.ch,{type:(R.mr.mimeType||'audio/webm').split(';')[0]});STU.st='proc';STU.rec=null;stuPaint();
   blob.arrayBuffer().then(function(a){return stuCtx().decodeAudioData(a)}).then(function(vb){
-    if(!STU)return;STU.vb=vb;STU.st='rev';STU.rec=null;return STU.bbP.then(function(){if(STU)stuPaint()})
+    if(!STU)return;STU.vb=vb;STU.st='rev';STU.rec=null;stuPaint()
   }).catch(function(){toast('Не удалось обработать запись');if(STU){STU.st='idle';STU.rec=null;stuPaint()}})}
 function stuStopPlay(){var P=STU&&STU.play;if(!P)return;STU.play=null;cancelAnimationFrame(P.raf);try{P.G.vs.onended=null;P.G.vs.stop()}catch(e){}try{P.G.bsr&&P.G.bsr.stop()}catch(e){}
   var b=document.getElementById('stuPl');if(b)b.innerHTML=ic('play','f')}
 function stuTogglePlay(){
-  if(!STU||!STU.vb)return;if(STU.play){stuStopPlay();return}
+  if(!STU||!STU.vb)return;if(STU.bbS==='load'&&!STU.play){toast('Оригинал ещё загружается');return}if(STU.play){stuStopPlay();return}
   var ctx=stuCtx(),G=stuGraph(ctx,ctx.destination,STU.vb,STU.bb);G.start(STUP,0);var st=ctx.currentTime,dur=STU.vb.duration,P={G:G,st:st,raf:0};STU.play=P;
   G.vs.onended=function(){if(STU&&STU.play===P){stuStopPlay();var pr=document.getElementById('stuPr');if(pr)pr.style.width='0%';var pt=document.getElementById('stuPt');if(pt)pt.textContent='0:00 / '+stuFmt(dur)}};
   var b=document.getElementById('stuPl');if(b)b.innerHTML=ic('pause','f');
@@ -4725,9 +4727,9 @@ function stuMake(){
   stuStopPlay();toast('Собираю файл…');var sig=JSON.stringify(STUP);
   return stuRender().then(function(buf){return stuLame().then(function(ok){return ok?stuMp3(buf):stuWav(buf)})}).then(function(b){STU.mp3={blob:b,sig:sig,ext:b.type==='audio/mpeg'?'mp3':'wav'};return STU.mp3})}
 function stuName(){return 'Кавер на '+STU.t.t}
-function stuDownload(){stuMake().then(function(m){var a=document.createElement('a');a.href=URL.createObjectURL(m.blob);a.download=stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);toast('Файл сохранён')}).catch(function(){toast('Не удалось собрать файл')})}
+function stuDownload(){if(STU.bbS==='load'){toast('Оригинал ещё загружается');return}stuMake().then(function(m){var a=document.createElement('a');a.href=URL.createObjectURL(m.blob);a.download=stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);toast('Файл сохранён')}).catch(function(){toast('Не удалось собрать файл')})}
 function stuUpload(){
-  if(!SB||!USER){needLogin();return}
+  if(!SB||!USER){needLogin();return}if(STU.bbS==='load'){toast('Оригинал ещё загружается');return}
   stuMake().then(function(m){var f=new File([m.blob],stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext,{type:m.blob.type});covUpload(STU.t,f)}).catch(function(){toast('Не удалось собрать файл')})}
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-stu],[data-tg]');if(!b||!STU)return;
