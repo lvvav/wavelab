@@ -1,0 +1,17 @@
+name: Deploy turn-creds
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, calls-video-mid-call]
+    paths: ['supabase/functions/turn-creds/**', '.github/workflows/deploy-turn.yml']
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase functions deploy turn-creds --project-ref zpmzqgxwqoisfvahfhqc
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
