@@ -236,6 +236,7 @@ body.noblur .np-bg{display:none}
 .hub-r b{display:block;font-size:15px;font-weight:600}
 .hub-r small{display:block;color:var(--mut);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hub-r .ch{color:var(--mut);transform:rotate(180deg);width:16px;height:16px;flex:none}
+.np-up[hidden]{display:none}.cov-r{position:relative}.cov-x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--text);opacity:.55}.cov-add{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;margin-top:6px;border-radius:12px;border:1px dashed var(--line);color:var(--text);font-size:14px;opacity:.85}.cov-add .i{width:18px;height:18px}
 .hub-out{margin-top:18px;width:100%;justify-content:center}.hub-ver{display:block;width:100%;margin:26px 0 8px;padding:8px;font-size:11px;letter-spacing:.02em;text-align:center;color:inherit;opacity:.32;background:none;border:0}
 @media(max-width:860px){#set .sheet{top:0;max-height:none;height:100%;border:0;border-radius:0}}
 .sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:22px 0 10px}
@@ -1414,6 +1415,7 @@ body.noanim .wc>*{opacity:1;transform:none}
     <div class="mc" id="npMc" hidden><h3 id="npMcT"></h3><div class="mcr" id="npMcR"></div></div>
     <div class="np-up"><h3>О треке</h3><div id="npInfo"></div></div>
     <div class="np-up"><h3>Далее</h3><div id="npUp"></div></div>
+    <div class="np-up" id="npCovBox" hidden><h3>Каверы</h3><div id="npCov"></div></div>
     <div class="np-up"><h3>Похожее</h3><div id="npSim"></div></div>
   </div>
 </div>
@@ -3050,7 +3052,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=58;
+var APP_VER='7.0',APP_BUILD=59;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3943,7 +3945,7 @@ function renderMenu(mode){if(mnKind!=='tr')return renderMenuX(mode);var t=TRACKS
   var h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv(t)+'<div><div class="tt">'+esc(t.t)+'</div><div class="ar">'+esc(ad(t))+'</div></div></div>';
   if(mode==='pl')h+=mi('back','down','Назад')+mi('newpl','plus','Новый плейлист')+PL.map(function(p){var has=p.k.indexOf(t.key)>-1;return mi('addpl',has?'check':'list',esc(p.n)+(has?' — уже добавлен':''),p.id)}).join('');
   else if(t.mine){var fv0=favs.indexOf(t.key)>-1;h+=mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+'<button class="mi'+(fv0?' on':'')+'" data-m="fav" type="button">'+(fv0?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv0?'Убрать из избранного':'В избранное')+'</button>'+mi('pl','plus','Добавить в плейлист')+mi('mydel','x','Удалить из моих файлов')}
-  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
+  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(SB&&!t.pv?mi('cover','mic','Выложить кавер'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
   $('mnBody').innerHTML=h}
 function openMenuX(kind,key){mnKind=kind;mnKey=key;mnId=-1;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
 function openMenu(id){mnKind='tr';mnId=id;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
@@ -3963,6 +3965,7 @@ $('mnBody').onclick=function(e){var b=e.target.closest('[data-m]');if(!b)return;
   closeMenu();
   if(m==='mydel'){myRemove(t)}
   else if(m==='radio'){radioStart(t)}
+  else if(m==='cover'){covPick(t)}
   else if(m==='next'){queue.unshift(mnId);toast('Сыграет следующим');renderNav()}
   else if(m==='q'){queue.push(mnId);toast('Добавлено в очередь');renderNav()}
   else if(m==='alb'){view='album';albK=((t.aa||t.a)+'|'+t.al).toLowerCase();genre='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
@@ -4545,6 +4548,54 @@ function renderSim(){
   $('npSim').innerHTML=l.length?l.map(function(id){var x=TRACKS[id];return '<div class="up" data-id="'+id+'">'+cv(x)+'<div><div class="tt">'+esc(x.t)+'</div><div class="ar">'+esc(x.a)+'</div></div></div>'}).join(''):'<div class="np-empty">Пока нечего предложить</div>';
 }
 $('npSim').onclick=function(e){var r=e.target.closest('.up');if(r)playId(+r.dataset.id)};
+/* ===== каверы: чужие и свои версии песни, файлы лежат в Supabase Storage (bucket covers), записи в таблице covers ===== */
+var COV={key:'',list:[],tok:0,nosql:false};
+function covOk(t){return !!(SB&&t&&t.key&&!t.pv&&!t.mine&&!t.dup)}
+function covUrl(path){try{return SB.storage.from('covers').getPublicUrl(path).data.publicUrl}catch(e){return ''}}
+function covRender(){
+  var t=TRACKS[cur],box=$('npCovBox');if(!box)return;
+  if(!covOk(t)||COV.nosql){box.hidden=true;return}
+  box.hidden=false;var tok=++COV.tok;COV.key=t.key;
+  var add='<button class="cov-add" data-cov="add" type="button">'+ic('plus')+'Выложить свой кавер на этот трек</button>';
+  $('npCov').innerHTML='<div class="np-empty">Загрузка…</div>'+add;
+  SB.from('covers').select('id,user_id,orig_key,title,path,dur,created_at').eq('orig_key',t.key).order('created_at',{ascending:false}).limit(20).then(function(r){
+    if(tok!==COV.tok)return;
+    if(r.error){COV.nosql=true;box.hidden=true;return}
+    COV.list=r.data||[];
+    chPeople(COV.list.map(function(c){return c.user_id})).then(function(){
+      if(tok!==COV.tok)return;
+      $('npCov').innerHTML=(COV.list.length?COV.list.map(function(c){var me=USER&&c.user_id===USER.id;
+        return '<div class="up cov-r" data-cv="'+c.id+'">'+cv(t)+'<div><div class="tt">'+esc(c.title)+'</div><div class="ar">'+esc(chName(c.user_id))+(c.dur?' · '+Math.floor(c.dur/60)+':'+('0'+c.dur%60).slice(-2):'')+'</div></div>'+(me?'<button class="cov-x" type="button" data-cov="del" data-id="'+c.id+'" aria-label="Удалить кавер">'+ic('x')+'</button>':'')+'</div>'}).join(''):'<div class="np-empty">Пока нет каверов. Будьте первым</div>')+add})}).catch(function(){})}
+function covPlay(id){
+  var c=COV.list.filter(function(x){return String(x.id)===String(id)})[0],o=byKey(COV.key);if(!c||!o)return;
+  var key='cv:'+c.id,t=TRACKS.filter(function(x){return x.key===key})[0];
+  if(!t){t={id:TRACKS.length,key:key,t:c.title,a:chName(c.user_id),al:'Кавер на «'+o.t+'»',aa:'',img:o.img,src:covUrl(c.path),dur:c.dur||0,q:'Кавер',g:'',y:'',n:0,f:false,pv:true,dup:true,fl:[]};TRACKS.push(t)}
+  playId(t.id,[t.id])}
+function covPick(t){
+  if(!SB||!USER){needLogin();return}
+  if(!covOk(t)){toast('Кавер можно выложить на треки из каталога');return}
+  var i=document.getElementById('covIn');if(!i){i=document.createElement('input');i.type='file';i.id='covIn';i.accept='audio/*,.mp3,.m4a,.flac,.ogg,.opus,.wav,.aac';i.hidden=true;document.body.appendChild(i)}
+  i.value='';i.onchange=function(){var f=i.files&&i.files[0];if(f)covUpload(t,f)};i.click()}
+function covUpload(t,f){
+  if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|flac|ogg|opus|wav|aac)$/i.test(f.name)){toast('Выберите аудиофайл (mp3, m4a, wav…)');return}
+  if(f.size>30*1048576){toast('Файл больше 30 МБ. Выберите поменьше');return}
+  var def=myParse(f.name).t||('Кавер на '+t.t),title=prompt('Название кавера',def);if(title===null)return;title=(title.trim()||def).slice(0,80);
+  toast('Загружаю кавер…');
+  myDur(f,function(d){
+    var ext=(f.name.match(/\.([a-z0-9]{2,5})$/i)||[0,'mp3'])[1].toLowerCase(),name=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.'+ext,path=USER.id+'/'+name;
+    SB.storage.from('covers').upload(path,f,{contentType:f.type||'audio/mpeg',cacheControl:'31536000'}).then(function(r){
+      if(r.error){toast(/not found|bucket/i.test(r.error.message||'')?'Каверы не включены: выполните SQL для каверов':/size|exceed|large/i.test(r.error.message||'')?'Файл слишком большой':'Не удалось загрузить файл');return}
+      return SB.from('covers').insert({orig_key:t.key,title:title,path:path,dur:d||0}).then(function(q){
+        if(q.error){try{SB.storage.from('covers').remove([path])}catch(e){}toast(/relation|exist|schema cache/i.test(q.error.message||'')?'Каверы не включены: выполните SQL для каверов':'Не удалось сохранить кавер');return}
+        toast('Кавер выложен');COV.nosql=false;covRender()})}).catch(function(){toast('Нет связи с сервером')})})}
+document.addEventListener('click',function(e){
+  var r=e.target.closest('#npCov [data-cov],#npCov .up');if(!r)return;
+  var a=r.dataset&&r.dataset.cov;
+  if(a==='add'){covPick(byKey(COV.key));return}
+  if(a==='del'){e.stopPropagation();var id=r.dataset.id,c=COV.list.filter(function(x){return String(x.id)===String(id)})[0];if(!c||!confirm('Удалить кавер «'+c.title+'»?'))return;
+    SB.from('covers').delete().eq('id',c.id).then(function(q){if(q.error){toast('Не удалось удалить');return}try{SB.storage.from('covers').remove([c.path])}catch(x){}toast('Кавер удалён');covRender()});return}
+  var row=e.target.closest('#npCov .up');if(row&&row.dataset.cv)covPlay(row.dataset.cv)});
+var _covSim=renderSim;renderSim=function(){_covSim();covRender()};
 
 /* ===== офлайн и приложение ===== */
 var OFFN='sl-audio',offBusy=false,deferredPrompt=null;
