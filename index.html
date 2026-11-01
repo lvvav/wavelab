@@ -3098,7 +3098,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=68;
+var APP_VER='7.0',APP_BUILD=69;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -5591,12 +5591,19 @@ document.addEventListener('click',function(e){
 /*CALLS-BEGIN*/
 /* ===== звонки (WebRTC): сигнализация через broadcast-канал sl-call-<uid>, запись в чате: messages.track = call/<id> и call/<id>/<итог> ===== */
 var CALL={st:'idle',cid:'',peer:'',dir:'',me:'',pc:null,ls:null,rs:null,iceQ:[],iceOut:[],offerSdp:'',t0:0,tick:null,ringTm:null,dcTm:null,inTm:null,rt:null,rtUid:'',tx:{},ring:null,logged:0,polled:'',muted:false,video:false,hasCam:false,camOff:false,rcam:true,facing:'user',spkOn:false};
-var CALL_ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}];
+var CALL_STUN=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}],CALL_ICE=CALL_STUN,CALL_ICE_AT=0,CALL_ICE_P=null;
+/* TURN: временные данные берём из функции turn-creds в Supabase (ключи только там). Не ответила за 3 сек. или не настроена: остаётся один STUN */
+function callIceLoad(){if(CALL_ICE_AT&&Date.now()-CALL_ICE_AT<50*60000)return Promise.resolve();if(CALL_ICE_P)return CALL_ICE_P;
+  if(typeof CONFIG==='undefined'||!CONFIG.SUPA_URL)return Promise.resolve();
+  var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctl)ctl.abort()},3000);
+  CALL_ICE_P=fetch(CONFIG.SUPA_URL.replace(/\/$/,'')+'/functions/v1/turn-creds',{method:'POST',headers:{'content-type':'application/json',apikey:CONFIG.SUPA_KEY,authorization:'Bearer '+CONFIG.SUPA_KEY},body:'{}',signal:ctl?ctl.signal:undefined})
+    .then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.iceServers&&j.iceServers.length){CALL_ICE=CALL_STUN.concat(j.iceServers);CALL_ICE_AT=Date.now()}}).catch(function(){})
+    .then(function(){clearTimeout(tm);CALL_ICE_P=null});return CALL_ICE_P}
 function callTx(uid){var o=CALL.tx[uid];if(o)return o.p;
   var ch=SB.channel('sl-call-'+uid),p=new Promise(function(res){var done=0;ch.subscribe(function(s){if(s==='SUBSCRIBED'&&!done){done=1;res(ch)}});setTimeout(function(){if(!done){done=1;res(ch)}},4000)});
   CALL.tx[uid]={ch:ch,p:p};return p}
 function callSend(uid,ev,pl){if(!SB||!uid)return;callTx(uid).then(function(ch){ch.send({type:'broadcast',event:ev,payload:pl})}).catch(function(){})}
-function callRxStart(){if(!SB||!USER||!SB.channel)return;if(CALL.rt&&CALL.rtUid===USER.id)return;callRxStop();
+function callRxStart(){if(!SB||!USER||!SB.channel)return;callIceLoad();if(CALL.rt&&CALL.rtUid===USER.id)return;callRxStop();
   var uid=USER.id,ch=SB.channel('sl-call-'+uid);
   ['offer','answer','ice','hangup','busy','decline','poll','cam','reoffer','reanswer'].forEach(function(ev){ch.on('broadcast',{event:ev},function(m){callOn(ev,(m&&m.payload)||{})})});
   CALL.rt=ch;CALL.rtUid=uid;ch.subscribe(function(s){if(s==='SUBSCRIBED')callPoll(uid)})}
@@ -5648,7 +5655,7 @@ function callStart(peer,video){
   callRxStart();var cid=callId();
   CALL.st='ring';CALL.dir='out';CALL.peer=peer;CALL.cid=cid;CALL.me=USER.id;CALL.iceQ=[];CALL.iceOut=[];CALL.logged=0;CALL.t0=0;CALL.muted=false;CALL.offerSdp='';CALL.spkOn=false;CALL.video=!!video;CALL.hasCam=false;CALL.camOff=false;CALL.rcam=true;CALL.facing='user';
   chPeople([peer]).then(callUiPaint);callUiPaint();callPause();
-  callMedia(CALL.video).then(function(s){
+  Promise.all([callMedia(CALL.video),callIceLoad()]).then(function(r){var s=r[0];
     if(CALL.cid!==cid){s.getTracks().forEach(function(t){t.stop()});return}
     CALL.hasCam=s.getVideoTracks().length>0;if(CALL.video&&!CALL.hasCam)CALL.video=false;callUiPaint();
     CALL.ls=s;var pc=callPc();s.getTracks().forEach(function(t){pc.addTrack(t,s)});
@@ -5668,7 +5675,7 @@ function callIncoming(p){
 function callAnswer(){
   if(CALL.st!=='in')return;var cid=CALL.cid,peer=CALL.peer;callRingStop();clearTimeout(CALL.inTm);
   CALL.st='conn';callInHide();callUiPaint();callPause();
-  callMedia(CALL.video).then(function(s){
+  Promise.all([callMedia(CALL.video),callIceLoad()]).then(function(r){var s=r[0];
     if(CALL.cid!==cid){s.getTracks().forEach(function(t){t.stop()});return}
     CALL.hasCam=s.getVideoTracks().length>0;callUiPaint();
     CALL.ls=s;var pc=callPc();s.getTracks().forEach(function(t){pc.addTrack(t,s)});
