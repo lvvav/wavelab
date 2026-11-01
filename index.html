@@ -127,7 +127,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
 .dl:hover{filter:brightness(1.08)}
 .dl.off{opacity:.4;pointer-events:none}
 
-.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,10px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:99px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,10px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:99px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:400;max-width:90vw;text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* телефон и планшет */
@@ -3065,7 +3065,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=62;
+var APP_VER='7.0',APP_BUILD=63;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -4590,18 +4590,20 @@ function covPick(t){
   if(!covOk(t)){toast('Кавер можно выложить на треки из каталога');return}
   var i=document.getElementById('covIn');if(!i){i=document.createElement('input');i.type='file';i.id='covIn';i.accept='audio/*,.mp3,.m4a,.flac,.ogg,.opus,.wav,.aac';i.hidden=true;document.body.appendChild(i)}
   i.value='';i.onchange=function(){var f=i.files&&i.files[0];if(f)covUpload(t,f)};i.click()}
-function covUpload(t,f){
-  if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|flac|ogg|opus|wav|aac)$/i.test(f.name)){toast('Выберите аудиофайл (mp3, m4a, wav…)');return}
-  if(f.size>30*1048576){toast('Файл больше 30 МБ. Выберите поменьше');return}
-  var def=myParse(f.name).t||('Кавер на '+t.t),title=prompt('Название кавера',def);if(title===null)return;title=(title.trim()||def).slice(0,80);
+function covUpload(t,f,title,cb){
+  var done=function(ok){if(cb)cb(ok)};
+  if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|flac|ogg|opus|wav|aac)$/i.test(f.name)){toast('Выберите аудиофайл (mp3, m4a, wav…)');return done(false)}
+  if(f.size>30*1048576){toast('Файл больше 30 МБ. Выберите поменьше');return done(false)}
+  if(title==null){var def=myParse(f.name).t||('Кавер на '+t.t);title=prompt('Название кавера',def);if(title===null)return done(false);title=title.trim()||def}
+  title=String(title).trim().slice(0,80)||('Кавер на '+t.t);
   toast('Загружаю кавер…');
   myDur(f,function(d){
     var ext=(f.name.match(/\.([a-z0-9]{2,5})$/i)||[0,'mp3'])[1].toLowerCase(),name=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.'+ext,path=USER.id+'/'+name;
     SB.storage.from('covers').upload(path,f,{contentType:f.type||'audio/mpeg',cacheControl:'31536000'}).then(function(r){
-      if(r.error){toast(/not found|bucket/i.test(r.error.message||'')?'Каверы не включены: выполните SQL для каверов':/size|exceed|large/i.test(r.error.message||'')?'Файл слишком большой':'Не удалось загрузить файл');return}
+      if(r.error){toast(/not found|bucket/i.test(r.error.message||'')?'Каверы не включены: выполните SQL для каверов':/size|exceed|large/i.test(r.error.message||'')?'Файл слишком большой':'Не удалось загрузить файл: '+(r.error.message||''));return done(false)}
       return SB.from('covers').insert({orig_key:t.key,title:title,path:path,dur:d||0}).then(function(q){
-        if(q.error){try{SB.storage.from('covers').remove([path])}catch(e){}toast(/relation|exist|schema cache/i.test(q.error.message||'')?'Каверы не включены: выполните SQL для каверов':'Не удалось сохранить кавер');return}
-        toast('Кавер выложен');COV.nosql=false;covRender()})}).catch(function(){toast('Нет связи с сервером')})})}
+        if(q.error){try{SB.storage.from('covers').remove([path])}catch(e){}toast(/relation|exist|schema cache/i.test(q.error.message||'')?'Каверы не включены: выполните SQL для каверов':'Не удалось сохранить кавер: '+(q.error.message||''));return done(false)}
+        toast('Кавер выложен');COV.nosql=false;covRender();done(true)})}).catch(function(){toast('Нет связи с сервером');done(false)})})}
 document.addEventListener('click',function(e){
   var r=e.target.closest('#npCov [data-cov],#npCov .up');if(!r)return;
   var a=r.dataset&&r.dataset.cov;
@@ -4653,7 +4655,7 @@ function stuClose(quiet){
   if(el){el.classList.remove('on');if(!quiet)el.innerHTML=''}}
 function stuKnob(k,l){var v=STUP[k];return '<div class="kn" data-k="'+k+'"><div class="kd"><i style="transform:rotate('+(-135+v*270)+'deg)"></i></div><b>'+l+'</b><span>'+Math.round(v*100)+'%</span></div>'}
 function stuPaint(){
-  var el=document.getElementById('stu');if(!el||!STU)return;var t=STU.t,h='<div class="stu-h"><button type="button" data-stu="x" aria-label="Закрыть">'+ic('back')+'</button><b>Студия: '+esc(t.t)+'</b></div><div class="stu-b">';
+  var el=document.getElementById('stu');if(!el||!STU)return;var _ti=document.getElementById('stuTi');if(_ti)STU.title=_ti.value;var t=STU.t,h='<div class="stu-h"><button type="button" data-stu="x" aria-label="Закрыть">'+ic('back')+'</button><b>Студия: '+esc(t.t)+'</b></div><div class="stu-b">';
   if(STU.st==='idle'){
     h+='<div class="stu-n"><b>🎧 Наденьте наушники</b>Оригинал песни будет играть, пока вы поёте. Без наушников микрофон запишет музыку из динамика.</div>'+
       '<div class="stu-r"><span>Громкость оригинала</span><input type="range" min="0" max="100" value="'+Math.round(STUP.back*100)+'" data-stu="bk"><em>'+Math.round(STUP.back*100)+'%</em></div>'+
@@ -4667,8 +4669,9 @@ function stuPaint(){
       '<div class="stu-ks">'+STU_KN.map(function(x){return stuKnob(x[0],x[1])}).join('')+'</div>'+
       '<div class="stu-tg"><button type="button" data-tg="radio" class="'+(STUP.radio?'on':'')+'">📻 Радио</button><button type="button" data-tg="bass" class="'+(STUP.bass?'on':'')+'">🔊 Бас+</button></div>'+
       '<div class="stu-r"><span>Синхрон голоса</span><input type="range" min="-300" max="300" step="10" value="'+STUP.sync+'" data-stu="sy"><em id="stuSy">'+(STUP.sync>0?'+':'')+STUP.sync+' мс</em></div>'+
+      '<div class="stu-r"><span>Название кавера</span><input type="text" id="stuTi" maxlength="80" value="'+esc(STU.title||('Кавер на '+STU.t.t))+'" style="flex:1;min-width:0;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 12px;font-size:16px"></div>'+
       (STU.bbS==='load'?'<div class="stu-n"><b>⏳ Загружаю оригинал…</b>Пока он не загрузился, прослушивание и сохранение недоступны. Можно настроить эффекты.</div>':STU.bb?'':'<div class="stu-n">Оригинал не удалось загрузить, кавер будет только с голосом.</div>')+
-      '<div class="stu-bt"><button type="button" data-stu="again">Записать заново</button><button type="button" data-stu="dl"'+(STU.bbS==='load'?' disabled':'')+'>Скачать</button><button type="button" class="pri" data-stu="up" style="grid-column:1/3"'+(STU.bbS==='load'?' disabled':'')+'>Выложить кавер на сайт</button></div>'+
+      '<div class="stu-bt"><button type="button" data-stu="again">Записать заново</button><button type="button" data-stu="dl"'+(STU.bbS==='load'||STU.busy?' disabled':'')+'>Скачать</button><button type="button" class="pri" data-stu="up" style="grid-column:1/3"'+(STU.bbS==='load'||STU.busy||!(SB&&USER)?' disabled':'')+'>'+(STU.busy||(SB&&USER?'Выложить кавер на сайт':'Войдите в аккаунт, чтобы выложить'))+'</button></div>'+
       '<button class="stu-lk" type="button" data-stu="file">Загрузить своё (готовый файл)</button>'}
   h+='</div>';el.innerHTML=h}
 function stuKnobPaint(k){var e=document.querySelector('.stu .kn[data-k="'+k+'"]');if(!e)return;e.querySelector('i').style.transform='rotate('+(-135+STUP[k]*270)+'deg)';e.querySelector('span').textContent=Math.round(STUP[k]*100)+'%'}
@@ -4729,8 +4732,16 @@ function stuMake(){
 function stuName(){return 'Кавер на '+STU.t.t}
 function stuDownload(){if(STU.bbS==='load'){toast('Оригинал ещё загружается');return}stuMake().then(function(m){var a=document.createElement('a');a.href=URL.createObjectURL(m.blob);a.download=stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);toast('Файл сохранён')}).catch(function(){toast('Не удалось собрать файл')})}
 function stuUpload(){
-  if(!SB||!USER){needLogin();return}if(STU.bbS==='load'){toast('Оригинал ещё загружается');return}
-  stuMake().then(function(m){var f=new File([m.blob],stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext,{type:m.blob.type});covUpload(STU.t,f)}).catch(function(){toast('Не удалось собрать файл')})}
+  if(!SB||!USER){toast('Войдите в аккаунт, чтобы выложить кавер');return}
+  if(STU.bbS==='load'){toast('Оригинал ещё загружается');return}
+  if(STU.busy)return;
+  var ti=document.getElementById('stuTi');STU.title=(ti&&ti.value.trim())||('Кавер на '+STU.t.t);
+  STU.busy='Собираю файл…';stuPaint();var t=STU.t,me=STU;
+  stuMake().then(function(m){
+    if(STU!==me)return;STU.busy='Загружаю…';stuPaint();
+    var f=new File([m.blob],stuName().replace(/[\\/:*?"<>|]/g,'')+'.'+m.ext,{type:m.blob.type});
+    covUpload(t,f,STU.title,function(ok){if(STU!==me)return;STU.busy='';if(ok){stuClose()}else stuPaint()})
+  }).catch(function(){if(STU===me){STU.busy='';stuPaint()}toast('Не удалось собрать файл')})}
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-stu],[data-tg]');if(!b||!STU)return;
   if(b.dataset.tg){STUP[b.dataset.tg]=STUP[b.dataset.tg]?0:1;b.classList.toggle('on',!!STUP[b.dataset.tg]);if(STU.play)STU.play.G.set(STUP);return}
