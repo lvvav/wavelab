@@ -1170,6 +1170,12 @@ body.noanim .wc>*{opacity:1;transform:none}
 .cb audio{display:block;width:210px;max-width:100%;height:36px;margin:2px 0}.ch-rec{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px}.ch-rec i{width:10px;height:10px;border-radius:50%;background:#e5484d;animation:chrec 1s infinite}.ch-rec b{flex:1;font-variant-numeric:tabular-nums}.ch-rec button{padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--text)}.ch-rec button.ok{background:var(--acc);color:var(--on);border-color:transparent}@keyframes chrec{50%{opacity:.25}}
 .cb .ch-ph{display:block;max-width:100%;max-height:260px;border-radius:12px;margin:2px 0;cursor:zoom-in;object-fit:cover}.cb video{display:block;max-width:100%;max-height:300px;border-radius:12px;margin:2px 0;background:#000}.ch-zoom{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.92);display:grid;place-items:center;cursor:zoom-out}.ch-zoom img{max-width:100%;max-height:100%}
 .cb video.ch-cr{width:200px;height:200px;max-height:none;max-width:100%;border-radius:50%;object-fit:cover;cursor:pointer;margin:2px 0}.ch-cir{position:fixed;inset:0;z-index:125;background:rgba(0,0,0,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#fff}.ch-cir video{width:min(78vw,320px);height:min(78vw,320px);border-radius:50%;object-fit:cover;background:#222;transform:scaleX(-1)}.ch-cir b{font-size:20px;font-variant-numeric:tabular-nums}.ch-cir .row2{display:flex;gap:28px;align-items:center}.ch-cir button{color:#fff}.ch-cir .rc{width:72px;height:72px;border-radius:50%;border:4px solid #fff;display:grid;place-items:center}.ch-cir .rc i{width:48px;height:48px;border-radius:50%;background:#e5484d;transition:.15s}.ch-cir .rc.on i{width:26px;height:26px;border-radius:7px}.ch-cir .cx{padding:10px 18px;border-radius:99px;background:rgba(255,255,255,.15)}
+.ch-f:not(.has) .ch-s{display:none}.ch-f.has .ch-rb{display:none}.ch-rb{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative;z-index:6}.ch-rb.flip .i{animation:chflip .35s}.ch-rb.hot{background:#e5484d;color:#fff;border-color:transparent;transform:scale(1.9);transition:transform .18s cubic-bezier(.3,1.6,.5,1);box-shadow:0 0 0 0 rgba(229,72,77,.5);animation:chpulse 1.2s infinite}
+@keyframes chflip{0%{transform:rotateY(90deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}@keyframes chpulse{70%{box-shadow:0 0 0 14px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+.ch-hb{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 70px 10px 16px;background:var(--bg);border-top:1px solid var(--line);height:calc(62px + env(safe-area-inset-bottom));padding-bottom:calc(10px + env(safe-area-inset-bottom));animation:chin .2s}.ch-hb i.dot{width:12px;height:12px;border-radius:50%;background:#e5484d;animation:chrec 1s infinite;flex:none}.ch-hb b{font-variant-numeric:tabular-nums;min-width:42px}.ch-hb .sl{flex:1;text-align:center;font-size:14px;opacity:.7;white-space:nowrap;transition:opacity .1s}.ch-hb button.bx{padding:8px 14px;border-radius:99px;border:1px solid var(--line);color:var(--text)}.ch-hb button.bs{padding:8px 16px;border-radius:99px;background:var(--acc);color:var(--on);font-weight:600}
+.ch-lk{position:absolute;right:6px;bottom:calc(100% + 14px);width:44px;padding:10px 0 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:16px;z-index:6;animation:chin .25s;transition:transform .08s}.ch-lk small{font-size:11px;opacity:.6;animation:chup 1s infinite}
+.ch-cpv{position:fixed;left:50%;top:38%;width:min(64vw,260px);height:min(64vw,260px);margin:calc(min(64vw,260px)/-2) 0 0 calc(min(64vw,260px)/-2);z-index:118;border-radius:50%;overflow:hidden;box-shadow:0 0 0 4px #e5484d,0 12px 50px rgba(0,0,0,.6);background:#222;animation:chpop .25s cubic-bezier(.3,1.5,.5,1)}.ch-cpv video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.ch-dim{position:fixed;inset:0;z-index:117;background:rgba(0,0,0,.55);animation:chfade .2s}
+@keyframes chin{from{opacity:0;transform:translateY(12px)}}@keyframes chup{50%{transform:translateY(-4px)}}@keyframes chpop{from{transform:scale(.3);opacity:0}}@keyframes chfade{from{opacity:0}}@keyframes chcancel{to{transform:translateX(-60px) scale(.2);opacity:0}}
 .ch-f{position:relative}.ch-pm{position:absolute;left:12px;bottom:calc(100% + 6px);z-index:3;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;flex-direction:column;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,.35)}.ch-pm button{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;text-align:left;color:var(--text);font-size:15px}.ch-pm button:active{background:var(--line)}.ch-pm .i{width:18px;height:18px}
 .cb{position:relative}.ch-jm{display:flex;flex-direction:column;gap:8px;min-width:190px}.ch-jm b{font-size:15px}.ch-jm button{padding:9px 14px;border-radius:99px;background:var(--text);color:var(--bg);font-weight:600}.ch-jm button[disabled]{opacity:.45}.cb.me .ch-jm button{background:var(--on);color:var(--acc)}
 .ch-rx{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.ch-rx button{padding:2px 8px;border-radius:99px;font-size:13px;background:rgba(128,128,128,.22);border:1px solid transparent;color:inherit}.ch-rx button.me{border-color:currentColor}.ch-rp{position:fixed;z-index:130;display:flex;gap:2px;padding:6px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.4)}.ch-rp button{font-size:26px;padding:4px 6px;border-radius:50%}.ch-rp button:active{transform:scale(1.25)}
@@ -5003,7 +5009,7 @@ document.addEventListener('click',function(e){
 });
 rtBanner();
 /* ===== личные сообщения (нужен supabase_chat.sql) ===== */
-var CH={rt:null,uid:'',busy:0,fail:0,nosql:false,unread:0,peer:'',msgs:[],att:'',inbox:[]};
+var CH={rmode:(function(){try{return localStorage.getItem('wl_rmode')==='circle'?'circle':'voice'}catch(e){return 'voice'}})(),rt:null,uid:'',busy:0,fail:0,nosql:false,unread:0,peer:'',msgs:[],att:'',inbox:[]};
 function chNoSql(e){return e&&/relation|does not exist|schema cache|permission/i.test(e.message||'')}
 function chTime(d){var x=new Date(d);return ('0'+x.getHours()).slice(-2)+':'+('0'+x.getMinutes()).slice(-2)}
 function chName(id){return '@'+((PEOPLE[id]&&PEOPLE[id].n)||'без ника')}
@@ -5045,7 +5051,7 @@ function chIncoming(m){if(!m||!m.id)return;
 function chRead(peer){if(!USER)return;SB.from('messages').update({read_at:new Date().toISOString()}).eq('recipient',USER.id).eq('sender',peer).is('read_at',null).select('id').then(function(r){
   var n=(r&&r.data&&r.data.length)||0;if(n){CH.unread=Math.max(0,CH.unread-n);chBadge()}}).catch(function(){})}
 function chEl(){var c=$('chat');if(c)return c;c=document.createElement('div');c.id='chat';c.className='chat';document.body.appendChild(c);return c}
-function chClose(){chRecStop(true);chCirClose();var c=$('chat');if(c)c.classList.remove('on');CH.peer='';CH.att=''}
+function chClose(){holdAbort();var c=$('chat');if(c)c.classList.remove('on');CH.peer='';CH.att=''}
 function chOpen(peer){
   if(!SB||!USER){needLogin();return}
   if(CH.nosql){toast('Чат не включён: выполните SQL из файла supabase_chat.sql');return}
@@ -5067,8 +5073,9 @@ function chInbox(){
 function chPeer(peer){
   CH.peer=peer;CH.msgs=[];CH.att='';var c=chEl();
   chPeople([peer]).then(function(){
-    c.innerHTML='<div class="ch-h"><button class="ch-x" data-ch="inbox" type="button" aria-label="Назад">'+ic('back')+'</button><b>'+esc(chName(peer))+'</b><span></span></div><div class="ch-b ch-t" id="chB"></div><div class="ch-a" id="chA"></div><form class="ch-f" id="chF"><button type="button" class="ch-tr" data-ch="plus" aria-label="Прикрепить">'+ic('plus')+'</button><input id="chI" type="text" maxlength="1000" placeholder="Сообщение" autocomplete="off"><input type="file" id="chFile" accept="image/*,video/*" hidden><button type="button" class="ch-tr ch-mc" data-ch="rec" aria-label="Записать голосовое">'+ic('mic')+'</button><button type="submit" class="ch-s" aria-label="Отправить">'+ic('next','f')+'</button></form>';
+    c.innerHTML='<div class="ch-h"><button class="ch-x" data-ch="inbox" type="button" aria-label="Назад">'+ic('back')+'</button><b>'+esc(chName(peer))+'</b><span></span></div><div class="ch-b ch-t" id="chB"></div><div class="ch-a" id="chA"></div><form class="ch-f" id="chF"><button type="button" class="ch-tr" data-ch="plus" aria-label="Прикрепить">'+ic('plus')+'</button><input id="chI" type="text" maxlength="1000" placeholder="Сообщение" autocomplete="off"><input type="file" id="chFile" accept="image/*,video/*" hidden><button type="button" class="ch-tr ch-mc ch-rb" id="chRb" aria-label="Голосовое или кружок: коснитесь, чтобы переключить, зажмите для записи">'+ic(CH.rmode==='circle'?'cam':'mic')+'</button><button type="submit" class="ch-s" aria-label="Отправить">'+ic('next','f')+'</button></form>';
     $('chF').onsubmit=function(e){e.preventDefault();chSend()};
+    $('chI').oninput=function(){$('chF').classList.toggle('has',!!this.value.trim())};holdBind();
     var a=USER.id,b=peer;
     SB.from('messages').select('id,sender,recipient,body,track,created_at,read_at').or('and(sender.eq.'+a+',recipient.eq.'+b+'),and(sender.eq.'+b+',recipient.eq.'+a+')').order('created_at',{ascending:false}).limit(150).then(function(r){
       if(CH.peer!==peer)return;
@@ -5089,26 +5096,7 @@ function chSend(){
     CH.msgs.push(r.data);chThread()}).catch(function(){toast('Нет связи с сервером');i.value=v})}
 
 /* ===== голосовые сообщения: запись, загрузка в Storage (bucket voice), ссылка в messages.track ===== */
-var VREC=null;
 function chVoiceUrl(k){try{return SB.storage.from('voice').getPublicUrl(k.replace(/^(voice|media|circle)\//,'')).data.publicUrl}catch(e){return ''}}
-function chRecUi(on){var a=$('chA');if(!a)return;
-  a.innerHTML=on?'<div class="ch-rec"><i></i><b id="chRt">0:00</b><button type="button" data-ch="rcancel">Отмена</button><button type="button" class="ok" data-ch="rsend">Отправить</button></div>':''}
-function chRecStart(){
-  if(VREC)return;
-  if(!CH.peer)return;
-  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Этот браузер не умеет записывать звук');return}
-  navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
-    var mt=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'].filter(function(m){return MediaRecorder.isTypeSupported(m)})[0]||'';
-    var mr;try{mr=new MediaRecorder(st,mt?{mimeType:mt,audioBitsPerSecond:32000}:undefined)}catch(e){st.getTracks().forEach(function(t){t.stop()});toast('Не удалось начать запись');return}
-    var v={mr:mr,st:st,ch:[],t0:Date.now(),cancel:false,peer:CH.peer,mime:mr.mimeType||mt||'audio/webm'};
-    mr.ondataavailable=function(e){if(e.data&&e.data.size)v.ch.push(e.data)};
-    mr.onstop=function(){clearInterval(v.iv);st.getTracks().forEach(function(t){t.stop()});if(VREC===v)VREC=null;if(v.cancel)return;chVoiceSend(v)};
-    v.iv=setInterval(function(){var s=Math.floor((Date.now()-v.t0)/1000),e=$('chRt');if(e)e.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s>=60)chRecStop(false)},250);
-    VREC=v;chRecUi(true);mr.start()
-  }).catch(function(){toast('Нет доступа к микрофону. Разрешите его в настройках браузера')})}
-function chRecStop(cancel){var v=VREC;if(!v)return;v.cancel=!!cancel;try{if(v.mr.state!=='inactive')v.mr.stop()}catch(e){}
-  if(cancel){clearInterval(v.iv);try{v.st.getTracks().forEach(function(t){t.stop()})}catch(e){}VREC=null}
-  chRecUi(false)}
 function chVoiceSend(v){
   var ms=Date.now()-v.t0;if(ms<1000){toast('Слишком короткое сообщение');return}
   var ext=/mp4/.test(v.mime)?'m4a':/ogg/.test(v.mime)?'ogg':'webm',blob=new Blob(v.ch,{type:v.mime.split(';')[0]}),
@@ -5152,7 +5140,7 @@ document.addEventListener('change',function(e){var t=e.target;if(t&&t.id==='chFi
 function chPmClose(keep){if(keep)return;var m=document.querySelector('.ch-pm');if(m)m.remove()}
 function chPlus(){var f=$('chF');if(!f)return;var o=f.querySelector('.ch-pm');if(o){o.remove();return}
   var d=document.createElement('div');d.className='ch-pm';
-  d.innerHTML='<button type="button" data-ch="att">'+ic('disc')+'Играющий трек</button><button type="button" data-ch="file">'+ic('img')+'Фото или видео</button><button type="button" data-ch="cir">'+ic('cam')+'Видеокружок</button><button type="button" data-ch="jam">'+ic('wave')+'Звать слушать вместе</button>';
+  d.innerHTML='<button type="button" data-ch="att">'+ic('disc')+'Играющий трек</button><button type="button" data-ch="file">'+ic('img')+'Фото или видео</button><button type="button" data-ch="jam">'+ic('wave')+'Звать слушать вместе</button>';
   f.appendChild(d)}
 function chJamSend(){
   if(!CH.peer)return;
@@ -5207,27 +5195,6 @@ function chRxPick(el,x,y){
 })();
 
 /* ===== видеокружки: запись с фронтальной камеры до 60 с, круглое видео в чате (bucket voice, track = circle/...) ===== */
-var CIR=null;
-function chCirClose(){var o=document.querySelector('.ch-cir');if(CIR){CIR.cancel=true;clearInterval(CIR.iv);try{if(CIR.mr&&CIR.mr.state!=='inactive')CIR.mr.stop()}catch(e){}try{CIR.st.getTracks().forEach(function(t){t.stop()})}catch(e){}CIR=null}if(o)o.remove()}
-function chCirOpen(){
-  if(!CH.peer||CIR)return;
-  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Этот браузер не умеет записывать видео');return}
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:480},height:{ideal:480}},audio:true}).then(function(st){
-    var o=document.createElement('div');o.className='ch-cir';
-    o.innerHTML='<video autoplay muted playsinline></video><b id="cirT">0:00</b><div class="row2"><button class="cx" type="button" data-ch="cirx">Отмена</button><button class="rc" id="cirB" type="button" data-ch="cirrec" aria-label="Записать"><i></i></button></div><small style="opacity:.7">Нажмите на красную кнопку, чтобы начать. Ещё раз — чтобы отправить</small>';
-    document.body.appendChild(o);o.querySelector('video').srcObject=st;
-    CIR={st:st,peer:CH.peer,mr:null,ch:[],t0:0,iv:0,cancel:false,mime:''}
-  }).catch(function(){toast('Нет доступа к камере или микрофону. Разрешите их в настройках браузера')})}
-function chCirRec(){
-  var v=CIR;if(!v)return;
-  if(v.mr){v.stopping=true;try{v.mr.stop()}catch(e){}return}
-  var mt=['video/webm;codecs=vp8,opus','video/webm','video/mp4'].filter(function(m){return MediaRecorder.isTypeSupported(m)})[0]||'';
-  var mr;try{mr=new MediaRecorder(v.st,mt?{mimeType:mt,videoBitsPerSecond:700000,audioBitsPerSecond:48000}:undefined)}catch(e){toast('Не удалось начать запись');return}
-  v.mr=mr;v.mime=mr.mimeType||mt||'video/webm';v.t0=Date.now();
-  mr.ondataavailable=function(e){if(e.data&&e.data.size)v.ch.push(e.data)};
-  mr.onstop=function(){clearInterval(v.iv);v.st.getTracks().forEach(function(t){t.stop()});var o=document.querySelector('.ch-cir');if(o)o.remove();if(CIR===v)CIR=null;if(v.cancel)return;chCirSend(v)};
-  v.iv=setInterval(function(){var s=Math.floor((Date.now()-v.t0)/1000),e=$('cirT');if(e)e.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s>=60)try{mr.stop()}catch(x){}},250);
-  var b=$('cirB');if(b)b.classList.add('on');mr.start()}
 function chCirSend(v){
   if(Date.now()-v.t0<1000){toast('Слишком короткий кружок');return}
   var ext=/mp4/.test(v.mime)?'mp4':'webm',blob=new Blob(v.ch,{type:v.mime.split(';')[0]}),name=Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.'+ext;
@@ -5239,6 +5206,68 @@ function chCirSend(v){
       if(q.error){toast('Не отправлено');return}
       if(CH.peer===v.peer){CH.msgs.push(q.data);chThread()}})
   }).catch(function(){toast('Нет связи с сервером')})}
+
+/* ===== как в Telegram: тап — переключить «голосовое / кружок», зажать — записать, вверх — закрепить, влево — отмена ===== */
+var HOLD=null;
+function holdVib(n){try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}}
+function holdBind(){
+  var b=$('chRb');if(!b)return;
+  b.addEventListener('contextmenu',function(e){e.preventDefault()});
+  b.addEventListener('pointerdown',function(e){
+    if(HOLD||e.button>0)return;e.preventDefault();
+    try{b.setPointerCapture(e.pointerId)}catch(x){}
+    var h=HOLD={x0:e.clientX,y0:e.clientY,st:'wait',kind:CH.rmode,R:null,locked:false,gone:false,peer:CH.peer};
+    h.tm=setTimeout(function(){h.tm=0;holdStart(h)},230)});
+  b.addEventListener('pointermove',function(e){var h=HOLD;if(!h||h.st!=='rec'||h.locked)return;
+    var dx=e.clientX-h.x0,dy=e.clientY-h.y0,sl=document.querySelector('.ch-hb .sl'),lk=document.querySelector('.ch-lk');
+    if(dx<0&&sl){sl.style.transform='translateX('+Math.max(dx,-120)+'px)';sl.style.opacity=Math.max(.15,1+dx/140)}
+    if(lk){lk.style.transform='translateY('+Math.max(dy,-90)+'px)'}
+    b.style.translate=Math.max(Math.min(dx,0),-130)+'px '+Math.max(dy,-90)+'px';
+    if(dx<-100){holdVib(20);b.style.translate='';holdFinish(false,true)}
+    else if(dy<-80){h.locked=true;holdVib(20);b.style.translate='';holdLockUi()}});
+  function end(e,cancel){var h=HOLD;if(!h)return;b.style.translate='';
+    if(h.tm){clearTimeout(h.tm);h.tm=0;HOLD=null;if(!cancel){CH.rmode=CH.rmode==='circle'?'voice':'circle';try{localStorage.setItem('wl_rmode',CH.rmode)}catch(x){}
+      b.innerHTML=ic(CH.rmode==='circle'?'cam':'mic');b.classList.remove('flip');void b.offsetWidth;b.classList.add('flip');holdVib(10);toast(CH.rmode==='circle'?'Режим: видеокружок':'Режим: голосовое')}return}
+    if(h.locked)return;
+    if(h.st==='rec')holdFinish(!cancel);else{h.gone=true}}
+  b.addEventListener('pointerup',function(e){end(e,false)});
+  b.addEventListener('pointercancel',function(e){end(e,true)})}
+function holdStart(h){
+  if(HOLD!==h)return;h.st='rec';
+  var video=h.kind==='circle';
+  if(!navigator.mediaDevices||!window.MediaRecorder){HOLD=null;toast('Этот браузер не умеет записывать звук и видео');return}
+  holdUi(h);holdVib(25);
+  navigator.mediaDevices.getUserMedia(video?{video:{facingMode:'user',width:{ideal:480},height:{ideal:480}},audio:true}:{audio:true}).then(function(st){
+    if(HOLD!==h){st.getTracks().forEach(function(t){t.stop()});return}
+    var pri=video?['video/webm;codecs=vp8,opus','video/webm','video/mp4']:['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'],
+        mt=pri.filter(function(m){return MediaRecorder.isTypeSupported(m)})[0]||'',mr;
+    try{mr=new MediaRecorder(st,mt?(video?{mimeType:mt,videoBitsPerSecond:700000,audioBitsPerSecond:48000}:{mimeType:mt,audioBitsPerSecond:32000}):undefined)}catch(e){st.getTracks().forEach(function(t){t.stop()});holdUiOff();HOLD=null;toast('Не удалось начать запись');return}
+    var R=h.R={mr:mr,st:st,ch:[],t0:Date.now(),peer:h.peer,mime:mr.mimeType||mt||(video?'video/webm':'audio/webm'),send:false,done:false};
+    mr.ondataavailable=function(e){if(e.data&&e.data.size)R.ch.push(e.data)};
+    mr.onstop=function(){clearInterval(h.iv);st.getTracks().forEach(function(t){t.stop()});R.done=true;if(R.send){if(video)chCirSend(R);else chVoiceSend(R)}};
+    if(video){var pv=document.querySelector('.ch-cpv video');if(pv){pv.muted=true;pv.srcObject=st;pv.play().catch(function(){})}}
+    h.iv=setInterval(function(){var s=Math.floor((Date.now()-R.t0)/1000),e=document.getElementById('chHt');if(e)e.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s>=60)holdFinish(true)},250);
+    mr.start();
+  }).catch(function(){HOLD=null;holdUiOff();toast(video?'Нет доступа к камере или микрофону. Разрешите их для сайта':'Нет доступа к микрофону. Разрешите его для сайта')})}
+function holdUi(h){
+  var f=$('chF');if(!f)return;var b=$('chRb');if(b)b.classList.add('hot');
+  var bar=document.createElement('div');bar.className='ch-hb';bar.innerHTML='<i class="dot"></i><b id="chHt">0:00</b><span class="sl">‹ Влево — отмена</span>';f.appendChild(bar);
+  var lk=document.createElement('div');lk.className='ch-lk';lk.innerHTML='<span>🔒</span><small>▲</small>';f.appendChild(lk);
+  if(h.kind==='circle'){var d=document.createElement('div');d.className='ch-dim';document.body.appendChild(d);var c=document.createElement('div');c.className='ch-cpv';c.innerHTML='<video playsinline muted></video>';document.body.appendChild(c)}}
+function holdUiOff(){['.ch-hb','.ch-lk','.ch-cpv','.ch-dim'].forEach(function(q){document.querySelectorAll(q).forEach(function(x){x.remove()})});var b=$('chRb');if(b){b.classList.remove('hot');b.style.translate=''}}
+function holdLockUi(){
+  var bar=document.querySelector('.ch-hb'),lk=document.querySelector('.ch-lk');if(lk)lk.remove();
+  var b=$('chRb');if(b){b.classList.remove('hot');b.style.translate=''}
+  if(bar){var t=document.getElementById('chHt').textContent;bar.style.paddingRight='16px';bar.innerHTML='<button class="bx" type="button" data-ch="hcancel">Отмена</button><i class="dot"></i><b id="chHt">'+t+'</b><span class="sl"></span><button class="bs" type="button" data-ch="hsend">Отправить</button>'}}
+function holdFinish(send,swipe){
+  var h=HOLD;if(!h)return;HOLD=null;clearTimeout(h.tm);clearInterval(h.iv);
+  var R=h.R;
+  if(swipe){var bar=document.querySelector('.ch-hb');if(bar){bar.style.animation='chcancel .25s forwards'}}
+  setTimeout(holdUiOff,swipe?240:0);
+  if(!R){h.gone=true;HOLD=null;return}
+  R.send=!!send;if(!send)holdVib(15);
+  try{if(R.mr.state!=='inactive')R.mr.stop()}catch(e){}}
+function holdAbort(){if(HOLD&&HOLD.R)holdFinish(false);else if(HOLD){clearTimeout(HOLD.tm);HOLD=null}holdUiOff()}
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-ch],[data-chat]');if(!b)return;
   if(b.dataset.chat){chOpen(b.dataset.chat);return}
@@ -5247,11 +5276,11 @@ document.addEventListener('click',function(e){
   else if(a==='att'){var t=TRACKS[cur];if(!t||t.mine||t.pv||!t.key){toast('Сначала включите трек, который хотите отправить');return}CH.att=t.key;chAtt()}
   else if(a==='unatt'){CH.att='';chAtt()}
   else if(a==='plus')chPlus();else if(a==='file'){var fi=$('chFile');if(fi)fi.click()}
-  else if(a==='jam')chJamSend();else if(a==='cir')chCirOpen();else if(a==='cirp'){var cv0=b;if(cv0.paused){document.querySelectorAll('video.ch-cr').forEach(function(x){if(x!==cv0)x.pause()});cv0.currentTime=cv0.ended?0:cv0.currentTime;cv0.play().catch(function(){})}else cv0.pause()}
-  else if(a==='cirrec')chCirRec();else if(a==='cirx')chCirClose();else if(a==='jamgo'){var jc=b.dataset.code;if(JM.code===jc){toast('Вы уже в этой комнате');return}jamJoin(jc,false);setTimeout(chThread,300)}
+  else if(a==='jam')chJamSend();else if(a==='cirp'){var cv0=b;if(cv0.paused){document.querySelectorAll('video.ch-cr').forEach(function(x){if(x!==cv0)x.pause()});cv0.currentTime=cv0.ended?0:cv0.currentTime;cv0.play().catch(function(){})}else cv0.pause()}
+  else if(a==='jamgo'){var jc=b.dataset.code;if(JM.code===jc){toast('Вы уже в этой комнате');return}jamJoin(jc,false);setTimeout(chThread,300)}
   else if(a==='rx'){chReact(b.dataset.mid,b.dataset.e)}
   else if(a==='zoom'){var z=document.createElement('div');z.className='ch-zoom';z.innerHTML='<img src="'+esc(b.src)+'" alt="">';z.onclick=function(){z.remove()};document.body.appendChild(z)}
-  else if(a==='rec')chRecStart();else if(a==='rcancel')chRecStop(true);else if(a==='rsend')chRecStop(false)
+  else if(a==='hsend')holdFinish(true);else if(a==='hcancel')holdFinish(false)
   else if(a==='play'){var x=byKey(b.dataset.k);if(x){chClose();playId(x.id,[x.id])}else toast('Этого трека нет в вашей библиотеке')}
   else if(a==='push'){try{var rq=Notification.requestPermission(function(){});var fin=function(p){pushSetup();accPaint();toast(p==='granted'?'Уведомления включены':'Уведомления не разрешены')};if(rq&&rq.then)rq.then(fin);else fin(Notification.permission)}catch(e){toast('Не удалось включить уведомления')}}
   else if(a==='open')chOpen()});
