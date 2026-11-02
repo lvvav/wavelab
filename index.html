@@ -628,6 +628,8 @@ body::before{animation:none}
 .fld input:focus{border-color:var(--acc)}
 .accmsg{min-height:20px;margin:12px 0;color:#ff7b72;font-size:13px;line-height:1.4}
 .accmsg.ok{color:var(--acc)}
+.fld[hidden],#accRe[hidden]{display:none!important}
+#accC{letter-spacing:.5em;text-align:center;font-size:22px}
 .alink{display:block;margin:16px 0 0;padding:0;color:var(--acc);font-size:14px;background:none;text-align:left}
 .abt{line-height:1.55;margin:12px 0}
 a.btn{text-decoration:none}
@@ -1538,9 +1540,11 @@ body.noanim .wc>*{opacity:1;transform:none}
   <small class="hint" id="accOr" style="text-align:center;margin:16px 0 0">или по почте</small>
   <label class="fld">Почта<input id="accN" type="email" maxlength="120" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
   <label class="fld">Пароль<input id="accP" type="password" maxlength="72" autocomplete="current-password" autocapitalize="off" spellcheck="false"></label>
+  <label class="fld" id="accCW" hidden>Код из письма (6 цифр)<input id="accC" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="000000"></label>
   <small class="hint" id="accH"></small>
   <div class="accmsg" id="accM" role="status"></div>
   <button class="btn" id="accGo" type="button">Войти</button>
+  <button class="alink" id="accRe" type="button" hidden>Отправить код ещё раз</button>
   <button class="alink" id="accSw" type="button"></button>
 </div></div>
 
@@ -3098,7 +3102,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=69;
+var APP_VER='7.0',APP_BUILD=70;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3135,7 +3139,7 @@ var NEWK=load('wl_newk',[]);if(!Array.isArray(NEWK))NEWK=[];
 var PROF=load('wl_prof',null),FOL=load('wl_fol',{u:[],p:[]}),RPL={},PEOPLE={},USR=null,pendPl='',askedNick=false;
 if(!FOL||!Array.isArray(FOL.u)||!Array.isArray(FOL.p))FOL={u:[],p:[]};
 /* ===== аккаунты и синхронизация: Supabase + Яндекс ID + Google + почта ===== */
-var SUPA_ON=!!(CONFIG.SUPA_URL&&CONFIG.SUPA_KEY),SB=null,USER=null,accMode='login',accBusy=false,
+var SUPA_ON=!!(CONFIG.SUPA_URL&&CONFIG.SUPA_KEY),SB=null,USER=null,accMode='login',accBusy=false,accPend='',
   SYNC=load('wl_sync',{}),SKEYS={wl3_favs:1,wl_pl:1,wl_hist:1,wl_cnt:1,wl_stats:1,wl_dt:1,wl_lib:1,wl3_set:1},
   syncT=0,syncDue=0,syncBusy=false,syncApplying=false,dirtyRev=0,syncSt='',syncAt=0,YA_TOK='',YA_ERR=false;
 if(!SYNC||typeof SYNC!=='object'||Array.isArray(SYNC))SYNC={};
@@ -3194,6 +3198,7 @@ function accPaint(){
 }
 function accOpen(mode){
   accMode=mode;accMsg('');$('accN').value='';$('accP').value='';
+  accPend='';$('accC').value='';$('accCW').hidden=true;$('accRe').hidden=true;$('accN').disabled=false;$('accP').parentNode.hidden=false;
   var ya=!!CONFIG.YA_CLIENT_ID,gg=CONFIG.GOOGLE_ON!==false&&SUPA_ON;
   try{qrStop()}catch(e){}
   $('accYa').hidden=!ya;$('accGg').hidden=!gg;$('accQr').hidden=mode==='reg'||!SUPA_ON;$('accOr').hidden=!(ya||gg||SUPA_ON&&mode!=='reg');
@@ -3205,7 +3210,7 @@ function accOpen(mode){
   $('acc').classList.add('on');$('acc').setAttribute('aria-hidden','false');
   if(!SUPA_ON)accMsg('Аккаунты пока не подключены к сайту');
 }
-function accClose(){$('acc').classList.remove('on');$('acc').setAttribute('aria-hidden','true');$('accP').value='';try{qrStop()}catch(e){}}
+function accClose(){$('acc').classList.remove('on');$('acc').setAttribute('aria-hidden','true');$('accP').value='';$('accC').value='';accPend='';try{qrStop()}catch(e){}}
 $('accBox').addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;
   if(b.id==='accIn')accOpen('login');
@@ -3248,7 +3253,7 @@ function drwGo(a){drwClose();
   else if(a==='news')nwsOpen()
   else if(a==='set')setOpen(true)}
 $('profBtn').onclick=function(){drwOpen()};
-$('accSw').onclick=function(){accOpen(accMode==='reg'?'login':'reg')};
+$('accSw').onclick=function(){accOpen(accPend?'reg':accMode==='reg'?'login':'reg')};
 $('accX').onclick=accClose;
 $('acc').onclick=function(e){if(e.target===this)accClose()};
 $('accYa').onclick=function(){
@@ -3262,8 +3267,50 @@ $('accGg').onclick=function(){
   accMsg('Открываю Google…',true);
   SB.auth.signInWithOAuth({provider:'google',options:{redirectTo:siteUrl()}}).then(function(r){if(r&&r.error)accMsg(accErr(r.error))}).catch(function(e){accMsg(accErr(e))});
 };
+/* шаг 2 регистрации: ввод 6-значного кода из письма */
+function accStep(em){
+  accPend=em;
+  $('accCW').hidden=false;$('accRe').hidden=false;$('accC').value='';
+  $('accN').disabled=true;$('accP').parentNode.hidden=true;
+  $('accYa').hidden=true;$('accGg').hidden=true;$('accQr').hidden=true;$('accOr').hidden=true;
+  $('accT').textContent='Подтверждение почты';
+  $('accGo').textContent='Подтвердить';
+  $('accSw').textContent='Изменить почту или пароль';
+  $('accH').textContent='';
+  accReCool();
+  setTimeout(function(){try{$('accC').focus()}catch(e){}},50);
+}
+var accReT=0;
+function accReCool(){
+  var b=$('accRe'),s=60;clearInterval(accReT);b.disabled=true;b.textContent='Отправить код ещё раз (через '+s+' с)';
+  accReT=setInterval(function(){s--;if(s<=0){clearInterval(accReT);b.disabled=false;b.textContent='Отправить код ещё раз'}else b.textContent='Отправить код ещё раз (через '+s+' с)'},1000);
+}
+function accVerify(){
+  var c=$('accC').value.replace(/\D/g,'');
+  if(c.length!==6)return accMsg('Введите 6 цифр из письма');
+  if(!needSB())return;
+  accBusy=true;$('accGo').disabled=true;accMsg('Проверяю код…',true);
+  SB.auth.verifyOtp({email:accPend,token:c,type:'signup'}).then(function(res){
+    if(res.error)throw res.error;
+    accClose();toast('Аккаунт создан');
+  }).catch(function(e){
+    var m=String(e&&e.message||e||'').toLowerCase();
+    accMsg(/expired|invalid|otp|token/.test(m)?'Неверный или просроченный код. Проверьте цифры или запросите новый':accErr(e));
+  }).then(function(){accBusy=false;$('accGo').disabled=false});
+}
+$('accRe').onclick=function(){
+  if(!accPend||accBusy||!needSB())return;
+  accBusy=true;accMsg('Отправляю новый код…',true);
+  SB.auth.resend({type:'signup',email:accPend}).then(function(res){
+    if(res.error)throw res.error;
+    accMsg('Новый код отправлен на '+accPend,true);accReCool();
+  }).catch(function(e){accMsg(accErr(e))}).then(function(){accBusy=false});
+};
+$('accC').addEventListener('keydown',function(e){if(e.key==='Enter')accSubmit()});
+$('accC').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,6);if(this.value.length===6&&!accBusy&&accPend)accVerify()});
 function accSubmit(){
   if(accBusy)return;
+  if(accPend)return accVerify();
   var em=$('accN').value.trim(),p=$('accP').value;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em))return accMsg('Введите адрес почты, например name@mail.ru');
   if(p.length<6||p.length>72)return accMsg('Пароль: от 6 до 72 символов');
@@ -3275,7 +3322,7 @@ function accSubmit(){
     var d=res.data||{};
     if(d.session){accClose()}
     else if(reg&&d.user&&d.user.identities&&!d.user.identities.length)accMsg('Эта почта уже зарегистрирована. Нажмите «Войти»');
-    else if(reg)accMsg('Мы отправили письмо на '+em+'. Подтвердите почту по ссылке и затем войдите.',true);
+    else if(reg){accStep(em);accMsg('Мы отправили 6-значный код на '+em+'. Введите его ниже.',true)}
   }).catch(function(e){accMsg(accErr(e))}).then(function(){accBusy=false;$('accGo').disabled=false});
 }
 /* ===== вход по QR-коду: ПК показывает код, телефон (уже вошедший) подтверждает ===== */
