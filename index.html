@@ -3110,7 +3110,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=72;
+var APP_VER='7.0',APP_BUILD=73;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3228,14 +3228,14 @@ $('accBox').addEventListener('click',function(e){
     SB.auth.signOut().catch(function(){}).then(function(){USER=null;PROF=null;save('wl_prof',null);accPaint();toast('Вы вышли из аккаунта. Данные остались на этом устройстве')});
   }
 });
-/* ===== новость: скоро SoundLife v7.0 ===== */
+/* ===== новость: SoundLife v7.0 вышел ===== */
 function nwsOpen(auto){
-  if(auto){try{if(localStorage.getItem('wl_news7'))return}catch(e){}}
-  try{localStorage.setItem('wl_news7','1')}catch(e){}
+  if(auto){try{if(localStorage.getItem('wl_news7r'))return}catch(e){}}
+  try{localStorage.setItem('wl_news7r','1')}catch(e){}
   if(document.querySelector('.nws'))return;
   var o=document.createElement('div');o.className='nws';
-  o.innerHTML='<div class="nws-b"><img src="news-v7.png" alt="SoundLife 7.0" class="nws-i"><div class="nws-t">Скоро</div><h2>SoundLife v7.0</h2><p>Готовим большое обновление. Совсем скоро на сайте появится:</p>'+
-    '<ul><li>личные сообщения и уведомления</li><li>слушать вместе с друзьями на расстоянии</li><li>переключение звука между устройствами</li><li>достижения и подборки по настроению</li><li>альбомы по дискам и красивые итоги года</li></ul>'+
+  o.innerHTML='<div class="nws-b"><img src="news-v7.png" alt="SoundLife 7.0" class="nws-i"><div class="nws-t">Вышло</div><h2>SoundLife v7.0</h2><p>Большое обновление уже на сайте. Что нового:</p>'+
+    '<ul><li>личные сообщения, звонки и уведомления</li><li>слушать вместе с друзьями на расстоянии</li><li>переключение звука между устройствами</li><li>комментарии к трекам</li><li>совместные плейлисты с друзьями</li><li>достижения и подборки по настроению</li><li>альбомы по дискам и красивые итоги года</li><li>регистрация по коду из письма</li></ul>'+
     '<div class="nws-a">'+(NEWK.length?'<button type="button" class="btn ghost" data-nw="new">Новые треки · '+NEWK.length+'</button>':'')+'<button type="button" class="btn" data-nw="ok">Понятно</button></div></div>';
   document.body.appendChild(o);requestAnimationFrame(function(){o.classList.add('on')});
   o.addEventListener('click',function(e){var b=e.target.closest('[data-nw]');
