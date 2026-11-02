@@ -3110,7 +3110,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=71;
+var APP_VER='7.0',APP_BUILD=72;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3434,7 +3434,8 @@ function mergeData(L,C){
   r.favs=uniq(L.favs,C.favs);
   (L.pl||[]).concat(Array.isArray(C.pl)?C.pl:[]).forEach(function(p){
     if(!p||!p.id||!Array.isArray(p.k))return;
-    if(pm[p.id]){pm[p.id].k=uniq(pm[p.id].k,p.k)}else{pm[p.id]={id:p.id,n:p.n,k:uniq(p.k)};pr.push(pm[p.id])}
+    if(pm[p.id]){if(!(pm[p.id].collab||p.collab))pm[p.id].k=uniq(pm[p.id].k,p.k);if(p.collab&&!pm[p.id].collab){pm[p.id].collab=1;pm[p.id].cid=p.cid;pm[p.id].own=p.own;pm[p.id].srv=p.srv;pm[p.id].srvN=p.srvN}}
+    else{pm[p.id]={id:p.id,n:p.n,k:uniq(p.k)};if(p.collab){pm[p.id].collab=1;pm[p.id].cid=p.cid;pm[p.id].own=p.own;pm[p.id].srv=p.srv;pm[p.id].srvN=p.srvN}pr.push(pm[p.id])}
   });
   r.pl=pr;r.hist=uniq(L.hist,C.hist,50);r.cnt=mx(L.cnt,C.cnt);
   var ll=libNorm(L.lib),cl=libNorm(C.lib);r.lib={al:uniq(ll.al,cl.al),ar:uniq(ll.ar,cl.ar)};
@@ -3518,7 +3519,7 @@ function onSession(ev,s){
   if(!u){if(USER){USER=null;PROF=null;accPaint()}return}
   var isNew=!USER||USER.id!==u.id;
   USER=u;accPaint();
-  if(isNew){accClose();profLoad();if(ev==='SIGNED_IN')toast('Вы вошли как '+accName(u));syncRun();setTimeout(qrAsk,600)}
+  if(isNew){accClose();profLoad();if(ev==='SIGNED_IN')toast('Вы вошли как '+accName(u));Promise.resolve(syncRun()).then(colPull,colPull);setTimeout(qrAsk,600)}
 }
 function yaFinish(tok){
   toast('Входим через Яндекс…');
@@ -3556,7 +3557,7 @@ function accInit(){
 }
 document.addEventListener('visibilitychange',function(){
   if(!USER)return;
-  if(document.hidden){if(SYNC.dirty)syncRun()}else if(Date.now()-syncAt>60000)syncRun();
+  if(document.hidden){if(SYNC.dirty)syncRun()}else{if(Date.now()-syncAt>60000)syncRun();if(Date.now()-colAt>30000)colPull()}
 });
 window.addEventListener('online',function(){if(USER)syncRun()});
 
@@ -3748,6 +3749,139 @@ function cmtPick(b){var m=b.dataset.m;
     SB.from('track_comments').delete().eq('id',id).then(function(r){if(r.error)return toast('Не удалось удалить');
       CMT.list=(CMT.list||[]).filter(function(c){return String(c.id)!==String(id)});cmtPaint();toast('Комментарий удалён')}).catch(function(){toast('Нет связи с сервером')})}}
 
+/* ===== совместные плейлисты: сервер главный, на устройстве копия; изменения уходят разницей ===== */
+var colT=0,colBusy=false,colAt=0;
+function uuid4(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();var h='0123456789abcdef',s='',i;for(i=0;i<36;i++){if(i===8||i===13||i===18||i===23)s+='-';else if(i===14)s+='4';else if(i===19)s+=h[8+Math.floor(Math.random()*4)];else s+=h[Math.floor(Math.random()*16)]}return s}
+function colShared(k){return typeof k==='string'&&k.slice(0,3)!=='my:'}
+function colPushSoon(){if(!(SB&&USER))return;if(!PL.some(function(p){return p.collab&&p.cid}))return;clearTimeout(colT);colT=setTimeout(function(){colPush()},800)}
+function colPush(){
+  if(!(SB&&USER))return Promise.resolve();
+  var jobs=[],fail=false;
+  PL.forEach(function(p){
+    if(!p.collab||!p.cid)return;
+    var cur=p.k.filter(colShared),srv=p.srv||[],
+        add=cur.filter(function(k){return srv.indexOf(k)<0}),del=srv.filter(function(k){return cur.indexOf(k)<0});
+    if(add.length)jobs.push(SB.from('collab_tracks').upsert(add.map(function(k){return {playlist_id:p.cid,track_key:k,added_by:USER.id}}),{onConflict:'playlist_id,track_key',ignoreDuplicates:true}).then(function(r){
+      if(r.error)throw r.error;var s=p.srv||[];add.forEach(function(k){if(s.indexOf(k)<0)s.push(k)});p.srv=s}));
+    if(del.length)jobs.push(SB.from('collab_tracks').delete().eq('playlist_id',p.cid).in('track_key',del).then(function(r){
+      if(r.error)throw r.error;p.srv=(p.srv||[]).filter(function(k){return del.indexOf(k)<0})}));
+    if(p.own===USER.id&&p.n!==p.srvN)jobs.push(SB.from('collab_playlists').update({name:p.n}).eq('id',p.cid).then(function(r){
+      if(r.error)throw r.error;p.srvN=p.n}));
+  });
+  if(!jobs.length)return Promise.resolve();
+  return Promise.all(jobs.map(function(j){return Promise.resolve(j).then(null,function(){fail=true})})).then(function(){
+    save('wl_pl',PL);if(fail)toast('Не удалось сохранить в совместный плейлист. Проверьте, что SQL из supabase_collab.sql выполнен')})
+}
+function colPull(){
+  if(!(SB&&USER)||colBusy)return Promise.resolve();
+  colBusy=true;var uid=USER.id;
+  return colPush().then(function(){return SB.from('collab_playlists').select('id,owner,name').order('created_at')}).then(function(r){
+    if(r.error)throw r.error;
+    var pls=r.data||[];
+    if(!pls.length)return {pls:pls,tr:[]};
+    return SB.from('collab_tracks').select('playlist_id,track_key').in('playlist_id',pls.map(function(q){return q.id})).order('added_at').then(function(r2){
+      if(r2.error)throw r2.error;return {pls:pls,tr:r2.data||[]}})
+  }).then(function(d){
+    if(!USER||USER.id!==uid)return;
+    var by={},seen={},changed=false,fresh=[];
+    d.tr.forEach(function(x){(by[x.playlist_id]=by[x.playlist_id]||[]).push(x.track_key)});
+    d.pls.forEach(function(q){
+      seen[q.id]=1;
+      var keys=by[q.id]||[],p=PL.filter(function(x){return x.cid===q.id})[0];
+      if(!p){p={id:'c'+q.id,n:q.name,k:[],collab:1,cid:q.id,own:q.owner};PL.push(p);changed=true;if(q.owner!==uid)fresh.push(q.name)}
+      var nk=keys.concat(p.k.filter(function(k){return !colShared(k)}));
+      if(p.n!==q.name&&!(p.own===uid&&p.n!==p.srvN)){p.n=q.name;changed=true}
+      if(nk.join('\n')!==p.k.join('\n')){p.k=nk;changed=true}
+      p.collab=1;p.own=q.owner;p.srv=keys.slice();p.srvN=q.name;
+    });
+    var keep=PL.filter(function(p,i){return !p.collab||!p.cid||(seen[p.cid]&&PL.findIndex(function(z){return z.cid===p.cid})===i)});
+    if(keep.length!==PL.length){PL=keep;changed=true;if(plId&&!PL.some(function(p){return p.id===plId})&&plId.slice(0,2)!=='r:'&&view==='pl'){view='pls';plId=''}}
+    save('wl_pl',PL);
+    if(fresh.length)toast(fresh.length===1?'Вас добавили в совместный плейлист «'+fresh[0]+'»':'Вас добавили в совместные плейлисты: '+fresh.length);
+    if(changed){if(view==='pls'||view==='pl')render();if(mlibOn)renderMlib()}
+  }).catch(function(){}).then(function(){colBusy=false;colAt=Date.now()})
+}
+setInterval(function(){if(document.hidden||!USER||Date.now()-colAt<25000)return;if(view==='pls'||(view==='pl'&&PL.some(function(p){return p.collab})))colPull()},15000);
+function colMake(p){
+  if(needLogin()||p.collab)return;
+  var cid=uuid4(),own=USER.id;
+  toast('Делаю плейлист совместным…');
+  SB.from('collab_playlists').insert({id:cid,owner:own,name:p.n}).then(function(r){
+    if(r.error)throw r.error;
+    var ks=p.k.filter(colShared);
+    if(!ks.length)return {error:null};
+    return SB.from('collab_tracks').insert(ks.map(function(k){return {playlist_id:cid,track_key:k,added_by:own}}))
+  }).then(function(r){
+    if(r&&r.error)throw r.error;
+    var old=p.id;p.id='c'+cid;p.collab=1;p.cid=cid;p.own=own;p.srv=p.k.filter(colShared);p.srvN=p.n;
+    if(plId===old)plId=p.id;
+    save('wl_pl',PL);render();if(mlibOn)renderMlib();
+    toast('Плейлист стал совместным. Добавьте друзей: «⋯» → Участники');
+  }).catch(function(){toast('Не удалось. Проверьте, что SQL из supabase_collab.sql выполнен')})
+}
+function colLeave(p){
+  if(!(SB&&USER))return;
+  var owner=p.own===USER.id;
+  if(!confirm(owner?'Удалить совместный плейлист «'+p.n+'» у всех участников?':'Выйти из совместного плейлиста «'+p.n+'»?'))return;
+  var q=owner?SB.from('collab_playlists').delete().eq('id',p.cid):SB.from('collab_members').delete().eq('playlist_id',p.cid).eq('user_id',USER.id);
+  q.then(function(r){
+    if(r.error)throw r.error;
+    var i=PL.indexOf(p);if(i>-1)PL.splice(i,1);
+    save('wl_pl',PL);
+    if(plId===p.id){view='pls';plId=''}
+    render();if(mlibOn)renderMlib();
+    toast(owner?'Плейлист удалён у всех':'Вы вышли из плейлиста');
+  }).catch(function(){toast('Не удалось. Проверьте связь и попробуйте ещё раз')})
+}
+/* участники */
+var CM={p:null,list:null,err:0};
+function colMembers(p){CM={p:p,list:null,err:0};mnKind='cmem';mnKey=p.id;mnId=-1;renderCmem();$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false');colMemLoad()}
+function colMemLoad(){
+  var p=CM.p;if(!p||!SB)return;
+  SB.from('collab_members').select('user_id,added_at').eq('playlist_id',p.cid).order('added_at').then(function(r){
+    if(CM.p!==p)return;
+    if(r.error){CM.err=1;return renderCmem()}
+    CM.list=r.data||[];CM.err=0;
+    var need=[];[p.own].concat(CM.list.map(function(x){return x.user_id})).forEach(function(id){if(id&&!PEOPLE[id]&&need.indexOf(id)<0)need.push(id)});
+    if(!need.length)return renderCmem();
+    return SB.from('profiles').select('user_id,nick,avatar').in('user_id',need).then(function(r2){(r2.data||[]).forEach(function(q){PEOPLE[q.user_id]={n:q.nick||'без ника',a:q.avatar||''}});if(CM.p===p)renderCmem()})
+  }).catch(function(){if(CM.p===p){CM.err=1;renderCmem()}})
+}
+function renderCmem(){
+  var p=CM.p;if(!p||mnKind!=='cmem')return;
+  var me=!!(USER&&USER.id===p.own),H=function(s){return '<div class="hint" style="padding:14px 4px;color:var(--mut)">'+s+'</div>'},
+      nm=function(id){return USER&&id===USER.id?((PROF&&PROF.nick)||'вы'):(PEOPLE[id]||{n:'без ника'}).n},rows='';
+  if(CM.err)rows=H('Не удалось загрузить участников. Проверьте, что SQL из supabase_collab.sql выполнен');
+  else if(CM.list===null)rows=H('Загружаю…');
+  else rows='<div class="cm"><div class="cm-h"><button class="cm-n" data-m="cmus" data-x="'+esc(p.own)+'" type="button">@'+esc(nm(p.own))+'</button><span>владелец</span></div></div>'+
+    CM.list.map(function(x){return '<div class="cm"><div class="cm-h"><button class="cm-n" data-m="cmus" data-x="'+esc(x.user_id)+'" type="button">@'+esc(nm(x.user_id))+'</button>'+(me?'<button class="cm-x" data-m="cmrm" data-x="'+esc(x.user_id)+'" type="button" aria-label="Убрать">'+ic('x')+'</button>':'')+'</div></div>'}).join('');
+  $('mnBody').innerHTML='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:''})+'<div><div class="tt">Участники</div><div class="ar">'+esc(p.n)+'</div></div></div>'+
+    (me?mi('cmadd','plus','Добавить друга по нику'):'')+rows+
+    (me?mi('cmdel','x','Удалить плейлист у всех'):mi('cmleave','x','Выйти из плейлиста'))+
+    H('Все участники могут добавлять и убирать треки. Название меняет владелец.')
+}
+function colAddMember(p){
+  if(!(SB&&USER))return;
+  askName('Ник друга','',function(n){
+    n=n.toLowerCase().replace(/^@/,'');
+    SB.from('profiles').select('user_id,nick,avatar').eq('nick',n).maybeSingle().then(function(r){
+      if(!r||!r.data)return toast('Такого ника нет');
+      var q=r.data;if(q.user_id===USER.id)return toast('Это вы');
+      PEOPLE[q.user_id]={n:q.nick||'без ника',a:q.avatar||''};
+      return SB.from('collab_members').insert({playlist_id:p.cid,user_id:q.user_id}).then(function(r2){
+        if(r2.error){toast(r2.error.code==='23505'?'Этот человек уже в плейлисте':'Не удалось добавить');return}
+        toast('@'+q.nick+' добавлен(а). Плейлист появится у него в списке');if(CM.p===p)colMemLoad()})
+    }).catch(function(){toast('Нет связи с сервером')})
+  },'Добавить')
+}
+function cmemPick(b){
+  var m=b.dataset.m,p=CM.p;if(!p)return;
+  if(m==='cmadd')colAddMember(p);
+  else if(m==='cmrm'){SB.from('collab_members').delete().eq('playlist_id',p.cid).eq('user_id',b.dataset.x).then(function(r){if(r.error)return toast('Не удалось убрать');toast('Участник убран');colMemLoad()}).catch(function(){toast('Нет связи с сервером')})}
+  else if(m==='cmleave'||m==='cmdel'){closeMenu();colLeave(p)}
+  else if(m==='cmus'){closeMenu();usrOpen(b.dataset.x)}
+}
+
 /* «О сайте» */
 function aboutOpen(o){$('about').classList.toggle('on',o);$('about').setAttribute('aria-hidden',o?'false':'true')}
 $('aboutBtn').onclick=function(){aboutOpen(true)};
@@ -3921,7 +4055,7 @@ function loadCovers(){
 var mnId=-1,lastSave=0,SK='';for(var si=0;si<9;si++)SK+='<div class="sk"><i></i><div><b></b><b></b></div></div>';
 function byKey(k){return TRACKS.filter(function(t){return t.key===k})[0]}
 function curPl(){if(plId.slice(0,2)==='r:'){var r=RPL[plId.slice(2)];return r?{id:plId,n:r.n,k:r.k,remote:true,pid:r.id,o:r.o}:null}return PL.filter(function(x){return x.id===plId})[0]}
-function savePL(){save('wl_pl',PL);pubSync()}
+function savePL(){save('wl_pl',PL);pubSync();try{colPushSoon()}catch(e){}}
 function askName(title,def,cb,ok){
   var o=document.createElement('div');o.className='ask';
   o.innerHTML='<div class="ask-b"><h3></h3><input type="text" maxlength="80" autocomplete="off"><div class="ask-a"><button type="button" class="ask-c">Отмена</button><button type="button" class="ask-o"></button></div></div>';
@@ -4010,7 +4144,7 @@ function autoOpen(id){
     else if(b.dataset.as==='save'){PL.push({id:'p'+Date.now().toString(36),n:D[1]+' '+D[2],k:D[3].map(function(t){return t.key})});savePL();close();toast('Плейлист сохранён: «'+D[2]+'»');if(view==='pls')render()}})}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-auto]');if(b)autoOpen(b.dataset.auto)});
 function pcard(p,i){var f=p.k.map(byKey).filter(function(t){return t&&t.img})[0];
-  return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-pl="'+esc(p.id)+'" type="button">'+cv({img:f?f.img:''})+'<div class="tt">'+esc(p.n)+'</div><div class="ar">'+p.k.length+' '+plural(p.k.length,['трек','трека','треков'])+'</div></button>'}
+  return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-pl="'+esc(p.id)+'" type="button">'+cv({img:f?f.img:''})+'<div class="tt">'+esc(p.n)+'</div><div class="ar">'+p.k.length+' '+plural(p.k.length,['трек','трека','треков'])+(p.collab?' · совместный':'')+'</div></button>'}
 function mi(a,icon,label,x){return '<button class="mi" data-m="'+a+'"'+(x?' data-x="'+esc(x)+'"':'')+' type="button">'+ic(icon)+label+'</button>'}
 var mnKind='tr',mnKey='';
 function mxObj(){if(mnKind==='pl')return plObj(mnKey);return (mnKind==='al'?ALB:ARTS).filter(function(x){return x.k===mnKey})[0]}
@@ -4035,6 +4169,7 @@ function menuX(b){
   if(mnKind==='sort')return sortPick(b);
   if(mnKind==='usr')return usrPick(b);
   if(mnKind==='cmt')return cmtPick(b);
+  if(mnKind==='cmem')return cmemPick(b);
   if(mnKind==='wish'||mnKind==='new')return sheetPick(b);
   var m=b.dataset.m,k=mnKey,kind=mnKind,A=mxObj(),ids=mxIds();
   if(!A){closeMenu();return}
@@ -4051,6 +4186,8 @@ function menuX(b){
   else if(m==='next'){if(!ids.length)return toast('Нет треков');ids.slice().reverse().forEach(function(id){queue.unshift(id)});toast('Сыграет следующим: '+ids.length+' '+plural(ids.length,['трек','трека','треков']));renderNav()}
   else if(m==='pub'&&kind==='pl'){pubSet(A.p,!A.p.pub)}
   else if(m==='plshare'&&kind==='pl'){pubSet(A.p,true,function(){shareLink('#pl='+encodeURIComponent(A.p.pid),A.n)})}
+  else if(m==='colmk'&&kind==='pl'){colMake(A.p)}
+  else if(m==='colmem'&&kind==='pl'){colMembers(A.p)}
   else if(m==='ren'&&kind==='pl'){askName('Новое название',A.n,function(n){A.p.n=n;savePL();render();if(mlibOn)renderMlib()},'Сохранить')}
   else if(m==='offall')offSave(ids.slice());
   else if(m==='dlall'){if(!ids.length)return toast('Нет треков');toast('Скачиваю треков: '+ids.length);ids.forEach(function(id,i){setTimeout(function(){download(id)},i*900)})}
@@ -4069,10 +4206,11 @@ function renderMenuX(mode){
   if(mnKind==='sort')return renderSort();
   if(mnKind==='usr')return renderUsr();
   if(mnKind==='cmt')return renderCmt();
+  if(mnKind==='cmem')return renderCmem();
   if(mnKind==='wish'||mnKind==='new')return renderSheetX();
   if(mnKind==='pl'){var O=plObj(mnKey);if(!O)return;
     $('mnBody').innerHTML='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:''})+'<div><div class="tt">'+esc(O.n)+'</div><div class="ar">Плейлист · '+O.tr.length+' '+plural(O.tr.length,['трек','трека','треков'])+'</div></div></div>'+
-      mi('play','play','Слушать')+mi('shuf','shuf','Вперемешку')+mi('next','plus','Играть следующим')+mi('qall','list','Добавить в очередь')+mi('offall','dl','Сохранить офлайн')+mi('plshare','share','Поделиться ссылкой')+mi('pub','list',O.p.pub?'Сделать приватным':'Сделать публичным')+mi('ren','list','Переименовать');return}
+      mi('play','play','Слушать')+mi('shuf','shuf','Вперемешку')+mi('next','plus','Играть следующим')+mi('qall','list','Добавить в очередь')+mi('offall','dl','Сохранить офлайн')+mi('plshare','share','Поделиться ссылкой')+mi('pub','list',O.p.pub?'Сделать приватным':'Сделать публичным')+mi('ren','list','Переименовать')+(O.p.collab?mi('colmem','user','Участники совместного плейлиста'):mi('colmk','user','Сделать совместным с друзьями'));return}
 
   if(mode==='pl'&&mnKind==='al')return mxPl();
   var k=mnKey,h,tr;
@@ -4133,7 +4271,7 @@ $('xBtn').onclick=function(){
   else if(view==='pl'){var P=curPl();if(P&&P.remote){PL.push({id:'p'+Date.now().toString(36),n:P.n,k:P.k.slice()});savePL();toast('Плейлист сохранён себе: «'+P.n+'»');return}if(P)askName('Новое название',P.n,function(n){P.n=n;savePL();render()},'Сохранить')}
   else if(view==='queue'){queue.length=0;render()}
   else if(view==='album'||view==='artist'||view==='fav'){offSave(playIds().slice())}};
-$('xBtn2').onclick=function(){var P=curPl();if(P&&confirm('Удалить плейлист «'+P.n+'»?')){PL.splice(PL.indexOf(P),1);savePL();view='pls';render()}};
+$('xBtn2').onclick=function(){var P=curPl();if(P&&P.collab){colLeave(P);return}if(P&&confirm('Удалить плейлист «'+P.n+'»?')){PL.splice(PL.indexOf(P),1);savePL();view='pls';render()}};
 /* продолжить с места */
 audio.addEventListener('timeupdate',function(){var n=Date.now();if(cur>-1&&TRACKS[cur]&&n-lastSave>4000){lastSave=n;save('wl_last',{k:TRACKS[cur].key,p:audio.currentTime})}});
 audio.addEventListener('pause',function(){if(cur>-1&&TRACKS[cur]&&audio.currentTime>0)save('wl_last',{k:TRACKS[cur].key,p:audio.currentTime})});
