@@ -630,6 +630,14 @@ body::before{animation:none}
 .accmsg.ok{color:var(--acc)}
 .fld[hidden],#accRe[hidden]{display:none!important}
 #accC{letter-spacing:.5em;text-align:center;font-size:22px}
+.cm-box{display:flex;gap:8px;margin:10px 0 6px}
+.cm-box input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;color:var(--text);font-size:16px;outline:0}
+.cm-box input:focus{border-color:var(--acc)}
+.cm{padding:12px 4px;border-bottom:1px solid var(--line)}
+.cm-h{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut)}
+.cm-n{padding:0;color:var(--acc);font-size:13px;font-weight:600}
+.cm-x{margin-left:auto;padding:4px;color:var(--mut)}.cm-x .i{width:16px;height:16px}
+.cm-b{margin-top:4px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
 .alink{display:block;margin:16px 0 0;padding:0;color:var(--acc);font-size:14px;background:none;text-align:left}
 .abt{line-height:1.55;margin:12px 0}
 a.btn{text-decoration:none}
@@ -3102,7 +3110,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=70;
+var APP_VER='7.0',APP_BUILD=71;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3692,6 +3700,54 @@ function usrPick(b){var m=b.dataset.m;
   else if(m==='uar'){closeMenu();view='artist';artK=b.dataset.x;genre='';query='';if(npOn)closeNp();$('scroll').scrollTop=0;render()}
   else if(m==='utr'){var t=byKey(b.dataset.x);closeMenu();if(t)playId(t.id)}}
 
+/* комментарии к трекам */
+var CMT={id:-1,key:'',list:null,err:0,busy:false,last:0};
+function cmtAgo(s){var d=Math.floor((Date.now()-new Date(s).getTime())/1000);if(d<60)return 'только что';if(d<3600)return Math.floor(d/60)+' мин назад';if(d<86400)return Math.floor(d/3600)+' ч назад';if(d<2592000)return Math.floor(d/86400)+' дн назад';return new Date(s).toLocaleDateString('ru-RU')}
+function cmtOpen(id){var t=TRACKS[id];if(!t)return;CMT={id:id,key:t.key,list:null,err:0,busy:false,last:0};mnKind='cmt';mnKey=t.key;mnId=id;renderCmt();cmtLoad()}
+function renderCmt(){var t=TRACKS[CMT.id];if(!t)return;
+  var box=(SB&&USER)?'<div class="cm-box"><input id="cmT" type="text" maxlength="500" autocomplete="off" placeholder="Напишите комментарий…"><button class="btn" id="cmGo" type="button">Отправить</button></div>'
+    :'<button class="btn" data-m="clog" type="button" style="width:100%;justify-content:center;margin:10px 0 6px">Войти, чтобы комментировать</button>';
+  $('mnBody').innerHTML='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv(t)+'<div><div class="tt">Комментарии</div><div class="ar">'+esc(t.t+' · '+ad(t))+'</div></div></div>'+
+    mi('back','down','Назад')+box+'<div id="cmL"></div>';
+  var g=$('cmGo');if(g){g.onclick=cmtSend;$('cmT').onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();cmtSend()}}}
+  cmtPaint()}
+function cmtPaint(){var e=$('cmL');if(!e||mnKind!=='cmt')return;
+  var H=function(s){return '<div class="hint" style="padding:14px 4px;color:var(--mut)">'+s+'</div>'};
+  if(CMT.err)return e.innerHTML=H('Не удалось загрузить комментарии. Проверьте, что SQL из supabase_comments.sql выполнен');
+  if(CMT.list===null)return e.innerHTML=H('Загружаю…');
+  if(!CMT.list.length)return e.innerHTML=H('Пока нет комментариев. Напишите первым');
+  e.innerHTML=CMT.list.map(function(c){var p=PEOPLE[c.user_id]||{n:'без ника',a:''},me=USER&&USER.id===c.user_id;
+    return '<div class="cm"><div class="cm-h"><button class="cm-n" data-m="cusr" data-x="'+esc(c.user_id)+'" type="button">@'+esc(p.n)+'</button><span>'+cmtAgo(c.created_at)+'</span>'+(me?'<button class="cm-x" data-m="cdel" data-x="'+c.id+'" type="button" aria-label="Удалить">'+ic('x')+'</button>':'')+'</div><div class="cm-b">'+esc(c.body)+'</div></div>'}).join('')}
+function cmtLoad(){var key=CMT.key;
+  if(!SB){CMT.list=[];return cmtPaint()}
+  SB.from('track_comments').select('id,user_id,body,created_at').eq('track_key',key).order('created_at',{ascending:false}).limit(100).then(function(r){
+    if(CMT.key!==key)return;
+    if(r.error){CMT.err=1;return cmtPaint()}
+    var l=r.data||[],need=[];CMT.list=l;CMT.err=0;
+    l.forEach(function(c){if(!PEOPLE[c.user_id]&&need.indexOf(c.user_id)<0)need.push(c.user_id)});
+    if(!need.length)return cmtPaint();
+    return SB.from('profiles').select('user_id,nick,avatar').in('user_id',need).then(function(r2){(r2.data||[]).forEach(function(q){PEOPLE[q.user_id]={n:q.nick||'без ника',a:q.avatar||''}});if(CMT.key===key)cmtPaint()})
+  }).catch(function(){if(CMT.key===key){CMT.err=1;cmtPaint()}})}
+function cmtSend(){
+  if(!(SB&&USER)){closeMenu();needLogin();return}
+  var inp=$('cmT'),v=inp?inp.value.trim():'';
+  if(!v)return toast('Напишите текст комментария');
+  if(v.length>500)return toast('Не больше 500 символов');
+  if(CMT.busy)return;
+  if(Date.now()-CMT.last<3000)return toast('Подождите пару секунд');
+  CMT.busy=true;var key=CMT.key;
+  SB.from('track_comments').insert({track_key:key,user_id:USER.id,body:v}).then(function(r){CMT.busy=false;
+    if(r.error){toast(/row-level|permission|relation|does not exist/i.test(r.error.message||'')?'Не удалось. Проверьте, что SQL из supabase_comments.sql выполнен':'Не удалось отправить');return}
+    CMT.last=Date.now();if(inp)inp.value='';if(CMT.key===key)cmtLoad()
+  }).catch(function(){CMT.busy=false;toast('Нет связи с сервером')})}
+function cmtPick(b){var m=b.dataset.m;
+  if(m==='back'){mnKind='tr';renderMenu('main')}
+  else if(m==='clog'){closeMenu();accOpen('login')}
+  else if(m==='cusr'){closeMenu();usrOpen(b.dataset.x)}
+  else if(m==='cdel'){var id=b.dataset.x;if(!SB)return;
+    SB.from('track_comments').delete().eq('id',id).then(function(r){if(r.error)return toast('Не удалось удалить');
+      CMT.list=(CMT.list||[]).filter(function(c){return String(c.id)!==String(id)});cmtPaint();toast('Комментарий удалён')}).catch(function(){toast('Нет связи с сервером')})}}
+
 /* «О сайте» */
 function aboutOpen(o){$('about').classList.toggle('on',o);$('about').setAttribute('aria-hidden',o?'false':'true')}
 $('aboutBtn').onclick=function(){aboutOpen(true)};
@@ -3978,6 +4034,7 @@ function shareAA(kind,key){
 function menuX(b){
   if(mnKind==='sort')return sortPick(b);
   if(mnKind==='usr')return usrPick(b);
+  if(mnKind==='cmt')return cmtPick(b);
   if(mnKind==='wish'||mnKind==='new')return sheetPick(b);
   var m=b.dataset.m,k=mnKey,kind=mnKind,A=mxObj(),ids=mxIds();
   if(!A){closeMenu();return}
@@ -4011,6 +4068,7 @@ function plObj(id){var p=PL.filter(function(x){return x.id===id})[0];if(!p)retur
 function renderMenuX(mode){
   if(mnKind==='sort')return renderSort();
   if(mnKind==='usr')return renderUsr();
+  if(mnKind==='cmt')return renderCmt();
   if(mnKind==='wish'||mnKind==='new')return renderSheetX();
   if(mnKind==='pl'){var O=plObj(mnKey);if(!O)return;
     $('mnBody').innerHTML='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:''})+'<div><div class="tt">'+esc(O.n)+'</div><div class="ar">Плейлист · '+O.tr.length+' '+plural(O.tr.length,['трек','трека','треков'])+'</div></div></div>'+
@@ -4038,7 +4096,7 @@ function renderMenu(mode){if(mnKind!=='tr')return renderMenuX(mode);var t=TRACKS
   var h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv(t)+'<div><div class="tt">'+esc(t.t)+'</div><div class="ar">'+esc(ad(t))+'</div></div></div>';
   if(mode==='pl')h+=mi('back','down','Назад')+mi('newpl','plus','Новый плейлист')+PL.map(function(p){var has=p.k.indexOf(t.key)>-1;return mi('addpl',has?'check':'list',esc(p.n)+(has?' — уже добавлен':''),p.id)}).join('');
   else if(t.mine){var fv0=favs.indexOf(t.key)>-1;h+=mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+'<button class="mi'+(fv0?' on':'')+'" data-m="fav" type="button">'+(fv0?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv0?'Убрать из избранного':'В избранное')+'</button>'+mi('pl','plus','Добавить в плейлист')+mi('mydel','x','Удалить из моих файлов')}
-  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(!t.pv?mi('studio','mic','Записать кавер в студии'):'')+(SB&&!t.pv?mi('cover','plus','Выложить кавер (файл)'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
+  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+(!t.pv?mi('cmt','msg','Комментарии'):'')+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(!t.pv?mi('studio','mic','Записать кавер в студии'):'')+(SB&&!t.pv?mi('cover','plus','Выложить кавер (файл)'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
   $('mnBody').innerHTML=h}
 function openMenuX(kind,key){mnKind=kind;mnKey=key;mnId=-1;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
 function openMenu(id){mnKind='tr';mnId=id;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
@@ -4053,6 +4111,7 @@ $('npMore').onclick=function(){if(cur>-1)openMenu(cur)};
 $('mnBody').onclick=function(e){var b=e.target.closest('[data-m]');if(!b)return;if(mnKind!=='tr')return menuX(b);var m=b.dataset.m,t=TRACKS[mnId];if(!t)return;
   if(m==='pl')return renderMenu('pl');
   if(m==='back')return renderMenu('main');
+  if(m==='cmt')return cmtOpen(mnId);
   if(m==='newpl'){newPl(function(n){n.k.push(t.key);savePL();toast('Добавлено в «'+n.n+'»');closeMenu();render()});return}
   if(m==='addpl'){var p=PL.filter(function(x){return x.id===b.dataset.x})[0];if(p&&p.k.indexOf(t.key)<0){p.k.push(t.key);savePL();toast('Добавлено в «'+p.n+'»')}closeMenu();return render()}
   closeMenu();
