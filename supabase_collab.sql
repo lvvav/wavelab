@@ -51,39 +51,39 @@ alter table public.collab_members enable row level security;
 alter table public.collab_tracks enable row level security;
 
 -- плейлисты
-drop policy if exists "cp select" on public.collab_playlists;
-create policy "cp select" on public.collab_playlists
+drop policy if exists cp_select on public.collab_playlists;
+create policy cp_select on public.collab_playlists
   for select to authenticated using (owner = auth.uid() or public.collab_can(id));
-drop policy if exists "cp insert" on public.collab_playlists;
-create policy "cp insert" on public.collab_playlists
+drop policy if exists cp_insert on public.collab_playlists;
+create policy cp_insert on public.collab_playlists
   for insert to authenticated with check (owner = auth.uid());
-drop policy if exists "cp update" on public.collab_playlists;
-create policy "cp update" on public.collab_playlists
+drop policy if exists cp_update on public.collab_playlists;
+create policy cp_update on public.collab_playlists
   for update to authenticated using (owner = auth.uid()) with check (owner = auth.uid());
-drop policy if exists "cp delete" on public.collab_playlists;
-create policy "cp delete" on public.collab_playlists
+drop policy if exists cp_delete on public.collab_playlists;
+create policy cp_delete on public.collab_playlists
   for delete to authenticated using (owner = auth.uid());
 
 -- участники
-drop policy if exists "cm select" on public.collab_members;
-create policy "cm select" on public.collab_members
+drop policy if exists cm_select on public.collab_members;
+create policy cm_select on public.collab_members
   for select to authenticated using (public.collab_can(playlist_id));
-drop policy if exists "cm insert" on public.collab_members;
-create policy "cm insert" on public.collab_members
+drop policy if exists cm_insert on public.collab_members;
+create policy cm_insert on public.collab_members
   for insert to authenticated with check (public.collab_owns(playlist_id));
-drop policy if exists "cm delete" on public.collab_members;
-create policy "cm delete" on public.collab_members
+drop policy if exists cm_delete on public.collab_members;
+create policy cm_delete on public.collab_members
   for delete to authenticated using (public.collab_owns(playlist_id) or user_id = auth.uid());
 
 -- треки
-drop policy if exists "ct select" on public.collab_tracks;
-create policy "ct select" on public.collab_tracks
+drop policy if exists ct_select on public.collab_tracks;
+create policy ct_select on public.collab_tracks
   for select to authenticated using (public.collab_can(playlist_id));
-drop policy if exists "ct insert" on public.collab_tracks;
-create policy "ct insert" on public.collab_tracks
+drop policy if exists ct_insert on public.collab_tracks;
+create policy ct_insert on public.collab_tracks
   for insert to authenticated with check (public.collab_can(playlist_id) and added_by = auth.uid());
-drop policy if exists "ct delete" on public.collab_tracks;
-create policy "ct delete" on public.collab_tracks
+drop policy if exists ct_delete on public.collab_tracks;
+create policy ct_delete on public.collab_tracks
   for delete to authenticated using (public.collab_can(playlist_id));
 
 revoke all on public.collab_playlists, public.collab_members, public.collab_tracks from anon;
