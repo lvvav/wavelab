@@ -3110,7 +3110,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=74;
+var APP_VER='7.0',APP_BUILD=75;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3980,6 +3980,40 @@ function flacTags(get){var o={tags:{},pic:null};
       else if(!o.pic){var p=4,ml=u32(b,p);p+=4+ml;var dl=u32(b,p);p+=4+dl+16;var pn=u32(b,p);p+=4;o.pic=b.subarray(p,p+pn)}
       return next()})})}
 }
+/* m4a/aac (MP4): название, автор, альбом, номер и обложка из блока moov/udta/meta/ilst */
+function m4aTags(get){var o={tags:{},pic:null};
+  return get(0,12).then(function(h){
+    if(h[4]!==102||h[5]!==116||h[6]!==121||h[7]!==112)return o;
+    return top(0,0)});
+  function top(pos,n){
+    if(n>40||pos>12e6)return o;
+    return get(pos,16).then(function(h){
+      var sz=u32(h,0),ty=String.fromCharCode(h[4],h[5],h[6],h[7]),hl=8;
+      if(sz===1){sz=u32(h,8)*4294967296+u32(h,12);hl=16}
+      if(sz<hl)return o;
+      if(ty==='moov'){if(sz>8e6)return o;return get(pos+hl,sz-hl).then(function(b){scan(b,0,b.length,0);return o})}
+      return top(pos+sz,n+1)})}
+  function scan(b,s,e,depth){
+    while(s+8<=e){
+      var sz=u32(b,s),ty=String.fromCharCode(b[s+4],b[s+5],b[s+6],b[s+7]);
+      if(sz<8||s+sz>e)break;
+      if(ty==='udta'&&depth<3)scan(b,s+8,s+sz,depth+1);
+      else if(ty==='meta'&&depth<4)scan(b,s+12,s+sz,depth+1);
+      else if(ty==='ilst')items(b,s+8,s+sz);
+      s+=sz}}
+  function items(b,s,e){
+    var K={'\xa9nam':'t','\xa9ART':'a','\xa9alb':'al','aART':'aa','\xa9day':'y','\xa9gen':'g'};
+    while(s+8<=e){
+      var sz=u32(b,s),ty=String.fromCharCode(b[s+4],b[s+5],b[s+6],b[s+7]);
+      if(sz<8||s+sz>e)break;
+      if(b[s+12]===100&&b[s+13]===97&&b[s+14]===116&&b[s+15]===97&&sz>24){
+        var d=b.subarray(s+24,s+sz);
+        if(K[ty]){if(!o.tags[K[ty]])o.tags[K[ty]]=dec(d,3)}
+        else if(ty==='trkn'&&d.length>=4)o.tags.n=(d[2]<<8)|d[3];
+        else if(ty==='disk'&&d.length>=4)o.tags.d=(d[2]<<8)|d[3];
+        else if(ty==='covr'&&!o.pic)o.pic=d}
+      s+=sz}}
+}
 function clean(r,o){var g={};['t','a','al','aa','g'].forEach(function(k){var v=String(r[k]||'').split('\0')[0].trim();if(v)g[k]=v});
   var y=String(r.y||'').match(/\d{4}/);if(y)g.y=y[0];var n=parseInt(r.n,10);if(n)g.n=n;var dn=parseInt(r.d,10);if(dn>0)g.d=dn;
   if(/^\(?\d+\)?$/.test(g.g||''))delete g.g;
@@ -4022,7 +4056,7 @@ function covPump(){
   if(covQ.length&&cur>-1&&!audio.paused&&!audio.error&&(audio.readyState<3||pfBusyAny())){clearTimeout(covWait);covWait=setTimeout(covPump,1500);return}
   while(covBusy<((cur>-1&&!audio.paused)?1:4)&&covQ.length){(function(t){covBusy++;
     var ck=t.key+'|'+t.sz,get=reader(t.src),isF=/\.flac$/i.test(t.key),ok=false;
-    (isF?flacTags:id3Tags)(get).then(function(r){
+    (isF?flacTags:/\.m4a$/i.test(t.key)?m4aTags:id3Tags)(get).then(function(r){
       var g=clean(r.tags,r);g.p=r.pic?1:0;ok=true;applyTags(t,g);
       var save=function(){tagCache[ck]=g};
       if(!r.pic){save();return}
@@ -4041,7 +4075,7 @@ function covPump(){
 function loadCovers(){
   covOpen(function(){
     covReady=true;
-    TRACKS.forEach(function(t){if(!/\.(mp3|flac)$/i.test(t.key))return;
+    TRACKS.forEach(function(t){if(!/\.(mp3|flac|m4a)$/i.test(t.key))return;
       var ck=t.key+'|'+t.sz,g=tagCache[ck],b=covCache[ck];
       if(g)applyTags(t,g);
       if(!t.img&&b)t.img=blobUrl(b);
