@@ -3150,7 +3150,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=79;
+var APP_VER='7.0',APP_BUILD=80;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6323,8 +6323,9 @@ loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(tru
 
   /* накладываем правки на треки и обложки */
   var _am=applyMeta;applyMeta=function(t){_am(t);var o=OV.t[t.key];if(o){if(o.al)t.al=o.al;if(o.aa)t.aa=o.aa}};
-  var _ba=buildAlbums;buildAlbums=function(){_ba();ALB.forEach(function(A){if(OV.c[A.k])A.img=OV.c[A.k]});};
-  function refresh(){TRACKS.forEach(function(t){var o=OV.t[t.key];if(o){if(o.al)t.al=o.al;if(o.aa)t.aa=o.aa}});buildAlbums();try{applyAA()}catch(e){}render()}
+  /* обложка альбома, выбранная в редакторе, ставится и самому альбому, и всем его песням */
+  var _ba=buildAlbums;buildAlbums=function(){_ba();ALB.forEach(function(A){var u=OV.c[A.k];if(u){A.img=u;A.tr.forEach(function(t){t.img=u})}})};
+  function refresh(){TRACKS.forEach(function(t){var o=OV.t[t.key];if(o){if(o.al)t.al=o.al;if(o.aa)t.aa=o.aa}});buildAlbums();try{applyAA()}catch(e){}render();try{var ct=TRACKS[cur];if(ct){setCv($('pCv'),ct);if(npOn)syncNp()}}catch(e){}}
 
   /* стили */
   var st=document.createElement('style');st.textContent=
