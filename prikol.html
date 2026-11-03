@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoundLife ПРИКОЛ</title>
+<style>body{margin:0;background:#f0f;color:#0f0;font:700 26px 'Comic Sans MS',cursive;display:grid;place-items:center;height:100vh;text-align:center}</style>
+</head>
+<body>ЗАГРУЖАЕМ УЖАС… 🌈🔥</body>
+<script>
+/* Прикол: тот же сайт, но с ужасным оформлением. Берёт настоящий index.html и накладывает поверх страшные стили,
+   поэтому всегда работает как основной сайт (все новые функции сразу тут). Основной сайт не меняется. */
+(function(){
+var CSS=`
+:root{--bg:#ff00c8!important;--panel:#00e5ff!important;--hover:#fff200!important;--line:#ff0000!important;--text:#1a00ff!important;--mut:#008a00!important;--acc:#ff6a00!important;--on:#ffffff!important;--danger:#00ff00!important;--r:0px!important}
+html{animation:prHue 7s linear infinite}
+@keyframes prHue{to{filter:hue-rotate(360deg)}}
+*{font-family:'Comic Sans MS','Comic Neue','Chalkboard SE','Marker Felt',cursive!important}
+body,.side,.main,.bar,.player,.tabs,nav{background:repeating-linear-gradient(45deg,#ff00c8 0 22px,#ffee00 22px 44px)!important;color:#1a00ff!important}
+body{padding-top:34px;cursor:crosshair}
+button,.btn,.nv,.mi,.hub-r{border:3px dashed #000!important;box-shadow:4px 4px 0 #000;text-shadow:1px 1px 0 #fff;transform:rotate(-1.2deg)}
+button:nth-child(even),.nv:nth-child(even){transform:rotate(1.8deg)}
+button:hover{transform:scale(1.12) rotate(4deg)!important}
+.cv{animation:prSpin 9s linear infinite;border-radius:50%!important}
+@keyframes prSpin{to{transform:rotate(360deg)}}
+.logo,h1,h2,h3,.nav-h{animation:prBlink .9s steps(2) infinite;text-decoration:underline wavy #f00;letter-spacing:.12em!important}
+@keyframes prBlink{50%{opacity:.25}}
+::-webkit-scrollbar{width:30px}::-webkit-scrollbar-thumb{background:#f0f;border:5px solid #0f0}
+input{border:4px double #f00!important;background:#ffff99!important}
+#prBar{position:fixed;top:0;left:0;right:0;height:34px;z-index:99999;background:#000;color:#ff0;overflow:hidden;white-space:nowrap;font-size:18px;line-height:34px}
+#prBar span{display:inline-block;padding-left:100%;animation:prRoll 14s linear infinite}
+@keyframes prRoll{to{transform:translateX(-100%)}}
+#prBack{position:fixed;left:8px;bottom:96px;z-index:99999;padding:8px 12px;background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,magenta);color:#000;font-weight:900;font-size:14px;text-decoration:none;transform:rotate(-6deg);border:3px dotted #000}
+#prGo{position:fixed;right:8px;bottom:96px;z-index:99999;padding:10px 14px;background:#0f0;color:#f00;font-weight:900;font-size:18px;animation:prJump .6s ease-in-out infinite alternate}
+@keyframes prJump{to{transform:translateY(-14px) rotate(8deg)}}
+.prE{position:fixed;z-index:99998;pointer-events:none;font-size:30px;animation:prFall 2.4s ease-in forwards}
+@keyframes prFall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
+`;
+var JS=`
+(function(){
+var E=['🔥','💥','🌈','🎉','🦄','🍕','👾','💃','🤡','⭐','💿','🎸','🐸','🍉'];
+function pop(x,y,fall){var e=document.createElement('div');e.className='prE';e.textContent=E[Math.floor(Math.random()*E.length)];e.style.left=x+'px';e.style.top=y+'px';
+ if(!fall)e.style.animationDuration='1s';document.body.appendChild(e);setTimeout(function(){e.remove()},2600)}
+var bar=document.createElement('div');bar.id='prBar';bar.innerHTML='<span>🔥🔥🔥 САМЫЙ ЛУЧШИЙ САЙТ ВО ВСЁМ ИНТЕРНЕТЕ 🔥🔥🔥 СЛУШАЙ МУЗЫКУ ПРЯМО СЕЙЧАС 🎵🎵🎵 ТОЛЬКО У НАС 💿 ЗВОНИ ДРУЗЬЯМ 📞 ЖМИ НА ВСЁ 👇👇👇</span>';
+document.body.appendChild(bar);
+var a=document.createElement('a');a.id='prBack';a.href='index.html';a.textContent='← на нормальный сайт';document.body.appendChild(a);
+var g=document.createElement('button');g.id='prGo';g.type='button';g.textContent='🎉 ЖМИ!!!';
+g.onclick=function(e){e.stopPropagation();for(var i=0;i<40;i++)pop(Math.random()*innerWidth,-30-Math.random()*200,1)};document.body.appendChild(g);
+document.addEventListener('click',function(e){pop(e.clientX,e.clientY,0)},true);
+var t='🔥 SoundLife ПРИКОЛ 🔥 ',i=0;setInterval(function(){document.title=t.slice(i%t.length)+t.slice(0,i%t.length);i++},350);
+})();
+`;
+fetch('index.html',{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(h){
+  var k=h.lastIndexOf('</body>');if(k<0)k=h.length;
+  h=h.replace('</head>','<style>'+CSS+'</style></head>');
+  k=h.lastIndexOf('</body>');if(k<0)k=h.length;
+  h=h.slice(0,k)+'<script>'+JS+'<\/script>'+h.slice(k);
+  document.open();document.write(h);document.close();
+}).catch(function(){document.body.innerHTML='Не получилось загрузить прикол 😢 <a href="index.html">на нормальный сайт</a>'});
+})();
+</script>
+</html>
