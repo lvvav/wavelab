@@ -3150,7 +3150,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=78;
+var APP_VER='7.0',APP_BUILD=79;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6299,7 +6299,6 @@ accPaint=function(){
 render();
 accInit();
 loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
-})();
 
 /* ===== Редактор альбома под замком (lvvav) ===== */
 (function(){
@@ -6417,6 +6416,7 @@ loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(tru
   var _r=render;render=function(){_r.apply(this,arguments);try{sync()}catch(e){}};
   TRACKS.length&&refresh();pull();
   var _fT=finishTracks;finishTracks=function(){_fT.apply(this,arguments);setTimeout(pull,0)};
+})();
 })();
 </script>
 </body>
