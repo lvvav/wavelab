@@ -3110,7 +3110,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=75;
+var APP_VER='7.0',APP_BUILD=76;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -5125,7 +5125,7 @@ audio.addEventListener('progress',pfCheck);
 audio.addEventListener('timeupdate',pfCheck);
 /* ===== Подгрузка трека кусками (как у Spotify): играем с первого куска, дальше держим запас ~40 с =====
    Только mp3 и только если браузер умеет MediaSource. Иначе, или при любой ошибке, работает обычный плеер. */
-var CHUNK={on:load('wl_chunk',true),cur:null},CK_AHEAD=40,CK_BACK=30;
+var CHUNK={on:load('wl_chunk',false),cur:null},CK_AHEAD=40,CK_BACK=30;
 window.slChunk=function(on){CHUNK.on=!!on;save('wl_chunk',CHUNK.on);toast(on?'Подгрузка кусками включена':'Подгрузка кусками выключена')};
 function chunkOk(t){
   return !!(CHUNK&&CHUNK.on&&window.MediaSource&&window.fetch&&window.AbortController&&MediaSource.isTypeSupported('audio/mpeg')&&
