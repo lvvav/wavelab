@@ -1,6 +1,6 @@
 // Soundlife: сервис-воркер. Кэширует оболочку сайта и обложки, чтобы всё открывалось быстро и без сети.
 // Музыка сюда не попадает: треки хранятся отдельно (кнопка «Сохранить офлайн»).
-var V = 'sl-shell-v76';
+var V = 'sl-shell-v77';
 var IMG = 'sl-img-v1';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
@@ -41,6 +41,17 @@ self.addEventListener('fetch', function (e) {
           return m || net;
         });
       })
+    );
+    return;
+  }
+
+  // Индекс тегов: всегда свежий из сети, офлайн из кэша
+  if (/\/tags\/index\.json$/.test(u.pathname)) {
+    e.respondWith(
+      fetch(r).then(function (res) {
+        if (res && res.ok) { var cp = res.clone(); caches.open(V).then(function (c) { c.put(r, cp); }); }
+        return res;
+      }).catch(function () { return caches.match(r); })
     );
     return;
   }

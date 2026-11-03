@@ -3110,7 +3110,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=76;
+var APP_VER='7.0',APP_BUILD=77;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6219,7 +6219,26 @@ accPaint=function(){
 };
 render();
 accInit();
-loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
+/* ===== готовый индекс тегов и обложек (tags/index.json, его строит tools/build-tags.js): названия и обложки видны сразу, без чтения каждого файла ===== */
+function idxLoad(cb){
+  var fin=false,go=function(){if(!fin){fin=true;cb()}};
+  setTimeout(go,3500);
+  try{
+    fetch('tags/index.json?b='+APP_BUILD,{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(j){
+      var late=fin;
+      try{
+        var T=j&&j.t,n=0;
+        if(T)TRACKS.forEach(function(t){
+          var ck=t.key+'|'+t.sz,e=T[ck];if(!e||!e[0])return;
+          tagCache[ck]=e[0];applyTags(t,e[0]);
+          if(e[1]&&!t.fimg)t.img='tags/c/'+e[1]+'.jpg';
+          n++});
+        if(n){dedupe();buildAlbums();try{applyAA()}catch(x){}persist();if(late)try{render()}catch(x){}}
+      }catch(x){}
+      go()}).catch(go);
+  }catch(x){go()}
+}
+loadTracks(function(){idxLoad(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()})});
 })();
 
 /* ===== Редактор альбома под замком (lvvav) ===== */
