@@ -1193,6 +1193,10 @@ body.noanim .wc>*{opacity:1;transform:none}
 #clRv{inset:0;width:100%;height:100%;z-index:0}
 .callui.rv #clRv{display:block}
 .callui.rv #clAv{display:none}
+#clVdo{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:0;background:#000}
+.callui.vdo:not(.vid) #clVdo{opacity:0;pointer-events:none}
+.callui.vdo.vid #clAv{display:none}
+.callui.vdo [data-cl="cam"],.callui.vdo [data-cl="flip"],.callui.vdo [data-cl="spk"]{display:none}
 .callui.rv .cl-top{text-shadow:0 1px 6px rgba(0,0,0,.7)}
 #clLv{z-index:2;right:14px;top:calc(14px + env(safe-area-inset-top));width:96px;height:128px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.5)}
 .callui.vid:not(.lo) #clLv{display:block}
@@ -3110,7 +3114,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=76;
+var APP_VER='7.0',APP_BUILD=77;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6016,6 +6020,8 @@ document.addEventListener('click',function(e){
 /*CALLS-BEGIN*/
 /* ===== звонки (WebRTC): сигнализация через broadcast-канал sl-call-<uid>, запись в чате: messages.track = call/<id> и call/<id>/<итог> ===== */
 var CALL={st:'idle',cid:'',peer:'',dir:'',me:'',pc:null,ls:null,rs:null,iceQ:[],iceOut:[],offerSdp:'',t0:0,tick:null,ringTm:null,dcTm:null,inTm:null,rt:null,rtUid:'',tx:{},ring:null,logged:0,polled:'',muted:false,video:false,hasCam:false,camOff:false,rcam:true,facing:'user',spkOn:false};
+/* звонки через VDO.Ninja (vdo.ninja): свои серверы связи, TURN не нужен. false = старый встроенный WebRTC */
+var CALL_VDO=true;
 var CALL_STUN=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}],CALL_ICE=CALL_STUN,CALL_ICE_AT=0,CALL_ICE_P=null;
 /* TURN: временные данные берём из функции turn-creds в Supabase (ключи только там). Не ответила за 3 сек. или не настроена: остаётся один STUN */
 function callIceLoad(){if(CALL_ICE_AT&&Date.now()-CALL_ICE_AT<50*60000)return Promise.resolve();if(CALL_ICE_P)return CALL_ICE_P;
@@ -6041,13 +6047,14 @@ function callPoll(uid){if(CALL.polled===uid||CALL.st!=='idle')return;CALL.polled
     var rows=(r&&r.data)||[],ended={},i,p;rows.forEach(function(m){p=m.track.split('/');if(p.length>2)ended[p[1]]=1});
     for(i=0;i<rows.length;i++){p=rows[i].track.split('/');if(p.length===2&&!ended[p[1]]){callSend(rows[i].sender,'poll',{cid:p[1],from:uid});break}}}).catch(function(){})}
 function callOn(ev,p){
-  if(ev==='offer'){if(!p.cid||!p.from||!p.sdp)return;
+  if(ev==='offer'){if(!p.cid||!p.from||(!p.sdp&&!p.vdo))return;
     if(CALL.st!=='idle'){if(CALL.cid===p.cid){if(CALL.st==='in')CALL.offerSdp=p.sdp;return}callSend(p.from,'busy',{cid:p.cid,from:USER.id});return}
     callIncoming(p);return}
-  if(ev==='poll'){if(CALL.dir==='out'&&CALL.cid===p.cid&&CALL.st==='ring'&&CALL.offerSdp){
-      callSend(CALL.peer,'offer',{cid:CALL.cid,from:CALL.me,sdp:CALL.offerSdp,video:CALL.video});CALL.iceOut.forEach(function(c){callSend(CALL.peer,'ice',{cid:CALL.cid,from:CALL.me,c:c})})}return}
+  if(ev==='poll'){if(CALL.dir==='out'&&CALL.cid===p.cid&&CALL.st==='ring'&&(CALL.offerSdp||CALL.vdo)){
+      callSend(CALL.peer,'offer',{cid:CALL.cid,from:CALL.me,sdp:CALL.offerSdp,vdo:CALL.vdo,video:CALL.video});CALL.iceOut.forEach(function(c){callSend(CALL.peer,'ice',{cid:CALL.cid,from:CALL.me,c:c})})}return}
   if(CALL.cid!==p.cid||CALL.st==='idle')return;
-  if(ev==='answer'){if(CALL.dir!=='out'||!CALL.pc||CALL.pc.remoteDescription)return;clearTimeout(CALL.ringTm);CALL.st='conn';callUiPaint();
+  if(ev==='answer'){if(CALL.vdo){if(CALL.dir==='out'&&CALL.st==='ring')vdoGo();return}
+    if(CALL.dir!=='out'||!CALL.pc||CALL.pc.remoteDescription)return;clearTimeout(CALL.ringTm);CALL.st='conn';callUiPaint();
     CALL.pc.setRemoteDescription({type:'answer',sdp:p.sdp}).then(callFlush).catch(function(){toast('Не удалось соединиться');callHang('fail',true)})}
   else if(ev==='ice'){if(CALL.pc&&CALL.pc.remoteDescription)CALL.pc.addIceCandidate(p.c).catch(function(){});else CALL.iceQ.push(p.c)}
   else if(ev==='cam'){CALL.rcam=!!p.on;callUiPaint()}
@@ -6080,6 +6087,13 @@ function callStart(peer,video){
   callRxStart();var cid=callId();
   CALL.st='ring';CALL.dir='out';CALL.peer=peer;CALL.cid=cid;CALL.me=USER.id;CALL.iceQ=[];CALL.iceOut=[];CALL.logged=0;CALL.t0=0;CALL.muted=false;CALL.offerSdp='';CALL.spkOn=false;CALL.video=!!video;CALL.hasCam=false;CALL.camOff=false;CALL.rcam=true;CALL.facing='user';
   chPeople([peer]).then(callUiPaint);callUiPaint();callPause();
+  if(CALL_VDO){
+    var v0={room:'sl'+callId()+callId(),pw:callId()+callId()};CALL.vdo=v0;
+    callSend(peer,'offer',{cid:cid,from:CALL.me,vdo:v0,video:CALL.video});
+    var nm0=(PROF&&PROF.nick)?'@'+PROF.nick:'друг';
+    SB.from('messages').insert({recipient:peer,body:(CALL.video?'📹 Звонит '+nm0+' (видео)':'📞 Звонит '+nm0),track:'call/'+cid}).then(function(){CALL.logged=1});
+    CALL.ringTm=setTimeout(function(){if(CALL.cid===cid&&CALL.st==='ring'){CALL.logged=CALL.logged||1;callHang('miss',true,'Не отвечает')}},30000);
+    return}
   Promise.all([callMedia(CALL.video),callIceLoad()]).then(function(r){var s=r[0];
     if(CALL.cid!==cid){s.getTracks().forEach(function(t){t.stop()});return}
     CALL.hasCam=s.getVideoTracks().length>0;if(CALL.video&&!CALL.hasCam)CALL.video=false;callUiPaint();
@@ -6093,13 +6107,14 @@ function callStart(peer,video){
       CALL.ringTm=setTimeout(function(){if(CALL.cid===cid&&CALL.st==='ring'){CALL.logged=CALL.logged||1;callHang('miss',true,'Не отвечает')}},30000)})
   }).catch(function(e){var d=e&&/denied|permission|notallowed/i.test((e.name||'')+(e.message||''));toast(d?'Разрешите микрофон для сайта':'Не удалось начать звонок');if(CALL.cid===cid)callFinish('err')})}
 function callIncoming(p){
-  CALL.st='in';CALL.dir='in';CALL.peer=p.from;CALL.cid=p.cid;CALL.me=USER.id;CALL.offerSdp=p.sdp;CALL.iceQ=[];CALL.iceOut=[];CALL.t0=0;CALL.muted=false;CALL.video=!!p.video;CALL.hasCam=false;CALL.camOff=false;CALL.rcam=true;CALL.facing='user';
+  CALL.st='in';CALL.dir='in';CALL.peer=p.from;CALL.cid=p.cid;CALL.me=USER.id;CALL.vdo=p.vdo||null;CALL.offerSdp=p.sdp;CALL.iceQ=[];CALL.iceOut=[];CALL.t0=0;CALL.muted=false;CALL.video=!!p.video;CALL.hasCam=false;CALL.camOff=false;CALL.rcam=true;CALL.facing='user';
   chPeople([p.from]).then(function(){if(CALL.cid!==p.cid||CALL.st!=='in')return;callInPaint();if(document.hidden)chNotify(chName(p.from),'Звонит')});
   callInPaint();callRingStart();
   CALL.inTm=setTimeout(function(){if(CALL.cid===p.cid&&CALL.st==='in'){toast('Пропущенный звонок');callFinish('miss')}},35000)}
 function callAnswer(){
   if(CALL.st!=='in')return;var cid=CALL.cid,peer=CALL.peer;callRingStop();clearTimeout(CALL.inTm);
   CALL.st='conn';callInHide();callUiPaint();callPause();
+  if(CALL.vdo){callSend(peer,'answer',{cid:cid,from:CALL.me,vdo:1});vdoGo();return}
   Promise.all([callMedia(CALL.video),callIceLoad()]).then(function(r){var s=r[0];
     if(CALL.cid!==cid){s.getTracks().forEach(function(t){t.stop()});return}
     CALL.hasCam=s.getVideoTracks().length>0;callUiPaint();
@@ -6108,6 +6123,16 @@ function callAnswer(){
       callSend(peer,'answer',{cid:cid,from:CALL.me,sdp:pc.localDescription.sdp});
       CALL.iceOut.forEach(function(c){callSend(peer,'ice',{cid:cid,from:CALL.me,c:c})})})
   }).catch(function(e){var d=e&&/denied|permission|notallowed/i.test((e.name||'')+(e.message||''));toast(d?'Разрешите микрофон для сайта':'Не удалось ответить');if(CALL.cid===cid){callSend(peer,'hangup',{cid:cid,from:CALL.me});callFinish('err')}})}
+function vdoGo(){
+  var v=CALL.vdo;if(!v)return;
+  callRingStop();callInHide();clearTimeout(CALL.inTm);clearTimeout(CALL.ringTm);
+  CALL.st='live';CALL.t0=Date.now();clearInterval(CALL.tick);CALL.tick=setInterval(callUiPaint,500);
+  var c=callEl(),old=$('clVdo');if(old)old.remove();
+  var f=document.createElement('iframe');f.id='clVdo';
+  f.allow='camera *;microphone *;autoplay;fullscreen;display-capture;screen-wake-lock';
+  f.src='https://vdo.ninja/?room='+encodeURIComponent(v.room)+'&password='+encodeURIComponent(v.pw)+'&webcam&autostart&cleanish&label='+encodeURIComponent((PROF&&PROF.nick)||'')+(CALL.video?'':'&videodevice=0');
+  c.insertBefore(f,c.firstChild);c.classList.add('vdo');callUiPaint();
+}
 function callDecline(){if(CALL.st!=='in')return;callSend(CALL.peer,'decline',{cid:CALL.cid,from:CALL.me});callFinish('none')}
 function callHang(res,notify,msg){if(CALL.st==='idle')return;if(notify)callSend(CALL.peer,'hangup',{cid:CALL.cid,from:CALL.me});callFinish(res,msg)}
 function callDur(ms){var s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
@@ -6118,6 +6143,7 @@ function callFinish(res,msg){
   if(CALL.ls)CALL.ls.getTracks().forEach(function(t){try{t.stop()}catch(e){}});
   var pc=CALL.pc;CALL.pc=null;if(pc){pc.onicecandidate=pc.ontrack=pc.onconnectionstatechange=null;try{pc.close()}catch(e){}}
   var a=$('callAud'),rv=$('clRv'),lv=$('clLv');if(a)a.srcObject=null;if(rv)rv.srcObject=null;if(lv)lv.srcObject=null;
+  var vf=$('clVdo');if(vf){try{vf.contentWindow.postMessage({close:true},'*')}catch(e){}vf.remove()}var ce=$('callUi');if(ce)ce.classList.remove('vdo');CALL.vdo=null;
   CALL.st='idle';CALL.cid='';CALL.peer='';CALL.dir='';CALL.ls=null;CALL.rs=null;CALL.iceQ=[];CALL.iceOut=[];CALL.offerSdp='';CALL.t0=0;CALL.video=false;CALL.hasCam=false;CALL.camOff=false;CALL.rcam=true;CALL.facing='user';CALL.spkOn=false;
   callInHide();
   if(out&&logged&&USER){
@@ -6155,6 +6181,7 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-ch="
   if(a==='ans')callAnswer();else if(a==='decline')callDecline();
   else if(a==='end')callHang(CALL.t0?'ok':'miss',true);
   else if(a==='spk')callSpk();else if(a==='cam')callCam();else if(a==='flip')callFlip();
+  else if(a==='mic'&&CALL.vdo){CALL.muted=!CALL.muted;var vf0=$('clVdo');try{vf0.contentWindow.postMessage({mic:!CALL.muted},'*')}catch(e){}callUiPaint()}
   else if(a==='mic'&&CALL.ls){CALL.muted=!CALL.muted;CALL.ls.getAudioTracks().forEach(function(t){t.enabled=!CALL.muted});callUiPaint()}});
 /* динамик/разговорный: только через setSinkId (Chrome на Android). В iPhone Safari выбрать выход звука из сайта нельзя, там кнопка скрыта */
 function callSpkCan(){var a=$('callAud');return !!(a&&a.setSinkId&&navigator.mediaDevices&&navigator.mediaDevices.enumerateDevices)}
