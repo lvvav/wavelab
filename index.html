@@ -950,6 +950,42 @@ a.btn{text-decoration:none}
 #shufAll.ico{order:7;margin-left:auto}
 #moreBtn.ico{order:8}
 #mn .who .cv.rdm{border-radius:50%}
+/* профиль человека */
+#mn:has(.pu) .sheet{max-height:92vh;padding-top:0}
+.pu-hero{position:relative;padding:36px 18px 20px;text-align:center;overflow:hidden}
+.pu-bg{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(34px) saturate(1.5);opacity:.6;transform:scale(1.15)}
+.pu-hero:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(31,31,31,0) 25%,#1f1f1f 100%)}
+.pu-hero>*{position:relative;z-index:1}.pu-hero>.pu-bg{position:absolute;z-index:0}
+.pu-hero:after{z-index:0}
+.pu-ava{display:flex;justify-content:center}
+.pu .pu-ava .cv{width:104px;height:104px;border-radius:50%;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.pu-nm{margin-top:12px;font-size:22px;font-weight:800;overflow-wrap:anywhere}
+.pu-me{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.14);font-size:12px}
+.pu-st{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 22px;margin-top:14px}
+.pu-s b{display:block;font-size:18px}.pu-s span{font-size:11px;color:var(--mut)}
+.pu-act{display:flex;gap:10px;justify-content:center;margin-top:16px}
+#mn .pu .pu-act .mi{width:auto;padding:10px 22px;border-radius:99px;background:rgba(255,255,255,.12);font-weight:700;font-size:14px;gap:8px}
+#mn .pu .pu-act .mi:first-child:not(.on){background:var(--acc);color:#111}
+.pu-np{display:flex;align-items:center;gap:12px;width:calc(100% - 32px);margin:0 16px;padding:10px;border-radius:14px;background:rgba(255,255,255,.07);text-align:left}
+.pu .pu-np .cv{width:56px;height:56px;border-radius:8px;flex:none}
+.pu-np span{min-width:0;display:block}.pu-np small{display:block;font-size:11px;color:var(--mut)}.pu-np small.live{color:var(--acc);font-weight:700}
+.pu-np b,.pu-np em{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}.pu-np em{font-size:13px;color:var(--mut)}
+.pu-sec{margin:22px 18px 10px;font-size:16px;font-weight:800}
+.pu-row{display:flex;gap:12px;overflow-x:auto;padding:0 18px 4px;scroll-snap-type:x proximity;scroll-padding:0 18px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.pu-row::-webkit-scrollbar{display:none}
+.pu-c{flex:0 0 120px;display:flex;flex-direction:column;gap:6px;min-width:0;text-align:left;scroll-snap-align:start}
+.pu .pu-c .cv,.pu-mos{width:120px;height:120px;border-radius:10px;flex:none}
+.pu-c b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pu-c small{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pu-r{align-items:center}.pu-r b{max-width:100%;text-align:center}.pu .pu-r .cv{border-radius:50%}
+.pu-mos{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;background:#333}
+.pu-mos i{background-size:cover;background-position:center;display:block}
+.pu-mos.one{display:block}.pu-mos.one i{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.pu-t{display:flex;align-items:center;gap:12px;width:100%;padding:7px 18px;text-align:left}
+.pu .pu-t .cv{width:46px;height:46px;border-radius:6px;flex:none}
+.pu-t span{min-width:0;display:block}.pu-t b,.pu-t small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pu-t small{font-size:12px;color:var(--mut)}
+.pu-hint{padding:18px;color:var(--mut);text-align:center}
+
 #playAll.ico{order:9;width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--on,#000)}
 #playAll.ico:hover{background:var(--acc);color:var(--on,#000);filter:brightness(1.08)}
 #playAll.ico .i{width:28px;height:28px}
@@ -3114,7 +3150,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=77;
+var APP_VER='7.0',APP_BUILD=78;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3681,23 +3717,39 @@ function usrOpen(id,row){
     SB.from('profiles').select('share').eq('user_id',id).maybeSingle().then(function(r){return (r&&!r.error&&r.data)?{ok:1,v:r.data.share}:{ok:0}}).catch(function(){return {ok:0}})]).then(function(a){
     if(!a[0]||!a[0].data){toast('Профиль не найден');return}
     go(a[0].data,(a[1]&&a[1].data)||[],a[2]&&a[2].ok?(a[2].v||null):undefined)}).catch(function(){toast('Нет связи с сервером')})}
-function renderUsr(){if(!USR)return;var q=PEOPLE[USR.id]||{n:'?',a:''},on=FOL.u.indexOf(USR.id)>-1,me=USER&&USER.id===USR.id,sh=USR.share&&typeof USR.share==='object'&&!USR.share.hid?USR.share:null,npx=USR.share&&typeof USR.share==='object'?USR.share.np:null;
+function renderUsr(){if(!USR)return;
+  var q=PEOPLE[USR.id]||{n:'?',a:''},on=FOL.u.indexOf(USR.id)>-1,me=USER&&USER.id===USR.id,
+      sh=USR.share&&typeof USR.share==='object'&&!USR.share.hid?USR.share:null,npx=USR.share&&typeof USR.share==='object'?USR.share.np:null;
   var als=sh?(sh.al||[]).map(function(k){return ALB.filter(function(x){return x.k===k})[0]}).filter(Boolean):[],
       ars=sh?(sh.ar||[]).map(function(k){return ARTS.filter(function(x){return x.k===k})[0]}).filter(Boolean):[],
       lks=sh?(sh.fav||[]).map(byKey).filter(function(t){return t&&!t.mine&&!t.pv}):[],
-      nF=sh&&sh.n&&sh.n.f!=null?sh.n.f:lks.length,
-      st=[USR.pls.length+' '+plural(USR.pls.length,['плейлист','плейлиста','плейлистов'])];
-  if(sh){st.unshift((sh.al||[]).length+' '+plural((sh.al||[]).length,['альбом','альбома','альбомов']),(sh.ar||[]).length+' '+plural((sh.ar||[]).length,['артист','артиста','артистов']),nF+' '+plural(nF,['лайк','лайка','лайков']))}
-  var H=function(t){return '<div class="sec" style="margin:16px 2px 4px">'+t+'</div>'},h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv({img:q.a}).replace('<span class="cv','<span class="cv rdm')+'<div><div class="tt">@'+esc(q.n)+'</div><div class="ar" style="white-space:normal;line-height:1.35">'+st.join(' · ')+'</div></div></div>'+
-    (me?'':'<button class="mi'+(on?' on':'')+'" data-m="ufol" type="button">'+(on?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(on?'Отписаться':'Подписаться')+'</button>'+(me||!USER?'':'<button class="mi" data-chat="'+esc(USR.id)+'" type="button">'+ic('list')+'Написать</button>'));
-  if(npx&&npx.t&&!me){var live=!npx.p&&Date.now()-npx.at<((npx.d||300)*1000+60000);h+='<div class="hint" style="padding:12px 4px 2px">'+(live?'<b style="color:var(--acc)">● Слушает сейчас</b>':'<span style="color:var(--mut)">Недавно слушал(а)</span>')+'<div>'+esc(npx.t)+' · '+esc(npx.a||'')+'</div></div>'}
-  if(USR.pls.length)h+=H('Плейлисты')+USR.pls.map(function(p){return mi('upl','list',esc(p.name)+' · '+(Array.isArray(p.tracks)?p.tracks.length:0),p.id)}).join('');
-  if(als.length)h+=H('Сохранённые альбомы')+als.slice(0,8).map(function(A){return mi('ual','disc',esc(A.t)+' · '+esc(A.a),A.k)}).join('');
-  if(ars.length)h+=H('Артисты')+ars.slice(0,8).map(function(R){return mi('uar','user',esc(R.n),R.k)}).join('');
-  if(lks.length)h+=H('Недавние лайки')+lks.slice(0,8).map(function(t){return mi('utr','play',esc(t.t)+' · '+esc(ad(t)),t.key)}).join('');
-  if((USR.share===null||(USR.share&&USR.share.hid))&&!me)h+='<div class="hint" style="padding:14px 4px 4px;color:var(--mut)">Пользователь скрыл свою медиатеку</div>';
-  else if(sh&&!als.length&&!ars.length&&!lks.length&&!USR.pls.length)h+='<div class="hint" style="padding:14px 4px 4px;color:var(--mut)">Пока ничего нет</div>';
-  $('mnBody').innerHTML=h}
+      nF=sh&&sh.n&&sh.n.f!=null?sh.n.f:lks.length;
+  var hue=0;String(q.n).split('').forEach(function(c){hue=(hue*31+c.charCodeAt(0))%360});
+  var bg=q.a?'background-image:url(\''+q.a+'\')':'background:linear-gradient(135deg,hsl('+hue+',65%,40%),hsl('+((hue+55)%360)+',70%,22%))';
+  var S=function(n,w){return '<div class="pu-s"><b>'+n+'</b><span>'+w+'</span></div>'},st='';
+  if(sh)st+=S((sh.al||[]).length,'альбомов')+S((sh.ar||[]).length,'артистов')+S(nF,'лайков');
+  st+=S(USR.pls.length,plural(USR.pls.length,['плейлист','плейлиста','плейлистов']));
+  var h='<div class="pu"><div class="pu-hero"><div class="pu-bg" style="'+bg+'"></div>'+
+    '<div class="pu-ava">'+cv({img:q.a},true).replace('<span class="cv','<span class="cv rdm')+'</div>'+
+    '<div class="pu-nm">@'+esc(q.n)+'</div>'+(me?'<div class="pu-me">Это вы</div>':'')+
+    '<div class="pu-st">'+st+'</div>'+
+    (me?'':'<div class="pu-act"><button class="mi'+(on?' on':'')+'" data-m="ufol" type="button">'+(on?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(on?'Отписаться':'Подписаться')+'</button>'+(USER?'<button class="mi" data-chat="'+esc(USR.id)+'" type="button">'+ic('list')+'Написать</button>':'')+'</div>')+
+    '</div>';
+  if(npx&&npx.t&&!me){
+    var live=!npx.p&&Date.now()-npx.at<((npx.d||300)*1000+60000),ntr=npx.k?byKey(npx.k):null;
+    h+='<button class="pu-np" type="button"'+(ntr?' data-m="utr" data-x="'+esc(ntr.key)+'"':'')+'>'+cv(ntr||{})+'<span><small'+(live?' class="live"':'')+'>'+(live?'● Слушает сейчас':'Недавно слушал(а)')+'</small><b>'+esc(npx.t)+'</b><em>'+esc(npx.a||'')+'</em></span></button>'}
+  var R=function(t,c){return '<div class="pu-sec">'+t+'</div><div class="pu-row">'+c+'</div>'};
+  if(als.length)h+=R('Альбомы',als.slice(0,14).map(function(A){return '<button class="pu-c" data-m="ual" data-x="'+esc(A.k)+'" type="button">'+cv({img:A.img})+'<b>'+esc(A.t)+'</b><small>'+esc(A.a)+'</small></button>'}).join(''));
+  if(USR.pls.length)h+=R('Плейлисты',USR.pls.map(function(p){
+    var ks=Array.isArray(p.tracks)?p.tracks:[],im=ks.map(function(k){return byKey(k)}).filter(function(t){return t&&t.img}).slice(0,4),
+        mos=im.length>=4?'<span class="pu-mos">'+im.map(function(t){return '<i style="background-image:url(\''+t.img+'\')"></i>'}).join('')+'</span>'
+           :im.length?'<span class="pu-mos one"><i style="background-image:url(\''+im[0].img+'\')"></i></span>':'<span class="pu-mos one"><i class="pu-no">'+ic('list')+'</i></span>';
+    return '<button class="pu-c" data-m="upl" data-x="'+esc(p.id)+'" type="button">'+mos+'<b>'+esc(p.name)+'</b><small>'+ks.length+' '+plural(ks.length,['трек','трека','треков'])+'</small></button>'}).join(''));
+  if(ars.length)h+=R('Артисты',ars.slice(0,14).map(function(r){return '<button class="pu-c pu-r" data-m="uar" data-x="'+esc(r.k)+'" type="button">'+cv({img:r.img}).replace('<span class="cv','<span class="cv rdm')+'<b>'+esc(r.n)+'</b></button>'}).join(''));
+  if(lks.length)h+='<div class="pu-sec">Недавние лайки</div>'+lks.slice(0,8).map(function(t){return '<button class="pu-t" data-m="utr" data-x="'+esc(t.key)+'" type="button">'+cv(t)+'<span><b>'+esc(t.t)+'</b><small>'+esc(ad(t))+'</small></span></button>'}).join('');
+  if((USR.share===null||(USR.share&&USR.share.hid))&&!me)h+='<div class="pu-hint">Пользователь скрыл свою медиатеку</div>';
+  else if(sh&&!als.length&&!ars.length&&!lks.length&&!USR.pls.length)h+='<div class="pu-hint">Пока ничего нет</div>';
+  $('mnBody').innerHTML=h+'</div>'}
 function usrPick(b){var m=b.dataset.m;
   if(m==='ufol'){folToggle('user',USR.id,function(){renderUsr()})}
   else if(m==='upl'){closeMenu();plOpen(b.dataset.x)}
