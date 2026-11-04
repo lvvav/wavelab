@@ -3153,7 +3153,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=86;
+var APP_VER='7.0',APP_BUILD=87;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6222,8 +6222,8 @@ function callUiPaint(){var c=callEl(),on=CALL.st==='ring'||CALL.st==='conn'||CAL
   var sk=$('clSpk');sk.classList.toggle('off',CALL.spkOn);sk.querySelector('small').textContent=CALL.spkOn?'Динамик вкл':'Динамик';c.classList.toggle('spk',callSpkCan());c.classList.toggle('vid',!!CALL.video);c.classList.toggle('lo',co);c.classList.toggle('mir',CALL.facing==='user');
   c.classList.toggle('rv',!!(CALL.video&&CALL.rcam&&CALL.rs&&CALL.rs.getVideoTracks().length))}
 function callUiEnd(msg){var c=callEl();c.classList.remove('rv','lo');if(msg&&c.classList.contains('on')){$('clSt').textContent=msg;setTimeout(function(){if(CALL.st==='idle')c.classList.remove('on')},1600)}else c.classList.remove('on')}
-function callInPaint(){callEl();var q=PEOPLE[CALL.peer]||{n:'без ника',a:''};$('ciNm').textContent='@'+q.n;$('ciKd').textContent=CALL.video?'Входящий видеозвонок':'Входящий звонок';$('ciAv').innerHTML=cv({img:q.a},true);$('callIn').classList.add('on')}
-function callInHide(){var c=$('callIn');if(c)c.classList.remove('on')}
+function callInPaint(){callEl();var q=PEOPLE[CALL.peer]||{n:'без ника',a:''};$('ciNm').textContent='@'+q.n;$('ciKd').textContent=CALL.video?'Входящий видеозвонок':'Входящий звонок';$('ciAv').innerHTML=cv({img:q.a},true);var ci=$('callIn');if(ci.parentNode!==document.body||ci.nextSibling)document.body.appendChild(ci);ci.style.zIndex='2147483000';ci.style.display='flex';ci.classList.add('on')}
+function callInHide(){var c=$('callIn');if(c){c.classList.remove('on');c.style.display=''}}
 /* ----- рингтон: WebAudio без файлов, плюс вибрация ----- */
 function callRingStart(){callRingStop();var ctx=null;try{var AC=window.AudioContext||window.webkitAudioContext;ctx=new AC();if(ctx.resume)ctx.resume()}catch(e){}
   var beep=function(){if(!ctx)return;try{[0,0.5].forEach(function(d){var o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+d;o.type='sine';o.frequency.value=d?520:440;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.05);g.gain.linearRampToValueAtTime(0,t+.4);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.45)})}catch(e){}
