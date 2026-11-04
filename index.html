@@ -1879,7 +1879,7 @@ function render(){
       '<div class="gn">'+esc(t.g)+'</div>'+
       '<div class="ql'+(t.f?' lossless':'')+'"><b>'+esc(t.q.split(' ')[0])+'</b> '+esc(t.q.split(' ').slice(1).join(' '))+'</div>'+
       '<div class="tm num">'+dur(t)+'</div>'+
-      '<div class="acts">'+
+      '<div class="acts">'+(window.slAdmOn&&window.slAdmOn()?'<button class="ab" data-a="ed" type="button" title="Править трек" aria-label="Править трек">'+ic('edit')+'</button>':'')+
         '<button class="ab fv'+(fv?' on':'')+(t.key===popKey?' pop':'')+'" data-a="fav" type="button" title="В избранное" aria-label="В избранное">'+ic('heart')+'</button>'+
         (view==='queue'?'<button class="ab" data-a="unq" type="button" title="Убрать из очереди" aria-label="Убрать">'+ic('x')+'</button>':'<button class="ab" data-a="m" type="button" title="Ещё" aria-label="Ещё">'+ic('more')+'</button>')+
         '<button class="ab dlb" data-a="dl" type="button" title="Скачать" aria-label="Скачать">'+ic('dl')+'</button>'+
@@ -2258,6 +2258,7 @@ $('list').addEventListener('click',function(e){
   var r=e.target.closest('.row');if(!r)return;
   var id=+r.dataset.id,b=e.target.closest('[data-a]'),a=b?b.dataset.a:'';
   if(a==='fav')return toggleFav(id);
+  if(a==='ed'){if(window.slEditTrack)window.slEditTrack(id);return}
   if(a==='m')return openMenu(id);
   if(a==='q'){queue.push(id);toast('Добавлено в очередь: '+TRACKS[id].t);return renderNav()}
   if(a==='unq'){queue.splice(+r.dataset.n,1);return render()}
@@ -3151,7 +3152,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=82;
+var APP_VER='7.0',APP_BUILD=83;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6323,10 +6324,11 @@ loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(tru
         saveOV();refresh()}).catch(function(){})}
 
   /* накладываем правки на треки и обложки */
-  var _am=applyMeta;applyMeta=function(t){_am(t);var o=OV.t[t.key];if(o){if(o.al)t.al=o.al;if(o.aa)t.aa=o.aa}};
+  function ovApply(t,o){if(!o)return;['t','a','al','aa','y'].forEach(function(k){if(o[k])t[k]=o[k]});var n=parseInt(o.n,10);if(n>0)t.n=n;var d=parseInt(o.d,10);if(d>0)t.d=d}
+  var _am=applyMeta;applyMeta=function(t){_am(t);ovApply(t,OV.t[t.key])};
   /* обложка альбома, выбранная в редакторе, ставится и самому альбому, и всем его песням */
   var _ba=buildAlbums;buildAlbums=function(){_ba();ALB.forEach(function(A){var u=OV.c[A.k];if(u){A.img=u;A.tr.forEach(function(t){t.img=u})}})};
-  function refresh(){TRACKS.forEach(function(t){var o=OV.t[t.key];if(o){if(o.al)t.al=o.al;if(o.aa)t.aa=o.aa}});buildAlbums();try{applyAA()}catch(e){}render();try{var ct=TRACKS[cur];if(ct){setCv($('pCv'),ct);if(npOn)syncNp()}}catch(e){}}
+  function refresh(){TRACKS.forEach(function(t){ovApply(t,OV.t[t.key])});buildAlbums();try{applyAA()}catch(e){}render();try{var ct=TRACKS[cur];if(ct){setCv($('pCv'),ct);if(npOn)syncNp()}}catch(e){}}
 
   /* стили */
   var st=document.createElement('style');st.textContent=
@@ -6338,7 +6340,10 @@ loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(tru
    '.adm .err{color:var(--danger);font-size:13px;min-height:18px;margin:0 0 6px}'+
    '.adm-l{max-height:46vh;overflow:auto;margin:8px 0;border:1px solid var(--line);border-radius:10px}'+
    '.adm-l label{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}'+
-   '.adm-l label small{display:block;color:var(--mut)}';
+   '.adm-l label small{display:block;color:var(--mut)}'+
+   '.adm-f{display:block;font-size:12px;color:var(--mut);margin:0 0 8px}.adm-f input{margin:4px 0 0!important}'+
+   '#admFab{position:fixed;right:16px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:120;width:54px;height:54px;border-radius:50%;background:var(--acc);color:var(--on);display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.45)}#admFab[hidden]{display:none}#admFab .i{width:26px;height:26px;stroke-width:2.6}'+
+   'body.adm-on .row,body.adm-on .cols{grid-template-columns:40px minmax(0,1fr) 150px 120px 56px 148px}@media(max-width:860px){body.adm-on .row,body.adm-on .cols{grid-template-columns:44px minmax(0,1fr) auto}}';
   document.head.appendChild(st);
 
   function modal(html){var bg=document.createElement('div');bg.className='adm-bg';bg.innerHTML='<div class="adm">'+html+'</div>';
@@ -6391,11 +6396,61 @@ loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(tru
     m.querySelector('#sQ').oninput=draw;draw();
     m.querySelector('#sC').onclick=function(){m.remove()};
     m.querySelector('#sOk').onclick=function(){var ks=Object.keys(sel);if(!ks.length){m.remove();return}
-      api('save',{items:ks.map(function(k){return {key:k,al:A.t,aa:A.a}})}).then(function(){ks.forEach(function(k){OV.t[k]={al:A.t,aa:A.a}});saveOV();refresh();toast('Добавлено: '+ks.length)}).catch(function(){toast('Не удалось сохранить')});m.remove()};
+      var items=ks.map(function(k){return {key:k,d:Object.assign({},OV.t[k]||{},{al:A.t,aa:A.a})}});
+      api('save',{items:items}).then(function(){items.forEach(function(x){OV.t[x.key]=x.d});saveOV();refresh();toast('Добавлено: '+ks.length)}).catch(function(){toast('Не удалось сохранить')});m.remove()};
   }
+
+  /* правка данных трека (карандаш в строке трека) */
+  function fld(id,lb,v,num){return '<label class="adm-f">'+lb+'<input type="text" id="'+id+'" value="'+esc(v==null||v===0?'':String(v))+'" autocomplete="off"'+(num?' inputmode="numeric" maxlength="4"':'')+'></label>'}
+  function editTrack(id){
+    var t=TRACKS[id];if(!t)return;
+    gate(function(){
+      var o=OV.t[t.key]||{},FL=[['t','eT'],['a','eA'],['al','eL'],['aa','eAA'],['y','eY'],['n','eN'],['d','eD']];
+      var m=modal('<h3>Править трек</h3><p>'+esc(t.key.split('/').pop())+' · правки видны всем</p>'+fld('eT','Название',t.t)+fld('eA','Артист',t.a)+fld('eL','Альбом',t.al)+fld('eAA','Артист альбома',t.aa)+fld('eY','Год',t.y,1)+fld('eN','Номер трека',t.n,1)+fld('eD','Диск',t.d,1)+
+        '<div class="err" id="eE"></div><div class="row"><button class="btn ghost" id="eC" type="button">Отмена</button><button class="btn" id="eS" type="button">Сохранить</button></div>'+
+        '<div class="row"><button class="btn ghost" id="eR" type="button">Сбросить правки этого трека</button></div>');
+      m.querySelector('#eC').onclick=function(){m.remove()};
+      m.querySelector('#eS').onclick=function(){
+        var d=Object.assign({},o);
+        FL.forEach(function(f){var v=m.querySelector('#'+f[1]).value.trim(),cur=t[f[0]]==null||t[f[0]]===0?'':String(t[f[0]]);if(v!==cur){if(v)d[f[0]]=v;else delete d[f[0]]}});
+        var has=Object.keys(d).length;
+        m.querySelector('#eE').textContent='Сохраняю…';
+        (has?api('save',{items:[{key:t.key,d:d}]}):api('reset',{keys:[t.key]})).then(function(){
+          if(has)OV.t[t.key]=d;else delete OV.t[t.key];saveOV();ovApply(t,d);refresh();m.remove();toast('Сохранено')})
+        .catch(function(er){m.querySelector('#eE').textContent=er.message==='denied'?'Нужно войти заново':'Не удалось сохранить'})};
+      m.querySelector('#eR').onclick=function(){api('reset',{keys:[t.key]}).then(function(){delete OV.t[t.key];saveOV();m.remove();location.reload()}).catch(function(){toast('Не удалось')})};
+    });
+  }
+  /* новый альбом: название и артист, потом выбор песен */
+  function newAlbum(){
+    gate(function(){
+      var m=modal('<h3>Новый альбом</h3><p>Введите название и артиста, потом выберете песни.</p><input type="text" id="nT" placeholder="Название альбома" autocomplete="off"><input type="text" id="nA" placeholder="Артист" autocomplete="off"><div class="err" id="nE"></div><div class="row"><button class="btn ghost" id="nC" type="button">Отмена</button><button class="btn" id="nOk" type="button">Дальше</button></div>');
+      m.querySelector('#nC').onclick=function(){m.remove()};
+      m.querySelector('#nOk').onclick=function(){var t=m.querySelector('#nT').value.trim(),a=m.querySelector('#nA').value.trim();if(!t||!a){m.querySelector('#nE').textContent='Нужны название и артист';return}m.remove();pick({t:t,a:a,tr:[]})};
+    });
+  }
+  /* круглая кнопка «+»: новый альбом, загрузка песен */
+  function fabMenu(){
+    var m=modal('<h3>Добавить</h3><p>Режим админ-панели включён</p>'+
+      '<div class="row"><button class="btn" id="fA" type="button">Новый альбом</button></div>'+
+      '<div class="row"><button class="btn" id="fU" type="button">Загрузить песни на сайт</button></div>'+
+      '<div class="row"><button class="btn ghost" id="fX" type="button">Закрыть</button></div>');
+    m.querySelector('#fA').onclick=function(){m.remove();newAlbum()};
+    m.querySelector('#fU').onclick=function(){m.remove();window.open('admin.html','_blank')};
+    m.querySelector('#fX').onclick=function(){m.remove()};
+  }
+  function paintFab(){
+    var f=document.getElementById('admFab'),on=admOn();
+    document.body.classList.toggle('adm-on',on);
+    if(!on){if(f)f.hidden=true;return}
+    if(!f){f=document.createElement('button');f.id='admFab';f.type='button';f.innerHTML=ic('plus');f.title='Добавить';f.setAttribute('aria-label','Добавить');f.onclick=fabMenu;document.body.appendChild(f)}
+    f.hidden=false;
+  }
+  window.slAdmOn=function(){return admOn()};window.slEditTrack=editTrack;
 
   /* 3) кнопка на странице альбома */
   function sync(){
+    try{paintFab()}catch(e){}
     var b=document.getElementById('admBtn');
     if(view!=='album'||!admOn()){if(b)b.hidden=true;return}
     if(!b){b=document.createElement('button');b.id='admBtn';b.type='button';b.className='btn ico';b.innerHTML=ic('edit');b.title='Править альбом';b.setAttribute('aria-label','Править альбом');
@@ -6404,7 +6459,7 @@ loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(tru
   }
   /* 4) переключатель в настройках: Настройки → Для разработчиков → Админ-панель (по умолчанию выключено) */
   function admOn(){try{return localStorage.getItem('wl_adm_on')==='1'}catch(e){return false}}
-  function admSet(v){try{localStorage.setItem('wl_adm_on',v?'1':'0')}catch(e){}paintAdm();sync();try{paintHub()}catch(e){}}
+  function admSet(v){try{localStorage.setItem('wl_adm_on',v?'1':'0')}catch(e){}paintAdm();sync();try{paintHub()}catch(e){}try{render()}catch(e){}}
   function paintAdm(){var b=document.getElementById('admBox');if(!b)return;
     b.innerHTML='<div class="fr"><div>Админ-панель<small>кнопка «Править альбом» на страницах альбомов: добавить песни и сменить обложку</small></div><button class="tg'+(admOn()?' on':'')+'" id="tAdm" type="button" aria-label="Админ-панель"></button></div>'+
       '<small class="hint">'+(admOn()?'Включена. Для правок нужен вход по паролю (один раз на устройстве).':'Выключена. При включении попросим юзернейм, пароль и кодовое слово.')+'</small>'}

@@ -56,9 +56,14 @@ Deno.serve(async (req) => {
   if (!(await tokenOk(req.headers.get("x-admin-token")))) return json({ error: "auth" }, 401);
 
   if (b.action === "save") {
-    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 300).map((x: any) => ({
-      key: str(x.key, 400), data: { al: str(x.al), aa: str(x.aa) },
-    })).filter((x: any) => x.key && x.data.al);
+    // правки трека: название, артист, альбом, артист альбома, год, номер, диск (только непустые поля)
+    const F = ["t", "a", "al", "aa", "y", "n", "d"];
+    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 300).map((x: any) => {
+      const src = x && x.d && typeof x.d === "object" ? x.d : x || {};
+      const data: Record<string, string> = {};
+      for (const f of F) { const v = str(src[f]).trim(); if (v) data[f] = v; }
+      return { key: str(x && x.key, 400), data };
+    }).filter((x: any) => x.key && Object.keys(x.data).length);
     if (items.length) {
       const { error } = await sb.from("album_edits").upsert(items.map((x: any) => ({ ...x, updated_at: new Date().toISOString() })));
       if (error) return json({ error: error.message }, 500);
