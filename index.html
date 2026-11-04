@@ -1970,7 +1970,8 @@ document.addEventListener('keydown',function(e){
   e.stopPropagation();e.preventDefault();openMenuX(b.dataset.mx,b.dataset.mk)
 },true);
 function mxb(kind,k){return '<span class="cmx" role="button" tabindex="0" aria-label="Ещё" data-mx="'+kind+'" data-mk="'+esc(k)+'">'+ic('more')+'</span>'}
-function relcard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+REL_ONE[relType(x)]+(x.y?' · '+esc(x.y):'')+' · '+x.tr.length+' '+plural(x.tr.length,['трек','трека','треков'])+'</div></button>'}
+function albDur(x){var s=0;for(var i=0;i<x.tr.length;i++){if(!x.tr[i].dur)return '';s+=x.tr[i].dur}return s?fmtLong(s):''}
+function relcard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+REL_ONE[relType(x)]+(x.y?' · '+esc(x.y):'')+' · '+x.tr.length+' '+plural(x.tr.length,['трек','трека','треков'])+(albDur(x)?' · '+albDur(x):'')+'</div></button>'}
 function albN(R){var o={};R.tr.forEach(function(t){if(t.al)o[t.al]=1});var n=Object.keys(o).length;return n?n+' '+plural(n,['альбом','альбома','альбомов']):''}
 function rcard(x,i){
   var c=PAL[hash(x.n)%PAL.length],h=x.img?cv({img:x.img}):'<span class="cv ini" style="background:'+c[0]+';color:'+c[1]+'">'+esc((x.n.trim().charAt(0)||'?').toUpperCase())+'</span>';
@@ -2042,8 +2043,8 @@ $('home').addEventListener('click',function(e){
   else{view='artist';artK=b.dataset.hr;artTab='tracks'}
   genre='';$('scroll').scrollTop=0;render();
 });
-function fmtLong(s){var m=Math.round(s/60);return m>=60?Math.floor(m/60)+' ч '+m%60+' мин':m+' мин'}
-function acard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+esc(x.a)+(x.y?' · '+esc(x.y):'')+' · '+x.tr.length+' '+plural(x.tr.length,['трек','трека','треков'])+'</div></button>'}
+function fmtLong(s){if(s<60)return Math.round(s)+' сек';var m=Math.round(s/60);return m>=60?Math.floor(m/60)+' ч '+m%60+' мин':m+' мин'}
+function acard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+esc(x.a)+(x.y?' · '+esc(x.y):'')+' · '+x.tr.length+' '+plural(x.tr.length,['трек','трека','треков'])+(albDur(x)?' · '+albDur(x):'')+'</div></button>'}
 function favCount(){return TRACKS.filter(function(t){return !t.dup&&favs.indexOf(t.key)>-1}).length}
 function plural(n,f){n=Math.abs(n)%100;var m=n%10;return n>10&&n<20?f[2]:m>1&&m<5?f[1]:m===1?f[0]:f[2]}
 function renderNav(){
@@ -3152,7 +3153,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=83;
+var APP_VER='7.0',APP_BUILD=84;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6300,7 +6301,26 @@ accPaint=function(){
 };
 render();
 accInit();
-loadTracks(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()});
+/* ===== готовый индекс тегов и обложек (tags/index.json, его строит tools/build-tags.js): названия и обложки видны сразу, без чтения каждого файла ===== */
+function idxLoad(cb){
+  var fin=false,go=function(){if(!fin){fin=true;cb()}};
+  setTimeout(go,3500);
+  try{
+    fetch('tags/index.json?b='+APP_BUILD,{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(j){
+      var late=fin;
+      try{
+        var T=j&&j.t,n=0;
+        if(T)TRACKS.forEach(function(t){
+          var ck=t.key+'|'+t.sz,e=T[ck];if(!e||!e[0])return;
+          tagCache[ck]=e[0];applyTags(t,e[0]);
+          if(e[1]&&!t.fimg)t.img='tags/c/'+e[1]+'.jpg';
+          n++});
+        if(n){dedupe();buildAlbums();try{applyAA()}catch(x){}persist();if(late)try{render()}catch(x){}}
+      }catch(x){}
+      go()}).catch(go);
+  }catch(x){go()}
+}
+loadTracks(function(){idxLoad(function(){loading=false;moodLoad();setTimeout(function(){nwsOpen(true)},1200);newCheck();wishNotify();render();openFromHash();loadCovers();resume();offScan()})});
 
 /* ===== Редактор альбома под замком (lvvav) ===== */
 (function(){
