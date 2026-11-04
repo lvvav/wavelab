@@ -3153,7 +3153,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=84;
+var APP_VER='7.0',APP_BUILD=86;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6086,13 +6086,13 @@ function callIceLoad(){if(CALL_ICE_AT&&Date.now()-CALL_ICE_AT<50*60000)return Pr
     .then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.iceServers&&j.iceServers.length){CALL_ICE=CALL_STUN.concat(j.iceServers);CALL_ICE_AT=Date.now()}}).catch(function(){})
     .then(function(){clearTimeout(tm);CALL_ICE_P=null});return CALL_ICE_P}
 function callTx(uid){var o=CALL.tx[uid];if(o)return o.p;
-  var ch=SB.channel('sl-call-'+uid),p=new Promise(function(res){var done=0;ch.subscribe(function(s){if(s==='SUBSCRIBED'&&!done){done=1;res(ch)}});setTimeout(function(){if(!done){done=1;res(ch)}},4000)});
+  var ch=SB.channel('sl-call-'+uid),p=new Promise(function(res){var done=0;ch.subscribe(function(s){var o0=CALL.tx[uid];if(o0)o0.s=s;if(s==='SUBSCRIBED'&&!done){done=1;res(ch)}});setTimeout(function(){if(!done){done=1;res(ch)}},4000)});
   CALL.tx[uid]={ch:ch,p:p};return p}
 function callSend(uid,ev,pl){if(!SB||!uid)return;callTx(uid).then(function(ch){ch.send({type:'broadcast',event:ev,payload:pl})}).catch(function(){})}
 function callRxStart(){if(!SB||!USER||!SB.channel)return;callIceLoad();if(CALL.rt&&CALL.rtUid===USER.id)return;callRxStop();
   var uid=USER.id,ch=SB.channel('sl-call-'+uid);
   ['offer','answer','ice','hangup','busy','decline','poll','cam','reoffer','reanswer'].forEach(function(ev){ch.on('broadcast',{event:ev},function(m){callOn(ev,(m&&m.payload)||{})})});
-  CALL.rt=ch;CALL.rtUid=uid;ch.subscribe(function(s){if(s==='SUBSCRIBED')callPoll(uid)})}
+  CALL.rt=ch;CALL.rtUid=uid;CALL.rxS='подключаюсь';ch.subscribe(function(s){CALL.rxS=s;if(s==='SUBSCRIBED')callPoll(uid)})}
 function callRxStop(){var c=CALL.rt;CALL.rt=null;CALL.rtUid='';CALL.polled='';if(c){try{SB.removeChannel(c)}catch(e){}}
   Object.keys(CALL.tx).forEach(function(k){try{SB.removeChannel(CALL.tx[k].ch)}catch(e){}});CALL.tx={}}
 /* сайт был закрыт, человек нажал на push: если звонок ещё идёт, просим звонящего прислать offer заново */
@@ -6148,6 +6148,7 @@ function callStart(peer,video){
     var nm0=(PROF&&PROF.nick)?'@'+PROF.nick:'друг';
     SB.from('messages').insert({recipient:peer,body:(CALL.video?'📹 Звонит '+nm0+' (видео)':'📞 Звонит '+nm0),track:'call/'+cid}).then(function(){CALL.logged=1});
     CALL.ringTm=setTimeout(function(){if(CALL.cid===cid&&CALL.st==='ring'){CALL.logged=CALL.logged||1;callHang('miss',true,'Не отвечает')}},30000);
+    setTimeout(function(){var o=CALL.tx[peer];if(CALL.cid===cid&&CALL.st==='ring'&&(!o||o.s!=='SUBSCRIBED'))toast('Нет связи с сервером звонков ('+((o&&o.s)||'нет ответа')+'). Звонок может не дойти')},4500);
     return}
   Promise.all([callMedia(CALL.video),callIceLoad()]).then(function(r){var s=r[0];
     if(CALL.cid!==cid){s.getTracks().forEach(function(t){t.stop()});return}
@@ -6482,13 +6483,14 @@ loadTracks(function(){idxLoad(function(){loading=false;moodLoad();setTimeout(fun
   function admSet(v){try{localStorage.setItem('wl_adm_on',v?'1':'0')}catch(e){}paintAdm();sync();try{paintHub()}catch(e){}try{render()}catch(e){}}
   function paintAdm(){var b=document.getElementById('admBox');if(!b)return;
     b.innerHTML='<div class="fr"><div>Админ-панель<small>кнопка «Править альбом» на страницах альбомов: добавить песни и сменить обложку</small></div><button class="tg'+(admOn()?' on':'')+'" id="tAdm" type="button" aria-label="Админ-панель"></button></div>'+
-      '<small class="hint">'+(admOn()?'Включена. Для правок нужен вход по паролю (один раз на устройстве).':'Выключена. При включении попросим юзернейм, пароль и кодовое слово.')+'</small>'}
+      '<small class="hint">'+(admOn()?'Включена. Для правок нужен вход по паролю (один раз на устройстве).':'Выключена. При включении попросим юзернейм, пароль и кодовое слово.')+'</small>'+
+      '<div class="fr" style="margin-top:14px"><div>Проверка звонков<small>покажет, подключён ли приём звонков на этом устройстве</small></div><button class="btn ghost" id="admDiag" type="button">Проверить</button></div>'}
   HUB.splice(HUB.length-1,0,['adm','check','Для разработчиков']);
   var _hs=hubSub;hubSub=function(k){return k==='adm'?'Админ-панель: '+(admOn()?'вкл':'выкл'):_hs(k)};
   var pg=document.createElement('div');pg.className='spg';pg.dataset.pg='adm';
   pg.innerHTML='<div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Для разработчиков</h2><span class="ib" style="visibility:hidden"></span></div><div id="admBox"></div>';
   document.getElementById('set').querySelector('.sheet').appendChild(pg);paintAdm();
-  pg.addEventListener('click',function(e){if(!e.target.closest('#tAdm'))return;
+  pg.addEventListener('click',function(e){if(e.target.closest('#admDiag')){alert(['Вход в аккаунт: '+(USER?'да':'нет'),'Приём звонков: '+(CALL.rxS||'не запущен'),'Статус звонка: '+CALL.st,'Интернет: '+(navigator.onLine?'есть':'нет'),'Уведомления: '+(window.Notification?Notification.permission:'не поддерживаются'),'Сборка сайта: '+APP_BUILD].join('\n'));return}if(!e.target.closest('#tAdm'))return;
     if(admOn())admSet(false);else gate(function(){admSet(true);toast('Админ-панель включена')})});
   var _r=render;render=function(){_r.apply(this,arguments);try{sync()}catch(e){}};
   TRACKS.length&&refresh();pull();
