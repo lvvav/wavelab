@@ -3153,7 +3153,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=85;
+var APP_VER='7.0',APP_BUILD=84;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -4327,7 +4327,7 @@ function renderMenu(mode){if(mnKind!=='tr')return renderMenuX(mode);var t=TRACKS
   var h='<div class="who" style="padding:4px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:6px">'+cv(t)+'<div><div class="tt">'+esc(t.t)+'</div><div class="ar">'+esc(ad(t))+'</div></div></div>';
   if(mode==='pl')h+=mi('back','down','Назад')+mi('newpl','plus','Новый плейлист')+PL.map(function(p){var has=p.k.indexOf(t.key)>-1;return mi('addpl',has?'check':'list',esc(p.n)+(has?' — уже добавлен':''),p.id)}).join('');
   else if(t.mine){var fv0=favs.indexOf(t.key)>-1;h+=mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+'<button class="mi'+(fv0?' on':'')+'" data-m="fav" type="button">'+(fv0?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv0?'Убрать из избранного':'В избранное')+'</button>'+mi('pl','plus','Добавить в плейлист')+mi('mydel','x','Удалить из моих файлов')}
-  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+(!t.pv?mi('cmt','msg','Комментарии'):'')+mi('ymus','play','Найти в Яндекс Музыке')+mi('spot','play','Найти в Spotify')+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(!t.pv?mi('studio','mic','Записать кавер в студии'):'')+(SB&&!t.pv?mi('cover','plus','Выложить кавер (файл)'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
+  else{var fv=favs.indexOf(t.key)>-1;h+=mi('share','share','Поделиться')+'<button class="mi'+(fv?' on':'')+'" data-m="fav" type="button">'+(fv?'<span class="mi-ok">'+ic('check')+'</span>':ic('plus'))+(fv?'Удалить из медиатеки':'Сохранить в медиатеку')+'</button>'+(!t.pv?mi('cmt','msg','Комментарии'):'')+mi('dl','dl','Скачать')+mi('off','dl',OFF[t.key]?'Убрать из офлайна':'Сохранить офлайн')+(t.a&&t.a!=='—'?mi('art','user','Перейти к исполнителю'):'')+(t.al?mi('alb','disc','Перейти к альбому'):'')+(MOODS&&MOODS[t.key]?mi('radio','wave','Радио по треку'):'')+(!t.pv?mi('studio','mic','Записать кавер в студии'):'')+(SB&&!t.pv?mi('cover','plus','Выложить кавер (файл)'):'')+mi('next','plus','Играть следующим')+mi('q','list','Добавить в очередь')+mi('pl','plus','Добавить в плейлист')+(view==='pl'&&!(curPl()||{}).remote?mi('rmpl','x','Убрать из плейлиста'):'')}
   $('mnBody').innerHTML=h}
 function openMenuX(kind,key){mnKind=kind;mnKey=key;mnId=-1;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
 function openMenu(id){mnKind='tr';mnId=id;renderMenu('main');$('mn').classList.add('on');$('mn').setAttribute('aria-hidden','false')}
@@ -4343,7 +4343,6 @@ $('mnBody').onclick=function(e){var b=e.target.closest('[data-m]');if(!b)return;
   if(m==='pl')return renderMenu('pl');
   if(m==='back')return renderMenu('main');
   if(m==='cmt')return cmtOpen(mnId);
-  if(m==='ymus'||m==='spot'){var q0=encodeURIComponent((t.a&&t.a!=='—'?t.a+' ':'')+t.t);closeMenu();window.open(m==='ymus'?'https://music.yandex.ru/search?text='+q0:'https://open.spotify.com/search/'+q0,'_blank');return}
   if(m==='newpl'){newPl(function(n){n.k.push(t.key);savePL();toast('Добавлено в «'+n.n+'»');closeMenu();render()});return}
   if(m==='addpl'){var p=PL.filter(function(x){return x.id===b.dataset.x})[0];if(p&&p.k.indexOf(t.key)<0){p.k.push(t.key);savePL();toast('Добавлено в «'+p.n+'»')}closeMenu();return render()}
   closeMenu();
