@@ -3153,7 +3153,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=87;
+var APP_VER='7.0',APP_BUILD=88;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -6403,7 +6403,7 @@ loadTracks(function(){idxLoad(function(){loading=false;moodLoad();setTimeout(fun
   function cover(A,f,m){
     var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){
       var s=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
-      c.getContext('2d').drawImage(im,0,0,c.width,c.height);toast('Загружаю…');api('cover',{k:A.k,img:c.toDataURL('image/jpeg',.85)}).then(function(j){OV.c[A.k]=j.url;saveOV();m.remove();refresh();toast('Обложка обновлена')}).catch(function(){toast('Не удалось загрузить')})};im.src=r.result};r.readAsDataURL(f)}
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);toast('Загружаю…');api('cover',{k:A.k,img:c.toDataURL('image/jpeg',.85)}).then(function(j){OV.c[A.k]=j.url;saveOV();m.remove();refresh();toast('Обложка обновлена')}).catch(function(e){var x=String((e&&e.message)||e);toast(x==='denied'?'Админ-вход устарел: выйдите и войдите снова':/fetch|network|load failed/i.test(x)?'Нет связи с Supabase (функция admin-album не отвечает)':'Ошибка: '+x)})};im.onerror=function(){toast('Не удалось открыть картинку')};im.src=r.result};r.readAsDataURL(f)}
   function pick(A){
     var inA={};A.tr.forEach(function(t){inA[t.key]=1});
     var l=TRACKS.filter(function(t){return !t.dup&&!inA[t.key]}).sort(function(a,b){return ad(a).localeCompare(ad(b),'ru')||a.t.localeCompare(b.t,'ru')});
