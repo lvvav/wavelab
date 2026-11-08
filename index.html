@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>document.addEventListener("gesturestart",function(e){e.preventDefault()});document.addEventListener("wheel",function(e){if(e.ctrlKey)e.preventDefault()},{passive:false});document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&(e.key==="+"||e.key==="-"||e.key==="="||e.key==="0"))e.preventDefault()})</script>
+<script>
+/* Облегчённый режим для слабых ПК. Включается ссылкой ?lite=1 (выключается ?lite=0), переключателем в настройках или сам: если браузер старый или у ПК всего 2 потока. Выбор хранится только на этом устройстве (sl_lite). */
+(function(){
+  var L=null,m=/[?&]lite=([01])/.exec(location.search),auto=false;
+  try{
+    if(m){localStorage.setItem('sl_lite',m[1]);L=m[1]==='1'}
+    else{var v=localStorage.getItem('sl_lite');if(v==='1'||v==='0')L=v==='1'}
+  }catch(e){if(m)L=m[1]==='1'}
+  if(L===null){
+    var weak=false;
+    try{weak=!(window.CSS&&CSS.supports&&CSS.supports('color','color-mix(in srgb,red,blue)'))}catch(e){weak=true}
+    if(!weak&&(navigator.hardwareConcurrency||4)<=2&&!('ontouchstart' in window))weak=true;
+    L=weak;auto=weak;
+  }
+  window.SL_LITE=!!L;window.SL_LITE_AUTO=auto;
+  if(L)document.documentElement.className+=' lite';
+  if(m&&window.history&&history.replaceState){try{history.replaceState(null,'',location.pathname+location.search.replace(/([?&])lite=[01]&?/,'$1').replace(/[?&]$/,'')+location.hash)}catch(e){}}
+})();
+</script>
 <style>html{touch-action:manipulation}</style>
 <title>SoundLife — каталог музыки</title>
 <meta name="theme-color" content="#0d0d11">
@@ -1331,6 +1350,38 @@ body.noanim .wc>*{opacity:1;transform:none}
 .qrbox .btn{margin-top:8px}
 .qrbox .alink{display:block;margin:12px auto 0;text-align:center}
 #acc.qrmode .fld,#acc.qrmode #accGo,#acc.qrmode #accYa,#acc.qrmode #accGg,#acc.qrmode #accOr,#acc.qrmode #accH,#acc.qrmode #accSw,#acc.qrmode #accQr,#acc.qrmode #accM{display:none!important}
+.tg:disabled{opacity:.4;cursor:default}
+/* ===== Облегчённый режим (html.lite): без анимаций, размытия и тяжёлых теней ===== */
+html.lite *,html.lite *::before,html.lite *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;will-change:auto!important;text-shadow:none!important}
+html.lite body::before{display:none}
+html.lite .np-bg,html.lite .pu-bg,html.lite .wv-bg{display:none!important}
+html.lite .player,html.lite .cols,html.lite .set{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.lite .player{background:var(--panel)!important;border:1px solid var(--line);box-shadow:none!important}
+html.lite .player::before{box-shadow:none}
+html.lite .cols{background:var(--panel)!important}
+html.lite .cv,html.lite .cv.xl,html.lite .acd .cv,html.lite .top.sc,html.lite .wv-go,html.lite .nws-i,html.lite .wc .wph,html.lite .gear:hover,html.lite .btn:hover,html.lite #scroll.albpg #hCv,html.lite .pu .pu-ava .cv,html.lite .ch-rp,html.lite .ch-cpv{box-shadow:none!important}
+html.lite .row:hover .cv,html.lite .acd:hover .cv,html.lite .btn:hover{transform:none}
+/* Старые браузеры (до 2023 года) не знают color-mix(): без запасных цветов плеер, шапка и карточки остаются прозрачными */
+@supports not (color:color-mix(in srgb,red,blue)){
+  .player{background:var(--panel);border:1px solid var(--line)}
+  .cols{background:var(--panel)}
+  .nv.on{background:var(--hover)}
+  .main{background:var(--panel)}
+  .search input,select,.gear,.chip,.ep,.atab,.qt{background:var(--hover)}
+  .search input:focus{box-shadow:0 0 0 2px var(--acc)}
+  .qi{background:var(--acc)}
+  .stc,.mc{background:var(--hover)}
+  .dc i{background:var(--acc);opacity:.55}
+  .pbtn{border-color:var(--line)}
+  .ach{border-top-color:var(--line)}
+  .ach .ai{background:var(--hover)}
+  .ach .sb{background:var(--line)}
+  .lyc{background:var(--panel)}
+  .lyc::before{display:none}
+  .lyc.full{background:var(--bg)}
+  .sc-card{background:#17171d}
+  .callui{background:#0b0d14}
+}
 </style>
 </head>
 <body>
@@ -1537,6 +1588,7 @@ body.noanim .wc>*{opacity:1;transform:none}
     <div class="fr"><div>Компактный список<small>больше треков на экране</small></div><button class="tg" id="tCo" type="button" aria-label="Компактный список"></button></div>
     <div class="fr"><div>Размытый фон плеера<small>цвет обложки за «Сейчас играет»</small></div><button class="tg" id="tBl" type="button" aria-label="Размытый фон"></button></div>
     <div class="fr"><div>Анимации<small>плавные появления и переходы</small></div><button class="tg" id="tAn" type="button" aria-label="Анимации"></button></div>
+    <div class="fr"><div>Облегчённый режим<small>для слабых ПК: без анимаций, размытия, визуализатора и эквалайзера. Только на этом устройстве</small></div><button class="tg" id="tLite" type="button" aria-label="Облегчённый режим"></button></div>
     </div>
     <div class="spg" data-pg="priv"><div class="sh-h"><button class="ib" data-sb type="button" aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button><h2>Конфиденциальность и приватность</h2><span class="ib" style="visibility:hidden"></span></div>
     <div id="pvBox"></div>
@@ -3026,6 +3078,13 @@ var DEF={theme:'oled',bg:'#000000',acc:'#c6ff3d',r:8,compact:false,blur:true,rai
 var S=load('wl3_set',{});if(!S||typeof S!=='object')S={};Object.keys(DEF).forEach(function(k){if(S[k]===undefined)S[k]=DEF[k]});
 if(!Array.isArray(S.eqv)||S.eqv.length!==10)S.eqv=new Array(10).fill(0);else S.eqv=S.eqv.slice();
 if(!PRESETS[S.eqp])S.eqp='custom';
+/* Облегчённый режим: пять тяжёлых настроек на этом устройстве выключены. То, что выбрано в настройках (и синхронизируется с аккаунтом), не меняется: сохраняется и уходит в облако настоящее значение (toJSON). */
+var LITE=!!window.SL_LITE,LREAL={};
+['anim','blur','rainbow','viz','eq'].forEach(function(k){
+  LREAL[k]=S[k];
+  Object.defineProperty(S,k,{enumerable:true,configurable:true,get:function(){return LITE?false:LREAL[k]},set:function(v){LREAL[k]=v}});
+});
+Object.defineProperty(S,'toJSON',{enumerable:false,configurable:true,value:function(){var o={},me=this;Object.keys(me).forEach(function(k){o[k]=(k in LREAL)?LREAL[k]:me[k]});return o}});
 function rgb(h){h=h.replace('#','');return [0,2,4].map(function(i){return parseInt(h.substr(i,2),16)})}
 function hx(a){return '#'+a.map(function(v){return ('0'+Math.round(v).toString(16)).slice(-2)}).join('')}
 function mix(a,b,t){var x=rgb(a),y=rgb(b);return hx(x.map(function(v,i){return v+(y[i]-v)*t}))}
@@ -3050,7 +3109,7 @@ function paintSet(){
   $('sw').innerHTML=Object.keys(THEMES).map(function(k){var t=THEMES[k],b=k==='custom'?S.bg:t[1],a=k==='custom'?S.acc:t[2];
     return '<button type="button" data-th="'+k+'" class="'+(S.theme===k?'on':'')+'"><i style="background:'+b+'"><b style="background:'+a+'"></b></i>'+t[0]+'</button>'}).join('');
   $('cBg').value=S.bg;$('cAcc').value=S.acc;$('cHue').value=hex2hue(S.acc);$('sR').value=S.r;
-  $('tRb').classList.toggle('on',S.rainbow);$('tCv').classList.toggle('on',S.cover);$('tCo').classList.toggle('on',S.compact);$('tBl').classList.toggle('on',S.blur);$('tAn').classList.toggle('on',S.anim);paintAudioSet();paintHub();paintPriv();
+  $('tRb').classList.toggle('on',S.rainbow);$('tCv').classList.toggle('on',S.cover);$('tCo').classList.toggle('on',S.compact);$('tBl').classList.toggle('on',S.blur);$('tAn').classList.toggle('on',S.anim);paintAudioSet();paintHub();paintPriv();paintLite();
 }
 function upd(){save('wl3_set',S);applyTheme();paintSet()}
 $('sw').onclick=function(e){var b=e.target.closest('[data-th]');if(!b)return;var k=b.dataset.th;S.theme=k;
@@ -3116,6 +3175,18 @@ $('tCv').onclick=function(){S.cover=!S.cover;dynAcc='';dynFor='';if(S.cover){S.r
 $('tCo').onclick=function(){S.compact=!S.compact;upd()};
 $('tBl').onclick=function(){S.blur=!S.blur;upd();npContrast(TRACKS[cur])};
 $('tAn').onclick=function(){S.anim=!S.anim;upd()};
+/* облегчённый режим: переключатель (после него страница перезагружается) и замок на пяти настройках, которые он выключает */
+function paintLite(){
+  var b=$('tLite');if(b)b.classList.toggle('on',LITE);
+  ['tBl','tAn','tRb','tEq','tViz'].forEach(function(id){var e=$(id);if(e){e.disabled=LITE;e.title=LITE?'Выключено облегчённым режимом':''}});
+}
+$('tLite').onclick=function(){
+  try{localStorage.setItem('sl_lite',LITE?'0':'1')}catch(e){}
+  toast(LITE?'Обычный режим, перезагружаю…':'Облегчённый режим, перезагружаю…');
+  setTimeout(function(){location.reload()},400);
+};
+if(window.SL_LITE_AUTO){try{if(!localStorage.getItem('sl_lite_note')){localStorage.setItem('sl_lite_note','1');
+  setTimeout(function(){toast('Включён облегчённый режим для слабого ПК. Выключить: Настройки → Контент и внешний вид');clearTimeout(toast.h);toast.h=setTimeout(function(){$('toast').classList.remove('on')},6500)},1500)}}catch(e){}}
 $('sRst').onclick=function(){S=JSON.parse(JSON.stringify(DEF));eqApply();upd();toast('Настройки сброшены')};
 var setPg='';
 function setPage(k){
@@ -3133,7 +3204,7 @@ function onoff(v){return v?'вкл':'выкл'}
 function hubSub(k){
   try{
     if(k==='acc')return USER?(accName(USER)+(PROF&&PROF.nick?' · @'+PROF.nick:'')):'Вход, ник, аватарка, синхронизация';
-    if(k==='look')return (THEMES[S.theme]?THEMES[S.theme][0]:'Тема')+(S.compact?', компактный список':'')+(S.anim?'':', без анимаций');
+    if(k==='look')return (THEMES[S.theme]?THEMES[S.theme][0]:'Тема')+(S.compact?', компактный список':'')+(LITE?', облегчённый режим':S.anim?'':', без анимаций');
     if(k==='priv')return 'Медиатека: '+onoff(SHARE_ON)+' · Что слушаю: '+onoff(NP_ON);
     if(k==='play'){var a=[];if(S.eq)a.push('эквалайзер');if(S.fade)a.push('плавные переходы');if(S.viz)a.push('визуализатор');return a.length?a.join(', '):'Эквалайзер, плавные переходы, визуализатор'}
     if(k==='ntf'){var st=pushState();return 'Push-уведомления: '+(st==='granted'?'включены':st==='denied'?'заблокированы':st==='no'?'недоступны':'выключены')}
@@ -3153,7 +3224,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=88;
+var APP_VER='7.0',APP_BUILD=89;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -3467,7 +3538,7 @@ function normDT(o){
 }
 function setT(){return +(function(){try{return localStorage.getItem('wl_set_t')}catch(e){return 0}})()||0}
 function libNorm(o){o=o&&typeof o==='object'&&!Array.isArray(o)?o:{};return {al:(Array.isArray(o.al)?o.al:[]).filter(function(x){return typeof x==='string'}),ar:(Array.isArray(o.ar)?o.ar:[]).filter(function(x){return typeof x==='string'})}}
-function setPick(o){var r={};Object.keys(DEF).forEach(function(k){if(o&&o[k]!==undefined&&typeof o[k]===typeof DEF[k])r[k]=o[k]});if(Array.isArray(r.eqv)&&r.eqv.length!==10)delete r.eqv;return r}
+function setPick(o){if(o&&typeof o.toJSON==='function')o=o.toJSON();var r={};Object.keys(DEF).forEach(function(k){if(o&&o[k]!==undefined&&typeof o[k]===typeof DEF[k])r[k]=o[k]});if(Array.isArray(r.eqv)&&r.eqv.length!==10)delete r.eqv;return r}
 function snapshot(){return {v:2,favs:favs,pl:PL,hist:HIST,cnt:CNT,st:ST,dt:DT,lib:libNorm(LIB),set:{t:setT(),v:setPick(S)}}}
 function mx(a,b){var r={},k;a=a||{};b=b||{};for(k in a)r[k]=a[k];for(k in b)r[k]=Math.max(+r[k]||0,+b[k]||0);return r}
 function uniq(a,b,n){var s={},r=[];(a||[]).concat(b||[]).forEach(function(x){if(typeof x==='string'&&!s[x]){s[x]=1;r.push(x)}});return n?r.slice(0,n):r}
@@ -4113,7 +4184,7 @@ var covWait=0;
 function covPump(){
   /* пока играющий трек ещё буферизуется, чтение тегов ждёт, чтобы не отбирать у него интернет */
   if(covQ.length&&cur>-1&&!audio.paused&&!audio.error&&(audio.readyState<3||pfBusyAny())){clearTimeout(covWait);covWait=setTimeout(covPump,1500);return}
-  while(covBusy<((cur>-1&&!audio.paused)?1:4)&&covQ.length){(function(t){covBusy++;
+  while(covBusy<((cur>-1&&!audio.paused)?1:(LITE?2:4))&&covQ.length){(function(t){covBusy++;
     var ck=t.key+'|'+t.sz,get=reader(t.src),isF=/\.flac$/i.test(t.key),ok=false;
     (isF?flacTags:/\.m4a$/i.test(t.key)?m4aTags:id3Tags)(get).then(function(r){
       var g=clean(r.tags,r);g.p=r.pic?1:0;ok=true;applyTags(t,g);
@@ -5422,7 +5493,7 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0&&!window.
 
 /* ===== мировая популярность треков (Last.fm) ===== */
 var LF_KEY=String(CONFIG.LASTFM_KEY||'').replace(/\s+/g,''),LF_VER='wl_lfm_v1',LF_TTL=14*864e5,LF_TTL_NF=2*864e5,LF_GAP=300,LF_MAX=2500,
-  lfOn=!!LF_KEY,LFC={},lfQ=[],lfBusy=false,lfFly='',lfLast=0,lfTimer=0,lfPause=0,lfBad={},lfVis={},lfIO=null,lfSaveT=0,lfIdleT=0,lfRbT=0,lfNet=0,lfDirty=false;
+  lfOn=!!LF_KEY&&!LITE,LFC={},lfQ=[],lfBusy=false,lfFly='',lfLast=0,lfTimer=0,lfPause=0,lfBad={},lfVis={},lfIO=null,lfSaveT=0,lfIdleT=0,lfRbT=0,lfNet=0,lfDirty=false;
 function lfLoad(){
   var o=load(LF_VER,{}),now=Date.now(),k,e;
   if(!o||typeof o!=='object'||Array.isArray(o))return {};
