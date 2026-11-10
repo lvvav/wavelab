@@ -1,0 +1,21 @@
+name: Deploy ymusic
+# Выкладывает функцию ymusic (Яндекс Музыка, личный режим) в Supabase.
+# Запускается сам при изменении функции, или вручную: GitHub → Actions → Deploy ymusic → Run workflow.
+# Секреты YANDEX_TOKEN и YM_OWNER_EMAIL лежат в Supabase (Edge Functions → Secrets), здесь их нет.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['supabase/functions/ymusic/**', '.github/workflows/deploy-ymusic.yml']
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # JWT проверяет сама функция: пускает только владельца по e-mail
+      - run: supabase functions deploy ymusic --yes --no-verify-jwt --project-ref zpmzqgxwqoisfvahfhqc
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
