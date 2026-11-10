@@ -2411,6 +2411,7 @@ function srchFind(q){var S=srchExact(q),n=function(x){return x.ar.length+x.al.le
   return M}
 function renderSrch(){
   var q=$('msQ').value.trim().toLowerCase();$('msX').hidden=!q;var B=$('msBody'),h='';
+  if(YMV){B.innerHTML=ymDetail();return}
   if(!q){
     var gs={},im={};TRACKS.forEach(function(t){if(t.dup||!t.g)return;gs[t.g]=(gs[t.g]||0)+1;if(!im[t.g]&&t.img)im[t.g]=t.img});
     var ks=Object.keys(gs);
@@ -2422,7 +2423,7 @@ function renderSrch(){
     if(ar.length)h+='<div class="ms-h3">Исполнители</div>'+ar.map(function(x){return '<button class="ms-r ar" data-sr="'+esc(x.k)+'" type="button"><span class="c"'+bg(x.img)+'>'+(x.img?'':ic('user'))+'</span><div><div class="n">'+esc(x.n)+'</div><div class="s">Исполнитель</div></div></button>'}).join('');
     if(al.length)h+='<div class="ms-h3">Альбомы</div>'+al.map(function(x){return '<button class="ms-r" data-sa="'+esc(x.k)+'" type="button"><span class="c"'+bg(x.img)+'>'+(x.img?'':ic('disc'))+'</span><div><div class="n">'+esc(x.t)+'</div><div class="s">Альбом · '+esc(x.a)+'</div></div></button>'}).join('');
     if(tr.length)h+='<div class="ms-h3">Треки</div>'+tr.map(function(t){return '<button class="ms-r" data-st="'+t.id+'" type="button"><span class="c"'+bg(t.img)+'>'+(t.img?'':ic('disc'))+'</span><div><div class="n">'+esc(t.t)+'</div><div class="s">'+esc(t.a)+'</div></div></button>'}).join('');
-    if(YMR.q===q&&YMR.list.length)h+='<div class="ms-h3">Яндекс Музыка</div><div class="ms-note">Полные треки и обложки из вашей Яндекс Музыки.</div>'+YMR.list.map(function(r,i){return '<button class="ms-r" data-ym="'+i+'" type="button"><span class="c"'+bg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">полный</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div></button>'}).join('');
+    var yh=ymHtml(q);if(yh)h+=yh;
     else if(PVR.q===q&&PVR.list.length)h+='<div class="ms-h3">Нет на сайте</div><div class="ms-note">Отрывки по 30 секунд (iTunes). Полного трека в нашем хранилище нет.</div>'+PVR.list.map(function(r,i){return '<button class="ms-r" data-pv="'+i+'" type="button"><span class="c"'+bg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">30 сек</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div><span class="pvw'+(wishHas(r.id)?' on':'')+'" role="button" tabindex="0" data-wish="'+i+'" title="Хочу этот трек" aria-label="Хочу этот трек">'+ic(wishHas(r.id)?'check':'plus')+'</span></button>'}).join('');
     if(!h)h='<div class="ms-e">'+(PVR.busy===q||YMR.busy===q?'Ищу…':'Ничего не найдено по запросу «'+esc($('msQ').value.trim())+'»')+'</div>';
   }
@@ -2456,7 +2457,7 @@ function pvPlay(i){var l=PVR.list;if(!l[i])return;var ids=l.map(function(r){var 
   playId(ids[i],ids);toast('Этого трека нет на сайте: играет отрывок 30 секунд')}
 /* ===== Яндекс Музыка (личный режим): полные треки и обложки вместо 30-секундных отрывков =====
    Всё секретное лежит в Supabase (функция ymusic). Работает только для владельца сайта, после входа в аккаунт. */
-var YMR={q:'',list:[],busy:'',off:false},ymT=0,ymSeq=0,YMC={},YMT=load('sl_ym',[]);if(!Array.isArray(YMT))YMT=[];
+var YMR={q:'',list:[],busy:'',off:false},ymT=0,ymSeq=0,YMC={},YMV=null,YMT=load('sl_ym',[]);if(!Array.isArray(YMT))YMT=[];
 function ymFn(body){
   if(!SB||!SB.auth)return Promise.reject({error:'login'});
   return SB.auth.getSession().then(function(r){var tk=r&&r.data&&r.data.session&&r.data.session.access_token;if(!tk)throw {error:'login'};
@@ -2471,12 +2472,12 @@ function ymErr(j){var c=j&&j.error;
   return 'Не удалось получить трек из Яндекс Музыки'}
 function ymQuery(){var q=$('msQ').value.trim().toLowerCase();clearTimeout(ymT);
   if(YMR.off||q.length<3||navigator.onLine===false||!SB||!USER){YMR={q:'',list:[],busy:'',off:YMR.off};return}
-  if(YMC[q]){YMR={q:q,list:YMC[q],busy:'',off:false};renderSrch();return}
+  if(YMC[q]){YMR={q:q,list:YMC[q].tracks||[],al:YMC[q].albums||[],ar:YMC[q].artists||[],busy:'',off:false};renderSrch();return}
   ymT=setTimeout(function(){YMR.busy=q;
     ymFn({a:'search',q:q}).then(function(j){
       if($('msQ').value.trim().toLowerCase()!==q)return;
       if(j.error){YMR={q:'',list:[],busy:'',off:j.error==='denied'||j.error==='no_owner'||j.error==='no_token'};renderSrch();return}
-      var l=j.tracks||[];YMC[q]=l;YMR={q:q,list:l,busy:'',off:false};renderSrch()
+      YMC[q]=j;YMR={q:q,list:j.tracks||[],al:j.albums||[],ar:j.artists||[],busy:'',off:false};renderSrch()
     }).catch(function(){YMR.busy='';renderSrch()})},450)}
 function ymAddTrack(r){var key='ym:'+r.id,i;
   for(i=0;i<TRACKS.length;i++)if(TRACKS[i].key===key)return TRACKS[i];
@@ -2485,6 +2486,51 @@ function ymAddTrack(r){var key='ym:'+r.id,i;
 function ymBoot(){if(!Array.isArray(YMT))return;YMT.forEach(function(r){if(r&&r.id)ymAddTrack(r)})}
 function ymSave(r){YMT=[{id:r.id,t:r.t,a:r.a,al:r.al||'',dur:r.dur||0,img:r.img||''}].concat(YMT.filter(function(x){return x.id!==r.id})).slice(0,200);save('sl_ym',YMT)}
 function ymPlay(i){var l=YMR.list;if(!l[i])return;var ids=l.map(function(r){return ymAddTrack(r).id});ymSave(l[i]);playId(ids[i],ids)}
+/* --- результаты и экраны альбома/артиста --- */
+function ymBg(i){return i?' style="background-image:url(\''+i+'\')"':''}
+function ymRowT(r,at){return '<button class="ms-r" '+at+' type="button"><span class="c"'+ymBg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">полный</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div></button>'}
+function ymRowA(r){return '<button class="ms-r" data-yml="'+esc(r.id)+'" type="button"><span class="c"'+ymBg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'</div><div class="s">Альбом · '+esc(r.a)+(r.y?' · '+esc(r.y):'')+'</div></div></button>'}
+function ymRowAr(r){return '<button class="ms-r ar" data-yma="'+esc(r.id)+'" type="button"><span class="c"'+ymBg(r.img)+'>'+(r.img?'':ic('user'))+'</span><div><div class="n">'+esc(r.t)+'</div><div class="s">Исполнитель · Яндекс Музыка</div></div></button>'}
+function ymHtml(q){
+  if(YMR.q!==q)return '';
+  var ar=(YMR.ar||[]).slice(0,3),al=(YMR.al||[]).slice(0,5),tr=(YMR.list||[]).slice(0,8),h='';
+  if(!ar.length&&!al.length&&!tr.length)return '';
+  h='<div class="ms-h3">Яндекс Музыка</div><div class="ms-note">Полные треки и обложки из вашей Яндекс Музыки.</div>';
+  if(ar.length)h+='<div class="ms-h3">Исполнители</div>'+ar.map(ymRowAr).join('');
+  if(al.length)h+='<div class="ms-h3">Альбомы</div>'+al.map(ymRowA).join('');
+  if(tr.length)h+='<div class="ms-h3">Треки</div>'+tr.map(function(r,i){return ymRowT(r,'data-ym="'+i+'"')}).join('');
+  return h}
+function ymOpen(kind,id){
+  YMV={k:kind,id:id,loading:true,d:null,flat:[],err:''};renderSrch();
+  ymFn({a:kind,id:id}).then(function(j){
+    if(!YMV||YMV.id!==id)return;
+    YMV.loading=false;
+    if(j.error)YMV.err=ymErr(j);
+    else{YMV.d=j;YMV.flat=kind==='album'?[].concat.apply([],j.discs||[]):(j.tracks||[])}
+    renderSrch()
+  }).catch(function(e){if(!YMV||YMV.id!==id)return;YMV.loading=false;YMV.err=ymErr(e);renderSrch()})}
+function ymDetail(){
+  var v=YMV,h='<button class="ms-r" data-ymb="1" type="button"><span class="c">'+ic('back')+'</span><div><div class="n">Назад к поиску</div></div></button>';
+  if(v.loading)return h+'<div class="ms-e">Загружаю…</div>';
+  if(v.err||!v.d)return h+'<div class="ms-e">'+esc(v.err||'Не удалось открыть')+'</div>';
+  var d=v.d,i=0;
+  if(v.k==='album'){
+    var al=d.album||{},ds=d.discs||[];
+    h+='<div class="ms-r"><span class="c" style="width:96px;height:96px;background-image:url(\''+esc(al.img||'')+'\')"></span><div><div class="n" style="white-space:normal">'+esc(al.t)+'</div><div class="s">'+esc(al.a)+(al.y?' · '+esc(al.y):'')+'</div></div></div>';
+    h+='<div style="padding:6px 0 10px"><button class="btn" data-ympa="1" type="button">Слушать альбом</button></div>';
+    ds.forEach(function(disc,n){
+      if(ds.length>1)h+='<div class="ms-h3">Диск '+(n+1)+'</div>';
+      h+=disc.map(function(r){var k=i++;return '<button class="ms-r" data-ymt="'+k+'" type="button"><span class="c" style="width:32px;height:32px;font-size:13px;color:var(--mut)">'+(k+1)+'</span><div><div class="n">'+esc(r.t)+'</div><div class="s">'+esc(r.a)+(r.dur?' · '+fmt(r.dur):'')+'</div></div></button>'}).join('')});
+    if(!i)h+='<div class="ms-e">В альбоме нет доступных треков</div>';
+  }else{
+    var ar=d.artist||{},tr=d.tracks||[],als=d.albums||[];
+    h+='<div class="ms-r ar"><span class="c" style="width:96px;height:96px;background-image:url(\''+esc(ar.img||'')+'\')"></span><div><div class="n" style="white-space:normal;font-size:20px">'+esc(ar.t)+'</div><div class="s">Исполнитель</div></div></div>';
+    if(tr.length)h+='<div style="padding:6px 0 0"><button class="btn" data-ympa="1" type="button">Слушать популярное</button></div><div class="ms-h3">Популярные треки</div>'+tr.map(function(r,k){return ymRowT(r,'data-ymt="'+k+'"')}).join('');
+    if(als.length)h+='<div class="ms-h3">Альбомы</div>'+als.map(ymRowA).join('');
+    if(!tr.length&&!als.length)h+='<div class="ms-e">У исполнителя ничего не нашлось</div>';
+  }
+  return h}
+function ymPlayFlat(i){var l=YMV&&YMV.flat;if(!l||!l[i])return;var ids=l.map(function(r){return ymAddTrack(r).id});ymSave(l[i]);playId(ids[i],ids)}
 /* ссылку на полный трек просим у функции в момент воспроизведения: у Яндекса она временная */
 function ymResolve(t){
   try{audio.removeAttribute('src');audio.load()}catch(e){}
@@ -2497,13 +2543,18 @@ function ymResolve(t){
     audio.src=j.url;audio.playbackRate=SPEEDS[spI];
     if(wantPlay){var p=audio.play();if(p&&p.catch)p.catch(function(){})}
   }).catch(function(e){if(my===ymSeq)toast(ymErr(e))})}
-$('msQ').oninput=function(){renderSrch();pvQuery();ymQuery()};
-$('msX').onclick=function(){$('msQ').value='';PVR={q:'',list:[],busy:''};YMR={q:'',list:[],busy:'',off:YMR.off};renderSrch();$('msQ').focus()};
+$('msQ').oninput=function(){YMV=null;renderSrch();pvQuery();ymQuery()};
+$('msX').onclick=function(){$('msQ').value='';PVR={q:'',list:[],busy:''};YMR={q:'',list:[],busy:'',off:YMR.off};YMV=null;renderSrch();$('msQ').focus()};
 $('msAv').onclick=function(){$('profBtn').click()};
 $('msBody').onclick=function(e){
   var w=e.target.closest('[data-wish]');if(w){var r0=PVR.list[+w.dataset.wish];if(r0){wishToggle(r0);renderSrch()}return}
   var b=e.target.closest('button');if(!b)return;
   var d=b.dataset;
+  if(d.ymb!==undefined){YMV=null;renderSrch();return}
+  if(d.yml!==undefined){ymOpen('album',d.yml);return}
+  if(d.yma!==undefined){ymOpen('artist',d.yma);return}
+  if(d.ympa!==undefined){ymPlayFlat(0);return}
+  if(d.ymt!==undefined){ymPlayFlat(+d.ymt);return}
   if(d.ym!==undefined){ymPlay(+d.ym);return}
   if(d.pv!==undefined){pvPlay(+d.pv);return}
   if(d.st!==undefined){var ids=[].slice.call($('msBody').querySelectorAll('[data-st]')).map(function(x){return +x.dataset.st});playId(+d.st,ids);return}
@@ -3269,7 +3320,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=90;
+var APP_VER='7.0',APP_BUILD=91;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){

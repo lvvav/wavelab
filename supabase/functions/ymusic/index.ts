@@ -3,7 +3,7 @@
 // Секреты (Supabase → Edge Functions → Secrets), в репозитории их нет:
 //   YANDEX_TOKEN     OAuth-токен аккаунта Яндекса с Плюсом
 //   YM_OWNER_EMAIL   e-mail, с которым ты входишь на сайт; только этому пользователю функция отвечает
-// Действия (POST, json): {a:'status'} | {a:'search', q} | {a:'url', id}
+// Действия (POST, json): {a:'status'} | {a:'search', q} | {a:'album', id} | {a:'artist', id} | {a:'url', id}
 import { createHash } from "node:crypto";
 
 const CORS = {
@@ -61,6 +61,21 @@ function mapTrack(t: any) {
     img: cover(t.coverUri ?? t.albums?.[0]?.coverUri),
     ok: t.available !== false,
   };
+}
+
+const names = (a: any[] | undefined) => (a ?? []).map((x: any) => x.name).join(", ");
+function mapAlbum(a: any) {
+  return {
+    id: String(a.id),
+    t: a.title + (a.version ? " (" + a.version + ")" : ""),
+    a: names(a.artists),
+    y: a.year ?? a.releaseDate?.slice(0, 4) ?? "",
+    n: a.trackCount ?? 0,
+    img: cover(a.coverUri ?? a.ogImage),
+  };
+}
+function mapArtist(x: any) {
+  return { id: String(x.id), t: x.name, img: cover(x.cover?.uri ?? x.ogImage) };
 }
 
 // способ 1 (классический): download-info → xml → подпись md5 → ссылка get-mp3
@@ -121,10 +136,42 @@ Deno.serve(async (req) => {
     if (b.a === "search") {
       const q = String(b.q ?? "").trim().slice(0, 120);
       if (!q) return json({ tracks: [] });
-      const r = await ym("/search?" + new URLSearchParams({ text: q, nocorrect: "false", type: "track", page: "0", "playlist-in-best": "true" }));
+      const r = await ym("/search?" + new URLSearchParams({ text: q, nocorrect: "false", type: "all", page: "0", "playlist-in-best": "true" }));
       if (!r.ok) return json({ error: "search", detail: "Поиск не удался (" + r.status + ")" }, 502);
-      const arr: any[] = r.j?.result?.tracks?.results ?? [];
-      return json({ tracks: arr.map(mapTrack).filter((x) => x.ok).slice(0, 30) });
+      const res = r.j?.result ?? {};
+      return json({
+        tracks: (res.tracks?.results ?? []).map(mapTrack).filter((x: any) => x.ok).slice(0, 15),
+        albums: (res.albums?.results ?? []).map(mapAlbum).slice(0, 8),
+        artists: (res.artists?.results ?? []).map(mapArtist).slice(0, 6),
+      });
+    }
+    if (b.a === "album") {
+      const id = String(b.id ?? "").replace(/\D/g, "");
+      if (!id) return json({ error: "id" }, 400);
+      const r = await ym(`/albums/${id}/with-tracks`);
+      const al = r.j?.result;
+      if (!r.ok || !al) return json({ error: "album", detail: "Альбом не открылся (" + r.status + ")" }, 502);
+      const img = cover(al.coverUri);
+      const discs = (al.volumes ?? [])
+        .map((v: any[]) => v.map(mapTrack).filter((x: any) => x.ok).map((x: any) => ({ ...x, img: x.img || img })))
+        .filter((d: any[]) => d.length);
+      return json({ album: mapAlbum(al), discs });
+    }
+    if (b.a === "artist") {
+      const id = String(b.id ?? "").replace(/\D/g, "");
+      if (!id) return json({ error: "id" }, 400);
+      const [br, da] = await Promise.all([
+        ym(`/artists/${id}/brief-info`),
+        ym(`/artists/${id}/direct-albums?page=0&page-size=40&sort-by=year`),
+      ]);
+      const info = br.j?.result;
+      if (!br.ok || !info) return json({ error: "artist", detail: "Артист не открылся (" + br.status + ")" }, 502);
+      const albums = da.j?.result?.albums ?? info.albums ?? [];
+      return json({
+        artist: { id, t: info.artist?.name ?? "", img: cover(info.artist?.cover?.uri ?? info.artist?.ogImage) },
+        tracks: (info.popularTracks ?? []).map(mapTrack).filter((x: any) => x.ok).slice(0, 15),
+        albums: albums.map(mapAlbum).slice(0, 40),
+      });
     }
     if (b.a === "url") {
       const id = String(b.id ?? "").replace(/[^0-9:]/g, "");
