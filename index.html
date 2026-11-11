@@ -1152,6 +1152,10 @@ body:not(.hasTrack){padding-bottom:8px}
 @media(min-width:861px){#sortBtn2{display:none!important}}
 .pvb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--acc);color:var(--on,#000);font-size:11px;font-weight:700;vertical-align:1px;white-space:nowrap}
 .ms-note{padding:6px 16px 0;color:var(--mut);font-size:12px}
+.srcsw{display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--line);border-radius:99px;background:var(--panel)}
+.srcsw button{padding:7px 18px;border-radius:99px;color:var(--mut);font-weight:600;font-size:13px;transition:background .2s,color .2s}
+.srcsw button:hover{color:var(--text)}
+.srcsw button.on{background:var(--acc);color:var(--on)}
 
 .pvw{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--mut);cursor:pointer}
 .pvw.on{color:var(--acc)}.pvw .i{width:20px;height:20px}
@@ -1886,10 +1890,15 @@ function render(){
   var l=visible();VORD=l.map(function(t){return t.id});if(cur<0)ORDER=VORD.slice();
   var titles={all:'Каталог',fav:'Избранное',queue:'Очередь',albums:'Альбомы',album:'Альбом',pls:'Плейлисты',pl:'Плейлист',hist:'История',artists:'Артисты',artist:'Артист',stats:'Итоги',mine:'Мои файлы'},AR=view==='artist'?ARTS.filter(function(x){return x.k===artK})[0]:null,ab=view==='album'?ALB.filter(function(x){return x.k===albK})[0]:null,P=view==='pl'?curPl():null;
   var nT=l.length+' '+plural(l.length,['трек','трека','треков']),tot=l.reduce(function(a,t){return a+(t.dur||0)},0),
-      al=view==='albums'?ALB.filter(function(x){return !query||(x.t+' '+x.a).toLowerCase().indexOf(query)>-1}):[],
-      ar2=view==='artists'?ARTS.filter(function(x){return !query||x.n.toLowerCase().indexOf(query)>-1}):[];
+      al=view==='albums'?albList():[],
+      ar2=view==='artists'?artList():[];
   $('title').textContent=ab?ab.t:AR?AR.n:P?P.n:genre&&view==='all'?genre:titles[view];
   $('sub').textContent=view==='pls'?PL.length+' '+plural(PL.length,['плейлист','плейлиста','плейлистов']):view==='albums'?al.length+' '+plural(al.length,['альбом','альбома','альбомов']):view==='stats'?'Ваша музыка в цифрах':view==='artists'?ar2.length+' '+plural(ar2.length,['артист','артиста','артистов']):AR?[nT,albN(AR),lfArtSub(AR.n)].filter(Boolean).join(' · '):ab?[ab.a,ab.y,nT,l.length&&l.every(function(t){return t.dur})?fmtLong(tot):''].filter(Boolean).join(' · '):nT;
+  if(ab&&ab.ym&&!ab.ld&&!ab.busy&&(!ab.err||Date.now()-ab.errAt>8000))ymLoadAlb(ab);
+  if(AR&&AR.ym&&!AR.ld&&!AR.busy&&(!AR.err||Date.now()-AR.errAt>8000))ymLoadArt(AR);
+  if(!ymChk&&SB&&USER)ymVerify();
+  if((view==='albums'||view==='artists')&&srcNow()==='ym')ymGridSearch();
+  $('q').placeholder=(view==='albums'||view==='artists')&&srcNow()==='ym'?'Поиск в Яндекс Музыке':'Поиск по трекам и артистам';
   $('mineAdd').hidden=view!=='mine';
   var RL=[],RS=null,aT=$('aTabs'),relView=false;
   if(view==='artist'&&AR){
@@ -1913,10 +1922,10 @@ function render(){
   sortBtnPaint();
   $('sortBtn2').hidden=relView||!l.length||['all','fav','artist','album','pl','hist'].indexOf(view)<0;
   $('playAll').hidden=$('shufAll').hidden=relView||!l.length||view==='queue'||view==='albums'||view==='pls'||view==='artists'||view==='stats';
-  $('shareBtn').hidden=!(ab||(AR&&!relView));$('moreBtn').hidden=!(ab||(AR&&!relView)||(P&&!P.remote));
+  $('shareBtn').hidden=!(ab||(AR&&!relView))||!!((ab&&ab.ym)||(AR&&AR.ym));$('moreBtn').hidden=!(ab||(AR&&!relView)||(P&&!P.remote))||!!((ab&&ab.ym)||(AR&&AR.ym));
   paintSub();
   $('backBtn').hidden=!(view==='album'||view==='pl'||view==='artist');
-  var xs={pls:['Новый плейлист'],pl:(P&&P.remote)?['Сохранить себе']:['Переименовать','Удалить'],queue:['Очистить'],album:['Сохранить офлайн'],artist:['Сохранить офлайн'],fav:['Сохранить офлайн']}[view]||[];if(relView)xs=[];
+  var xs={pls:['Новый плейлист'],pl:(P&&P.remote)?['Сохранить себе']:['Переименовать','Удалить'],queue:['Очистить'],album:['Сохранить офлайн'],artist:['Сохранить офлайн'],fav:['Сохранить офлайн']}[view]||[];if(relView||(ab&&ab.ym)||(AR&&AR.ym))xs=[];
   $('xBtn').hidden=!xs[0];$('xBtn').textContent=xs[0]||'';var xo=xs[0]==='Сохранить офлайн';$('xBtn').classList.toggle('ico',xo);if(xo){$('xBtn').innerHTML=ic('dl')+'<span class="bt">'+xs[0]+'</span>';$('xBtn').title=$('xBtn').dataset.t=xs[0];$('xBtn').setAttribute('aria-label',xs[0])}else $('xBtn').removeAttribute('title');$('xBtn2').hidden=!xs[1];$('xBtn2').textContent=xs[1]||'';
   if(view==='albums'||view==='pls'||view==='artists'||view==='stats')l=[];
   if(view==='artist'&&AR&&!relView){l=popList(AR);VORD=l.map(function(t){return t.id});if(cur<0)ORDER=VORD.slice();if(!artMore)l=l.slice(0,5)}
@@ -1934,15 +1943,16 @@ function render(){
       '<div class="acts">'+(window.slAdmOn&&window.slAdmOn()?'<button class="ab" data-a="ed" type="button" title="Править трек" aria-label="Править трек">'+ic('edit')+'</button>':'')+
         '<button class="ab fv'+(fv?' on':'')+(t.key===popKey?' pop':'')+'" data-a="fav" type="button" title="В избранное" aria-label="В избранное">'+ic('heart')+'</button>'+
         (view==='queue'?'<button class="ab" data-a="unq" type="button" title="Убрать из очереди" aria-label="Убрать">'+ic('x')+'</button>':'<button class="ab" data-a="m" type="button" title="Ещё" aria-label="Ещё">'+ic('more')+'</button>')+
-        '<button class="ab dlb" data-a="dl" type="button" title="Скачать" aria-label="Скачать">'+ic('dl')+'</button>'+
+        (t.ym?'':'<button class="ab dlb" data-a="dl" type="button" title="Скачать" aria-label="Скачать">'+ic('dl')+'</button>')+
       '</div></div>';
   }).join('');
   if(!l.length&&view!=='albums'&&view!=='pls'&&view!=='artists'&&view!=='stats'){
     var msg={mine:['Здесь будут ваши файлы','Нажмите «+ Добавить файлы» и выберите свои mp3. Они видны только вам и хранятся на этом устройстве'],album:['Альбом пуст',''],artist:['Нет треков',''],pl:['Плейлист пуст','Добавьте треки через меню «⋯»'],hist:['История пуста','Здесь появятся треки, которые вы слушали'],all:TRACKS.length?['Ничего не найдено','Попробуйте изменить запрос или жанр']:loading?['Загружаю каталог…','']:['Каталог пуст','Загрузите mp3 или flac в папку music на GitHub'],fav:['В избранном пока пусто','Нажмите на сердечко рядом с треком'],queue:['Очередь пуста','Нажмите «+» рядом с треком, чтобы добавить']}[view];
     html=loading&&view==='all'?SK:'<div class="empty"><b>'+msg[0]+'</b>'+msg[1]+(TRACKS.length&&(query||(genre&&view==='all'))?'<div style="margin-top:16px"><button class="btn ghost" data-reset type="button">Сбросить фильтры</button></div>':'')+'</div>';
   }
-  if(view==='albums')html=al.length?'<div class="agrid">'+al.map(acard).join('')+'</div>':'<div class="empty"><b>Альбомов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
-  if(view==='artists')html=ar2.length?'<div class="agrid">'+ar2.map(rcard).join('')+'</div>':'<div class="empty"><b>Артистов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>';
+  if(view==='albums')html=al.length?'<div class="agrid">'+al.map(acard).join('')+'</div>':(srcNow()==='ym'?ymEmpty('al'):'<div class="empty"><b>Альбомов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>');
+  if(view==='artists')html=ar2.length?'<div class="agrid">'+ar2.map(rcard).join('')+'</div>':(srcNow()==='ym'?ymEmpty('ar'):'<div class="empty"><b>Артистов пока нет</b>Они появятся, когда сайт прочитает теги в файлах</div>');
+  if(view==='albums'||view==='artists')html=srcSw()+html;
   if(view==='stats')html=wrpBtn()+statsHtml();
   if(view==='pls')html=autoCards()+(PL.length?'<div class="agrid">'+PL.map(pcard).join('')+'</div>':'<div class="empty"><b>Плейлистов пока нет</b>Нажмите «Новый плейлист» или «⋯» у любого трека</div>');
   if(relView)html=relScreen(RS);
@@ -1952,9 +1962,11 @@ function render(){
     if(PR.length)html+='<div class="more-h" style="margin-top:30px"><h3 class="sec-h" style="margin:0">Популярные релизы</h3><button class="linkb" data-rel type="button">Показать все</button></div>'+PR.map(function(x,n){return relRow(x,n===0&&RS.last&&x.k===RS.last.k?'Последний релиз':'',0)}).join('')+'<button class="pbtn" data-rel type="button">Открыть дискографию</button>';
   }
   if(view==='album'&&ab){
-    var ak=ab.a.toLowerCase(),oth=relsOf(ak).filter(function(x){return x.k!==ab.k}),arO=ARTS.filter(function(x){return x.k===ak})[0];
+    var ak=ab.ym?(ab.aid?'ym:ar:'+ab.aid:'-'):ab.a.toLowerCase(),oth=relsOf(ak).filter(function(x){return x.k!==ab.k}),arO=ARTS.filter(function(x){return x.k===ak})[0];
     if(oth.length)html+='<div class="more"><div class="more-h"><h3>Ещё от '+esc(arO?arO.n:ab.a)+'</h3>'+(arO?'<button class="linkb" data-goar="'+esc(arO.k)+'" type="button">Вся дискография ›</button>':'')+'</div><div class="agrid">'+oth.map(relcard).join('')+'</div></div>';
   }
+  var ymW=(ab&&ab.ym&&!ab.ld)?ab:(AR&&AR.ym&&!AR.ld&&!relView)?AR:null;
+  if(ymW)html='<div class="empty"><b>'+(ymW.err?'Не удалось открыть':'Загружаю из Яндекс Музыки…')+'</b>'+(ymW.err?esc(ymW.err):'')+'</div>';
   $('list').innerHTML=html;popKey='';
   var vk=view+'|'+genre+'|'+albK+'|'+artK+'|'+plId+'|'+artTab;
   var LL=$('list');
@@ -1963,11 +1975,11 @@ function render(){
   renderNav();paintModes();syncNp();jumpChk();renderHome();lfObserve();navNote();
 }
 var artMore=false;
-function popSort(arr){var a=arr.map(function(t,i){return {t:t,i:i}});a.sort(function(x,y){return (lfL(y.t)-lfL(x.t))||((CNT[y.t.key]||0)-(CNT[x.t.key]||0))||(x.i-y.i)});return a.map(function(o){return o.t})}
+function popSort(arr){if(arr.length&&arr.every(function(t){return t.ym}))return arr.slice();var a=arr.map(function(t,i){return {t:t,i:i}});a.sort(function(x,y){return (lfL(y.t)-lfL(x.t))||((CNT[y.t.key]||0)-(CNT[x.t.key]||0))||(x.i-y.i)});return a.map(function(o){return o.t})}
 function popList(R){return popSort(R.tr).slice(0,10)}
 function playIds(){if(view==='artist'){var R=ARTS.filter(function(x){return x.k===artK})[0];if(R)return popSort(R.tr).map(function(t){return t.id})}return VORD}
 function relSections(R){
-  var k=R.k,all=relsOf(k),own=all.filter(function(x){return x.a.toLowerCase()===k}),feat=all.filter(function(x){return x.a.toLowerCase()!==k});
+  var k=R.k,all=relsOf(k),own=R.ym?all:all.filter(function(x){return x.a.toLowerCase()===k}),feat=R.ym?[]:all.filter(function(x){return x.a.toLowerCase()!==k});
   function byY(a,b){return (b.y||'').localeCompare(a.y||'')||a.t.localeCompare(b.t,'ru')}
   own.sort(byY);feat.sort(byY);
   var last=own[0]||null,rest=own.slice(1);
@@ -2003,14 +2015,15 @@ document.addEventListener('click',function(e){
 });
  var REL_LBL={album:'Альбомы',ep:'Мини-альбомы',single:'Синглы'},REL_ONE={album:'Альбом',ep:'Мини-альбом',single:'Сингл'},REL_ORD=['album','ep','single'];
 function relType(x){
-  var n=x.tr.length,t=x.t||'';
+  var n=nTr(x),t=x.t||'';
   if(/(^|[\s\-–—(\[])(single|сингл)([\s)\]]|$)/i.test(t))return 'single';
   if(/(^|[\s\-–—(\[])(ep|э-?пи|mini[\s-]?album|мини[\s-]?альбом)([\s)\]]|$)/i.test(t))return 'ep';
   return n<=3?'single':n<=6?'ep':'album';
 }
 function relsOf(k){
   var o={album:0,ep:1,single:2};
-  return ALB.filter(function(x){return x.a.toLowerCase()===k||x.tr.some(function(t){return t.a.toLowerCase()===k})})
+  var base=/^ym:ar:/.test(k)?(YMR2[k]?YMR2[k].rels.map(function(q){return YMA[q]}).filter(Boolean):[]):ALB.filter(function(x){return !x.ym&&(x.a.toLowerCase()===k||x.tr.some(function(t){return t.a.toLowerCase()===k}))});
+  return base
     .sort(function(a,b){return o[relType(a)]-o[relType(b)]||(b.y||'').localeCompare(a.y||'')||a.t.localeCompare(b.t,'ru')});
 }
 document.addEventListener('click',function(e){
@@ -2021,13 +2034,13 @@ document.addEventListener('keydown',function(e){
   if(e.key!=='Enter'&&e.key!==' ')return;var b=e.target.closest&&e.target.closest('.cmx');if(!b)return;
   e.stopPropagation();e.preventDefault();openMenuX(b.dataset.mx,b.dataset.mk)
 },true);
-function mxb(kind,k){return '<span class="cmx" role="button" tabindex="0" aria-label="Ещё" data-mx="'+kind+'" data-mk="'+esc(k)+'">'+ic('more')+'</span>'}
+function mxb(kind,k){if(String(k).indexOf('ym:')===0)return '';return '<span class="cmx" role="button" tabindex="0" aria-label="Ещё" data-mx="'+kind+'" data-mk="'+esc(k)+'">'+ic('more')+'</span>'}
 function albDur(x){var s=0;for(var i=0;i<x.tr.length;i++){if(!x.tr[i].dur)return '';s+=x.tr[i].dur}return s?fmtLong(s):''}
-function relcard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+REL_ONE[relType(x)]+(x.y?' · '+esc(x.y):'')+' · '+x.tr.length+' '+plural(x.tr.length,['трек','трека','треков'])+(albDur(x)?' · '+albDur(x):'')+'</div></button>'}
-function albN(R){var o={};R.tr.forEach(function(t){if(t.al)o[t.al]=1});var n=Object.keys(o).length;return n?n+' '+plural(n,['альбом','альбома','альбомов']):''}
+function relcard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+REL_ONE[relType(x)]+(x.y?' · '+esc(x.y):'')+' · '+nTr(x)+' '+plural(nTr(x),['трек','трека','треков'])+(albDur(x)?' · '+albDur(x):'')+'</div></button>'}
+function albN(R){if(R.ym){var m=R.rels.length;return m?m+' '+plural(m,['альбом','альбома','альбомов']):''}var o={};R.tr.forEach(function(t){if(t.al)o[t.al]=1});var n=Object.keys(o).length;return n?n+' '+plural(n,['альбом','альбома','альбомов']):''}
 function rcard(x,i){
   var c=PAL[hash(x.n)%PAL.length],h=x.img?cv({img:x.img}):'<span class="cv ini" style="background:'+c[0]+';color:'+c[1]+'">'+esc((x.n.trim().charAt(0)||'?').toUpperCase())+'</span>';
-  return '<button class="acd rd" style="--i:'+Math.min(i,14)+'" data-ar="'+esc(x.k)+'" type="button">'+h+mxb('ar',x.k)+'<div class="tt">'+esc(x.n)+'</div><div class="ar">'+lfArtCard(x)+'</div></button>'
+  return '<button class="acd rd" style="--i:'+Math.min(i,14)+'" data-ar="'+esc(x.k)+'" type="button">'+h+mxb('ar',x.k)+'<div class="tt">'+esc(x.n)+'</div><div class="ar">'+(x.ym?'Яндекс Музыка':lfArtCard(x))+'</div></button>'
 }
 function bigOn(){return !audio.paused&&cur>-1&&playIds().indexOf(cur)>-1}
 function paintBig(){var b=$('playAll'),on=bigOn();if(b.dataset.on===(on?'1':'0'))return;b.dataset.on=on?'1':'0';b.innerHTML='<svg class="i f"><use href="#i-'+(on?'pause':'play')+'"/></svg>'+(on?'Пауза':'Слушать всё');var tx=on?'Пауза':'Слушать всё';b.title=tx;b.setAttribute('aria-label',tx)}
@@ -2041,7 +2054,7 @@ function paintRows(){
 function renderHome(){
   var show=view==='all'&&!genre&&!query&&!loading&&TRACKS.length>0;
   $('home').hidden=!show;if(!show)return;
-  var T=[['fav','heart','Избранное',favCount()],['albums','disc','Альбомы',ALB.length],['artists','user','Артисты',ARTS.length],['hist','moon','История',HIST.length],['stats','chart','Итоги','']];
+  var T=[['fav','heart','Избранное',favCount()],['albums','disc','Альбомы',nat(ALB).length],['artists','user','Артисты',nat(ARTS).length],['hist','moon','История',HIST.length],['stats','chart','Итоги','']];
   paintWave();paintStatCard();
   $('qtGrid').innerHTML=T.map(function(x){return '<button class="qt" data-qv="'+x[0]+'" type="button"><span class="qi">'+ic(x[1])+'</span><span class="qn">'+x[2]+'</span>'+(x[3]?'<span class="qc num">'+x[3]+'</span>':'')+'</button>'}).join('');
   if(window.matchMedia&&matchMedia('(max-width:860px)').matches)paintHomeM();
@@ -2068,9 +2081,9 @@ function moreCard(v){return '<button class="acd more" data-more="'+v+'" type="bu
 function homeRows(hist){
   var h=moodTiles(),used={},N=homeN();
   if(hist.length){hist.slice(0,N).forEach(function(A){used[A.k]=1});h+='<h3 class="hs-t">Слушаем дальше?</h3><div class="hs">'+hist.slice(0,N).map(function(A,i){return acard(A,i)}).join('')+(hist.length>N?moreCard('hist'):'')+'</div>'}
-  var rest=ALB.filter(function(A){return !used[A.k]});
+  var rest=nat(ALB).filter(function(A){return !used[A.k]});
   if(rest.length)h+='<h3 class="hs-t">Альбомы для тебя</h3><div class="hs">'+rest.slice(0,N).map(function(A,i){return acard(A,i)}).join('')+(rest.length>N?moreCard('albums'):'')+'</div>';
-  if(ARTS.length)h+='<h3 class="hs-t">Исполнители</h3><div class="hs">'+ARTS.slice(0,N).map(function(R){return '<button class="acd rd" data-hr="'+esc(R.k)+'" type="button">'+cv({img:R.img})+mxb('ar',R.k)+'<div class="tt">'+esc(R.n)+'</div><div class="ar">Исполнитель</div></button>'}).join('')+(ARTS.length>N?moreCard('artists'):'')+'</div>';
+  if(nat(ARTS).length)h+='<h3 class="hs-t">Исполнители</h3><div class="hs">'+nat(ARTS).slice(0,N).map(function(R){return '<button class="acd rd" data-hr="'+esc(R.k)+'" type="button">'+cv({img:R.img})+mxb('ar',R.k)+'<div class="tt">'+esc(R.n)+'</div><div class="ar">Исполнитель</div></button>'}).join('')+(nat(ARTS).length>N?moreCard('artists'):'')+'</div>';
   return h}
 function paintHomeM(){
   var tl=[{c:'fv',a:'data-qv="fav"',h:ic('heart'),st:'',n:'Любимые треки'}],seen={};
@@ -2080,7 +2093,7 @@ function paintHomeM(){
   LIB.ar.slice(0,3).forEach(function(k){var R=ARTS.filter(function(x){return x.k===k})[0];if(R)tl.push({c:'',a:'data-hr="'+esc(R.k)+'"',h:R.img?'':ic('user'),st:R.img?' style="background-image:url(\''+R.img+'\')"':'',n:R.n})});
   var hist=[];HIST.forEach(function(k){var t=byKey(k);if(t&&t.al){var A=albOfTrack(t);if(A&&!hist.some(function(x){return x.k===A.k}))hist.push(A)}});
   hist.forEach(function(A){if(tl.length<8)addAl(A)});
-  ALB.forEach(function(A){if(tl.length<8)addAl(A)});
+  nat(ALB).forEach(function(A){if(tl.length<8)addAl(A)});
   tl=tl.slice(0,8);
   $('qtGrid').innerHTML=tl.map(function(x){return '<button class="qt m '+x.c+'" '+x.a+' type="button"><span class="qm"'+x.st+'>'+x.h+'</span><span class="qn">'+esc(x.n)+'</span></button>'}).join('');
   $('hsRows').innerHTML=homeRows(hist);
@@ -2096,12 +2109,12 @@ $('home').addEventListener('click',function(e){
   genre='';$('scroll').scrollTop=0;render();
 });
 function fmtLong(s){if(s<60)return Math.round(s)+' сек';var m=Math.round(s/60);return m>=60?Math.floor(m/60)+' ч '+m%60+' мин':m+' мин'}
-function acard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+esc(x.a)+(x.y?' · '+esc(x.y):'')+' · '+x.tr.length+' '+plural(x.tr.length,['трек','трека','треков'])+(albDur(x)?' · '+albDur(x):'')+'</div></button>'}
+function acard(x,i){return '<button class="acd" style="--i:'+Math.min(i,14)+'" data-ak="'+esc(x.k)+'" type="button">'+cv({img:x.img})+mxb('al',x.k)+'<div class="tt">'+esc(x.t)+'</div><div class="ar">'+esc(x.a)+(x.y?' · '+esc(x.y):'')+' · '+nTr(x)+' '+plural(nTr(x),['трек','трека','треков'])+(albDur(x)?' · '+albDur(x):'')+'</div></button>'}
 function favCount(){return TRACKS.filter(function(t){return !t.dup&&favs.indexOf(t.key)>-1}).length}
 function plural(n,f){n=Math.abs(n)%100;var m=n%10;return n>10&&n<20?f[2]:m>1&&m<5?f[1]:m===1?f[0]:f[2]}
 function renderNav(){
   setTimeout(function(){if(typeof qPaint==='function')qPaint()},0);
-  $('cMine').textContent=TRACKS.filter(function(t){return t.mine&&!t.ym}).length||'';$('cAll').textContent=TRACKS.filter(function(t){return !t.dup}).length;$('cAlb').textContent=ALB.length||'';$('cAr').textContent=ARTS.length||'';$('cPl').textContent=PL.length||'';$('cFav').textContent=favCount()||'';$('cQ').textContent=queue.length||'';
+  $('cMine').textContent=TRACKS.filter(function(t){return t.mine&&!t.ym}).length||'';$('cAll').textContent=TRACKS.filter(function(t){return !t.dup}).length;$('cAlb').textContent=nat(ALB).length||'';$('cAr').textContent=nat(ARTS).length||'';$('cPl').textContent=PL.length||'';$('cFav').textContent=favCount()||'';$('cQ').textContent=queue.length||'';
   document.querySelectorAll('.nv').forEach(function(b){b.classList.toggle('on',(b.dataset.view===view||(view==='album'&&b.dataset.view==='albums')||(view==='artist'&&b.dataset.view==='artists')||(view==='pl'&&b.dataset.view==='pls'))&&!genre)});
   var gs={};TRACKS.forEach(function(t){if(!t.dup)gs[t.g]=(gs[t.g]||0)+1});
   var h='',ch='<button class="hset" id="homeSet" type="button" aria-label="Настройки и профиль">'+($('profBtn').innerHTML||ic('user'))+'</button><button class="chip'+(!genre?' on':'')+'" data-g="" type="button">Все</button>';
@@ -2289,6 +2302,7 @@ function toggleFav(id){
 }
 function download(id){
   var t=TRACKS[id];if(!t)return;
+  if(t.ym){toast('Скачивание недоступно для Яндекс Музыки');return}
   if(!t.src){toast(t.ym?'Не удалось проиграть трек из Яндекс Музыки. Попробуйте ещё раз':'У трека нет ссылки: обновите страницу');return}
   toast('Скачивание: '+t.t);
   if(window.SLN&&window.SLN.download&&window.SLN.download(t,t.src,(t.a+' - '+t.t).replace(/[\\/:*?"<>|]/g,'_')+((t.key.match(/\.[a-z0-9]{2,4}$/i)||['.mp3'])[0])))return;
@@ -2356,16 +2370,18 @@ function bnavPaint(){
   var m=mlibOn?'lib':srchOn?'search':(view==='all'&&!query&&!genre)?'home':(view==='all'?'search':'lib');
   b.forEach(function(x){x.classList.toggle('on',x.dataset.b===m)});
 }
-function subKey(){return view==='album'?['al',albK]:view==='artist'?['ar',artK]:(view==='pl'&&plId.slice(0,2)==='r:')?['rp',plId.slice(2)]:null}
+function subKey(){return view==='album'?[albK.indexOf('ym:')===0?'yal':'al',albK]:view==='artist'?[artK.indexOf('ym:')===0?'yar':'ar',artK]:(view==='pl'&&plId.slice(0,2)==='r:')?['rp',plId.slice(2)]:null}
 function paintSub(){
   var b=$('subBtn');if(!b)return;var k=subKey();b.hidden=!k||(view==='artist'&&artTab!=='tracks');if(b.hidden)return;
   if(k[0]==='rp'){var o2=FOL.p.indexOf(k[1])>-1;b.classList.toggle('on',o2);$('subT').textContent=o2?'Вы подписаны':'Подписаться';return}
+  if(k[0]==='yal'||k[0]==='yar'){var yk=k[0]==='yal'?'al':'ar',yo=ymLiked(yk,k[1]);b.classList.toggle('on',yo);$('subT').textContent=yo?(yk==='ar'?'Вы подписаны':'В медиатеке'):(yk==='ar'?'Подписаться':'Сохранить');return}
   var on=libHas(k[0],k[1]);b.classList.toggle('on',on);
   $('subT').textContent=on?(k[0]==='ar'?'Вы подписаны':'В медиатеке'):(k[0]==='ar'?'Подписаться':'Сохранить');
 }
 $('subBtn').onclick=function(){
   var k=subKey();if(!k)return;
   if(k[0]==='rp'){folToggle('pl',k[1],function(){paintSub()});return}
+  if(k[0]==='yal'||k[0]==='yar'){var yk2=k[0]==='yal'?'al':'ar',yon=ymLike(yk2,k[1]);paintSub();toast(yon?(yk2==='ar'?'Вы подписались на артиста':'Альбом добавлен в медиатеку'):(yk2==='ar'?'Вы отписались':'Альбом убран из медиатеки'));if(view==='albums'||view==='artists')render();return}
   var on=libToggle(k[0],k[1]);paintSub();if(mlibOn)renderMlib();
   toast(on?(k[0]==='ar'?'Вы подписались на артиста':'Альбом добавлен в медиатеку'):(k[0]==='ar'?'Вы отписались':'Альбом убран из медиатеки'));
 };
@@ -2392,12 +2408,12 @@ var FZX=0;
 function fzWord(q,w){if(w.indexOf(q)>-1)return 0;var m=q.length<=2?0:(q.length<=5?1:2)+FZX;if(!m)return 99;var d=lev(q,w,m);if(d<=m)return d;
   if(w.length>q.length){d=lev(q,w.slice(0,q.length),m);if(d<=m)return d+.5}return 99}
 function fzScore(qw,text){var ws=fzNorm(text).split(' '),tot=0,i,j,b,d;for(i=0;i<qw.length;i++){b=99;for(j=0;j<ws.length;j++){d=fzWord(qw[i],ws[j]);if(d<b)b=d;if(!b)break}if(b>=99)return -1;tot+=b}return tot}
-function srchExact(q){return {ar:ARTS.filter(function(x){return x.n.toLowerCase().indexOf(q)>-1}).slice(0,3),
-  al:ALB.filter(function(x){return (x.t+' '+x.a).toLowerCase().indexOf(q)>-1}).slice(0,4),
+function srchExact(q){return {ar:nat(ARTS).filter(function(x){return x.n.toLowerCase().indexOf(q)>-1}).slice(0,3),
+  al:nat(ALB).filter(function(x){return (x.t+' '+x.a).toLowerCase().indexOf(q)>-1}).slice(0,4),
   tr:TRACKS.filter(function(t){return !t.dup&&(t.t+' '+ad(t)+' '+(t.al||'')).toLowerCase().indexOf(q)>-1}).slice(0,25)}}
 function srchFuzzy(q){var qw=fzNorm(q).split(' ').filter(Boolean);if(!qw.length)return {ar:[],al:[],tr:[]};
   function pick(list,txt,n){var o=[];list.forEach(function(x){var sc=fzScore(qw,txt(x));if(sc>=0)o.push([sc,x])});o.sort(function(a,b){return a[0]-b[0]});return o.slice(0,n).map(function(x){return x[1]})}
-  return {ar:pick(ARTS,function(x){return x.n},3),al:pick(ALB,function(x){return x.t+' '+x.a},4),tr:pick(TRACKS.filter(function(t){return !t.dup}),function(t){return t.t+' '+ad(t)},12)}}
+  return {ar:pick(nat(ARTS),function(x){return x.n},3),al:pick(nat(ALB),function(x){return x.t+' '+x.a},4),tr:pick(TRACKS.filter(function(t){return !t.dup}),function(t){return t.t+' '+ad(t)},12)}}
 function srchFind(q){var S=srchExact(q),n=function(x){return x.ar.length+x.al.length+x.tr.length};if(n(S)>=3)return S;
   var alt=[layFix(q),layFixR(q)].filter(function(a){return a&&a!==q});
   for(var i=0;i<alt.length;i++){var A=srchExact(alt[i]);if(n(A)>n(S)){A.fz='Раскладка: показано по запросу «'+esc(alt[i])+'»';return A}}
@@ -2411,7 +2427,6 @@ function srchFind(q){var S=srchExact(q),n=function(x){return x.ar.length+x.al.le
   return M}
 function renderSrch(){
   var q=$('msQ').value.trim().toLowerCase();$('msX').hidden=!q;var B=$('msBody'),h='';
-  if(YMV){B.innerHTML=ymDetail();return}
   if(!q){
     var gs={},im={};TRACKS.forEach(function(t){if(t.dup||!t.g)return;gs[t.g]=(gs[t.g]||0)+1;if(!im[t.g]&&t.img)im[t.g]=t.img});
     var ks=Object.keys(gs);
@@ -2457,7 +2472,7 @@ function pvPlay(i){var l=PVR.list;if(!l[i])return;var ids=l.map(function(r){var 
   playId(ids[i],ids);toast('Этого трека нет на сайте: играет отрывок 30 секунд')}
 /* ===== Яндекс Музыка (личный режим): полные треки и обложки вместо 30-секундных отрывков =====
    Всё секретное лежит в Supabase (функция ymusic). Работает только для владельца сайта, после входа в аккаунт. */
-var YMR={q:'',list:[],busy:'',off:false},ymT=0,ymSeq=0,YMC={},YMV=null,YMT=load('sl_ym',[]);if(!Array.isArray(YMT))YMT=[];
+var YMR={q:'',list:[],busy:'',off:false},ymT=0,ymSeq=0,YMC={},YMT=load('sl_ym',[]);if(!Array.isArray(YMT))YMT=[];
 function ymFn(body){
   if(!SB||!SB.auth)return Promise.reject({error:'login'});
   return SB.auth.getSession().then(function(r){var tk=r&&r.data&&r.data.session&&r.data.session.access_token;if(!tk)throw {error:'login'};
@@ -2483,10 +2498,10 @@ function ymAddTrack(r){var key='ym:'+r.id,i;
   for(i=0;i<TRACKS.length;i++)if(TRACKS[i].key===key)return TRACKS[i];
   var t={id:TRACKS.length,key:key,t:r.t,a:r.a,al:r.al||'Яндекс Музыка',aa:'',img:r.img||'',src:'',dur:r.dur||0,q:'Яндекс Музыка',g:'',y:'',n:0,f:false,mine:true,ym:true,dup:true,fl:[],ymid:r.id};
   TRACKS.push(t);return t}
-function ymBoot(){if(!Array.isArray(YMT))return;YMT.forEach(function(r){if(r&&r.id)ymAddTrack(r)})}
+function ymBoot(){if(Array.isArray(YMT))YMT.forEach(function(r){if(r&&r.id)ymAddTrack(r)});YML.al.forEach(function(m){if(m&&m.id)ymAlb(m)});YML.ar.forEach(function(m){if(m&&m.id)ymArt(m)})}
 function ymSave(r){YMT=[{id:r.id,t:r.t,a:r.a,al:r.al||'',dur:r.dur||0,img:r.img||''}].concat(YMT.filter(function(x){return x.id!==r.id})).slice(0,200);save('sl_ym',YMT)}
 function ymPlay(i){var l=YMR.list;if(!l[i])return;var ids=l.map(function(r){return ymAddTrack(r).id});ymSave(l[i]);playId(ids[i],ids)}
-/* --- результаты и экраны альбома/артиста --- */
+/* --- результаты поиска Яндекса --- */
 function ymBg(i){return i?' style="background-image:url(\''+i+'\')"':''}
 function ymRowT(r,at){return '<button class="ms-r" '+at+' type="button"><span class="c"'+ymBg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">полный</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div></button>'}
 function ymRowA(r){return '<button class="ms-r" data-yml="'+esc(r.id)+'" type="button"><span class="c"'+ymBg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'</div><div class="s">Альбом · '+esc(r.a)+(r.y?' · '+esc(r.y):'')+'</div></div></button>'}
@@ -2500,37 +2515,98 @@ function ymHtml(q){
   if(al.length)h+='<div class="ms-h3">Альбомы</div>'+al.map(ymRowA).join('');
   if(tr.length)h+='<div class="ms-h3">Треки</div>'+tr.map(function(r,i){return ymRowT(r,'data-ym="'+i+'"')}).join('');
   return h}
-function ymOpen(kind,id){
-  YMV={k:kind,id:id,loading:true,d:null,flat:[],err:''};renderSrch();
-  ymFn({a:kind,id:id}).then(function(j){
-    if(!YMV||YMV.id!==id)return;
-    YMV.loading=false;
-    if(j.error)YMV.err=ymErr(j);
-    else{YMV.d=j;YMV.flat=kind==='album'?[].concat.apply([],j.discs||[]):(j.tracks||[])}
-    renderSrch()
-  }).catch(function(e){if(!YMV||YMV.id!==id)return;YMV.loading=false;YMV.err=ymErr(e);renderSrch()})}
-function ymDetail(){
-  var v=YMV,h='<button class="ms-r" data-ymb="1" type="button"><span class="c">'+ic('back')+'</span><div><div class="n">Назад к поиску</div></div></button>';
-  if(v.loading)return h+'<div class="ms-e">Загружаю…</div>';
-  if(v.err||!v.d)return h+'<div class="ms-e">'+esc(v.err||'Не удалось открыть')+'</div>';
-  var d=v.d,i=0;
-  if(v.k==='album'){
-    var al=d.album||{},ds=d.discs||[];
-    h+='<div class="ms-r"><span class="c" style="width:96px;height:96px;background-image:url(\''+esc(al.img||'')+'\')"></span><div><div class="n" style="white-space:normal">'+esc(al.t)+'</div><div class="s">'+esc(al.a)+(al.y?' · '+esc(al.y):'')+'</div></div></div>';
-    h+='<div style="padding:6px 0 10px"><button class="btn" data-ympa="1" type="button">Слушать альбом</button></div>';
-    ds.forEach(function(disc,n){
-      if(ds.length>1)h+='<div class="ms-h3">Диск '+(n+1)+'</div>';
-      h+=disc.map(function(r){var k=i++;return '<button class="ms-r" data-ymt="'+k+'" type="button"><span class="c" style="width:32px;height:32px;font-size:13px;color:var(--mut)">'+(k+1)+'</span><div><div class="n">'+esc(r.t)+'</div><div class="s">'+esc(r.a)+(r.dur?' · '+fmt(r.dur):'')+'</div></div></button>'}).join('')});
-    if(!i)h+='<div class="ms-e">В альбоме нет доступных треков</div>';
-  }else{
-    var ar=d.artist||{},tr=d.tracks||[],als=d.albums||[];
-    h+='<div class="ms-r ar"><span class="c" style="width:96px;height:96px;background-image:url(\''+esc(ar.img||'')+'\')"></span><div><div class="n" style="white-space:normal;font-size:20px">'+esc(ar.t)+'</div><div class="s">Исполнитель</div></div></div>';
-    if(tr.length)h+='<div style="padding:6px 0 0"><button class="btn" data-ympa="1" type="button">Слушать популярное</button></div><div class="ms-h3">Популярные треки</div>'+tr.map(function(r,k){return ymRowT(r,'data-ymt="'+k+'"')}).join('');
-    if(als.length)h+='<div class="ms-h3">Альбомы</div>'+als.map(ymRowA).join('');
-    if(!tr.length&&!als.length)h+='<div class="ms-e">У исполнителя ничего не нашлось</div>';
-  }
-  return h}
-function ymPlayFlat(i){var l=YMV&&YMV.flat;if(!l||!l[i])return;var ids=l.map(function(r){return ymAddTrack(r).id});ymSave(l[i]);playId(ids[i],ids)}
+/* --- Яндекс Музыка в родных страницах сайта: альбомы и артисты лежат в тех же списках ALB и ARTS,
+       поэтому страница альбома, страница артиста и сетки рисуются тем же кодом, что и свои --- */
+var YMA={},YMR2={},YML=load('sl_ym_lib',{al:[],ar:[]}),YM_ON=load('sl_ym_on',false),ymChk=0,SRCV=load('sl_src','gh'),YMS={q:'',al:[],ar:[],busy:'',err:''},ymGT=0;
+if(!YML||!Array.isArray(YML.al)||!Array.isArray(YML.ar))YML={al:[],ar:[]};
+function nat(a){return a.filter(function(x){return !x.ym})}
+function nTr(x){return x.ym?(x.ymn||x.tr.length):x.tr.length}
+function srcNow(){return YM_ON&&SRCV==='ym'?'ym':'gh'}
+function ymAlb(m){
+  var k='ym:al:'+m.id,x=YMA[k];
+  if(!x){x=YMA[k]={k:k,t:m.t||'',a:m.a||'',y:m.y?String(m.y):'',img:m.img||'',tr:[],ym:true,ymid:String(m.id),ymn:m.n||0,aid:m.aid||'',ld:false,busy:false,err:'',errAt:0}}
+  else{if(m.t)x.t=m.t;if(m.a)x.a=m.a;if(m.y)x.y=String(m.y);if(m.img)x.img=m.img;if(m.n)x.ymn=m.n;if(m.aid)x.aid=m.aid}
+  if(ALB.indexOf(x)<0)ALB.push(x);
+  return x}
+function ymArt(m){
+  var k='ym:ar:'+m.id,x=YMR2[k];
+  if(!x){x=YMR2[k]={k:k,n:m.t||m.n||'',img:m.img||'',tr:[],ym:true,ymid:String(m.id),rels:[],ld:false,busy:false,err:'',errAt:0}}
+  else{if(m.t||m.n)x.n=m.t||m.n;if(m.img)x.img=m.img}
+  if(ARTS.indexOf(x)<0)ARTS.push(x);
+  return x}
+/* пересборка списков из тегов не должна терять альбомы и артистов Яндекса */
+var _ymBA=buildAlbums;buildAlbums=function(){_ymBA();Object.keys(YMA).forEach(function(k){if(ALB.indexOf(YMA[k])<0)ALB.push(YMA[k])})};
+var _ymBR=buildArtists;buildArtists=function(){_ymBR();Object.keys(YMR2).forEach(function(k){if(ARTS.indexOf(YMR2[k])<0)ARTS.push(YMR2[k])})};
+function ymLoadAlb(A){
+  if(A.busy)return;A.busy=true;A.err='';
+  ymFn({a:'album',id:A.ymid}).then(function(j){
+    A.busy=false;
+    if(j.error){A.err=ymErr(j);A.errAt=Date.now();render();return}
+    ymAlb(j.album||{id:A.ymid});
+    var tr=[];(j.discs||[]).forEach(function(disc,di){disc.forEach(function(r,i){var t=ymAddTrack(r);t.d=di+1;t.n=i+1;t.y=A.y||'';t.al=A.t;if(!t.img)t.img=A.img;tr.push(t)})});
+    A.tr=tr;if(tr.length)A.ymn=tr.length;A.ld=true;
+    if(A.aid&&A.a){var ra=ymArt({id:A.aid,t:A.a.split(', ')[0]});if(!ra.ld&&!ra.busy&&!ra.err)ymLoadArt(ra)}
+    render()
+  }).catch(function(e){A.busy=false;A.err=ymErr(e);A.errAt=Date.now();render()})}
+function ymLoadArt(R){
+  if(R.busy)return;R.busy=true;R.err='';
+  ymFn({a:'artist',id:R.ymid}).then(function(j){
+    R.busy=false;
+    if(j.error){R.err=ymErr(j);R.errAt=Date.now();render();return}
+    var a=j.artist||{};if(a.t)R.n=a.t;if(a.img)R.img=a.img;
+    R.tr=(j.tracks||[]).map(ymAddTrack);
+    R.rels=(j.albums||[]).map(function(m){return ymAlb(m).k});
+    R.ld=true;render()
+  }).catch(function(e){R.busy=false;R.err=ymErr(e);R.errAt=Date.now();render()})}
+/* переход из экрана поиска на родную страницу альбома или артиста */
+function ymGo(kind,E){
+  YM_ON=true;save('sl_ym_on',true);SRCV='ym';save('sl_src','ym');
+  if(mlibOn)mlibShow(false);if(srchOn)srchShow(false);
+  if(kind==='album'){view='album';albK=E.k;albFrom='';albFromFor=''}else{view='artist';artK=E.k;artTab='tracks'}
+  genre='';query='';$('q').value='';$('qx').hidden=true;$('scroll').scrollTop=0;render();renderNav()}
+/* лайки: хранятся только на этом устройстве, в общие профили не попадают */
+function ymLiked(kind,k){return YML[kind].some(function(m){return m.k===k})}
+function ymLike(kind,k){
+  var E=(kind==='al'?YMA:YMR2)[k];if(!E)return false;var i=-1;
+  YML[kind].forEach(function(m,n){if(m.k===k)i=n});
+  if(i>-1)YML[kind].splice(i,1);
+  else YML[kind].unshift(kind==='al'?{k:k,id:E.ymid,t:E.t,a:E.a,y:E.y,img:E.img,n:E.ymn,aid:E.aid}:{k:k,id:E.ymid,t:E.n,img:E.img});
+  save('sl_ym_lib',YML);return i<0}
+/* переключатель источника в разделах «Альбомы» и «Артисты» */
+function srcSw(){
+  if(!YM_ON)return '';var y=srcNow()==='ym';
+  return '<div class="srcsw" role="tablist" aria-label="Источник музыки"><button type="button" role="tab" data-src="gh" class="'+(y?'':'on')+'" aria-selected="'+(!y)+'">GitHub</button><button type="button" role="tab" data-src="ym" class="'+(y?'on':'')+'" aria-selected="'+y+'">Яндекс Музыка</button></div>'}
+function ymGrid(kind){
+  var q=query,out;
+  if(q.length>=3&&YMS.q===q)out=(kind==='al'?YMS.al:YMS.ar).map(function(k){return (kind==='al'?YMA:YMR2)[k]}).filter(Boolean);
+  else{out=YML[kind].map(function(m){return (kind==='al'?YMA:YMR2)[m.k]}).filter(Boolean);
+    if(q)out=out.filter(function(x){return ((kind==='al'?x.t+' '+x.a:x.n)).toLowerCase().indexOf(q)>-1})}
+  return out}
+function albList(){return srcNow()==='ym'?ymGrid('al'):nat(ALB).filter(function(x){return !query||(x.t+' '+x.a).toLowerCase().indexOf(query)>-1})}
+function artList(){return srcNow()==='ym'?ymGrid('ar'):nat(ARTS).filter(function(x){return !query||x.n.toLowerCase().indexOf(query)>-1})}
+function ymEmpty(kind){
+  if(query.length>=3)return '<div class="empty"><b>'+(YMS.busy===query||YMS.q!==query?'Ищу в Яндекс Музыке…':(YMS.err||'Ничего не найдено'))+'</b></div>';
+  return '<div class="empty"><b>'+(kind==='al'?'Сохранённых альбомов Яндекс Музыки пока нет':'Подписок на артистов Яндекс Музыки пока нет')+'</b>Введите название в поиске сверху, откройте найденное и нажмите «'+(kind==='al'?'Сохранить':'Подписаться')+'»: оно появится здесь</div>'}
+function ymGridSearch(){
+  var q=query;if(q.length<3||YMS.q===q||YMS.busy===q)return;
+  clearTimeout(ymGT);ymGT=setTimeout(function(){
+    YMS.busy=q;
+    ymFn({a:'search',q:q}).then(function(j){
+      if(query!==q&&YMS.busy===q)YMS.busy='';
+      if(query!==q)return;
+      if(j.error){YMS={q:q,al:[],ar:[],busy:'',err:ymErr(j)};render();return}
+      YMS={q:q,al:(j.albums||[]).map(function(m){return ymAlb(m).k}),ar:(j.artists||[]).map(function(m){return ymArt(m).k}),busy:'',err:''};render()
+    }).catch(function(e){YMS={q:q,al:[],ar:[],busy:'',err:ymErr(e)};render()})},450)}
+/* только владелец сайта видит переключатель: проверяем один раз за сессию */
+function ymVerify(){
+  ymChk=1;
+  ymFn({a:'status'}).then(function(j){
+    var on=!(j&&(j.error==='denied'||j.error==='no_owner'||j.error==='no_token'));
+    if(on!==YM_ON){YM_ON=on;save('sl_ym_on',on);render()}
+  }).catch(function(e){if(e&&e.error==='login')ymChk=0})}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-src]');if(!b)return;
+  SRCV=b.dataset.src==='ym'?'ym':'gh';save('sl_src',SRCV);YMS={q:'',al:[],ar:[],busy:'',err:''};render()});
 /* ссылку на полный трек просим у функции в момент воспроизведения: у Яндекса она временная */
 function ymResolve(t){
   try{audio.removeAttribute('src');audio.load()}catch(e){}
@@ -2543,18 +2619,15 @@ function ymResolve(t){
     audio.src=j.url;audio.playbackRate=SPEEDS[spI];
     if(wantPlay){var p=audio.play();if(p&&p.catch)p.catch(function(){})}
   }).catch(function(e){if(my===ymSeq)toast(ymErr(e))})}
-$('msQ').oninput=function(){YMV=null;renderSrch();pvQuery();ymQuery()};
-$('msX').onclick=function(){$('msQ').value='';PVR={q:'',list:[],busy:''};YMR={q:'',list:[],busy:'',off:YMR.off};YMV=null;renderSrch();$('msQ').focus()};
+$('msQ').oninput=function(){renderSrch();pvQuery();ymQuery()};
+$('msX').onclick=function(){$('msQ').value='';PVR={q:'',list:[],busy:''};YMR={q:'',list:[],busy:'',off:YMR.off};renderSrch();$('msQ').focus()};
 $('msAv').onclick=function(){$('profBtn').click()};
 $('msBody').onclick=function(e){
   var w=e.target.closest('[data-wish]');if(w){var r0=PVR.list[+w.dataset.wish];if(r0){wishToggle(r0);renderSrch()}return}
   var b=e.target.closest('button');if(!b)return;
   var d=b.dataset;
-  if(d.ymb!==undefined){YMV=null;renderSrch();return}
-  if(d.yml!==undefined){ymOpen('album',d.yml);return}
-  if(d.yma!==undefined){ymOpen('artist',d.yma);return}
-  if(d.ympa!==undefined){ymPlayFlat(0);return}
-  if(d.ymt!==undefined){ymPlayFlat(+d.ymt);return}
+  if(d.yml!==undefined){var ma=(YMR.al||[]).filter(function(x){return x.id===d.yml})[0];if(ma)ymGo('album',ymAlb(ma));return}
+  if(d.yma!==undefined){var mr=(YMR.ar||[]).filter(function(x){return x.id===d.yma})[0];if(mr)ymGo('artist',ymArt(mr));return}
   if(d.ym!==undefined){ymPlay(+d.ym);return}
   if(d.pv!==undefined){pvPlay(+d.pv);return}
   if(d.st!==undefined){var ids=[].slice.call($('msBody').querySelectorAll('[data-st]')).map(function(x){return +x.dataset.st});playId(+d.st,ids);return}
@@ -3320,7 +3393,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=91;
+var APP_VER='7.0',APP_BUILD=92;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -4451,7 +4524,7 @@ function menuX(b){
   else if(m==='ren'&&kind==='pl'){askName('Новое название',A.n,function(n){A.p.n=n;savePL();render();if(mlibOn)renderMlib()},'Сохранить')}
   else if(m==='offall')offSave(ids.slice());
   else if(m==='dlall'){if(!ids.length)return toast('Нет треков');toast('Скачиваю треков: '+ids.length);ids.forEach(function(id,i){setTimeout(function(){download(id)},i*900)})}
-  else if(m==='art'){var ak=(A.a||'').toLowerCase();if(!ARTS.some(function(x){return x.k===ak})){var t0=A.tr[0];ak=t0?t0.a.toLowerCase():ak}if(!ARTS.some(function(x){return x.k===ak}))return toast('Страница артиста не найдена');view='artist';artK=ak;artTab='tracks';genre='';$('scroll').scrollTop=0;render()}
+  else if(m==='art'){if(A.ym&&A.aid){ymArt({id:A.aid,t:String(A.a||'').split(', ')[0]});view='artist';artK='ym:ar:'+A.aid;artTab='tracks';genre='';$('scroll').scrollTop=0;render();return}var ak=(A.a||'').toLowerCase();if(!ARTS.some(function(x){return x.k===ak})){var t0=A.tr[0];ak=t0?t0.a.toLowerCase():ak}if(!ARTS.some(function(x){return x.k===ak}))return toast('Страница артиста не найдена');view='artist';artK=ak;artTab='tracks';genre='';$('scroll').scrollTop=0;render()}
   else if(m==='disc'){var r=relsOf(k),f=REL_ORD.filter(function(q){return r.some(function(x){return relType(x)===q})})[0];view='artist';artK=k;artTabFor=k;artTab=r.length?'rel':'tracks';genre='';$('scroll').scrollTop=0;render()}
 }
 var SORTN={def:'По умолчанию',pop:'Популярные',world:'Популярные в мире',az:'По названию',art:'По артисту'};
@@ -5638,6 +5711,7 @@ function lfBadge(t){
 }
 function lfLis(n){return n<1000?n+' '+plural(n,['слушатель','слушателя','слушателей']):lfFmt(n)+' слушателей'}
 function lfArtCard(x){
+  if(x.ym)return 'Яндекс Музыка';
   var s=x.tr.length+' '+plural(x.tr.length,['трек','трека','треков']),n=lfAL(x.n);
   return n?s+' · '+(n<1000?lfLis(n):lfFmt(n)+' слуш.'):s;
 }

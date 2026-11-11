@@ -71,6 +71,7 @@ function mapAlbum(a: any) {
     a: names(a.artists),
     y: a.year ?? a.releaseDate?.slice(0, 4) ?? "",
     n: a.trackCount ?? 0,
+    aid: String(a.artists?.[0]?.id ?? ""),
     img: cover(a.coverUri ?? a.ogImage),
   };
 }
