@@ -3393,7 +3393,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=92;
+var APP_VER='7.0',APP_BUILD=93;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -4191,7 +4191,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){accClose();
 applyTheme();paintSet();
 
 /* ===== теги и обложки из mp3/flac ===== */
-var covCache={},tagCache=load('wl_tags2',{}),covT=0,covQ=[],covBusy=0,covRender=0,covReady=false;
+var covCache={},tagCache=load('wl_tags2',{}),covT=0,covQ=[],covBusy=0,covRT=0,covReady=false;
 /* обложки лежат в IndexedDB (там много места), а не в localStorage (лимит ~5 МБ: из-за него обложки терялись после перезахода) */
 var covDB=null;
 function covOpen(cb){
@@ -4348,7 +4348,7 @@ function buildArtists(){
     return x});
   ARTS.sort(function(a,b){return a.n.localeCompare(b.n,'ru')});
 }
-function covDone(){clearTimeout(covRender);covRender=setTimeout(function(){dedupe();buildAlbums();applyAA();render();var t=TRACKS[cur];if(t){$('pT').textContent=t.t;$('pA').textContent=ad(t)+' · '+t.q;setCv($('pCv'),t);updDyn(t);if(npOn)syncNp()}},1200)}
+function covDone(){clearTimeout(covRT);covRT=setTimeout(function(){dedupe();buildAlbums();applyAA();render();var t=TRACKS[cur];if(t){$('pT').textContent=t.t;$('pA').textContent=ad(t)+' · '+t.q;setCv($('pCv'),t);updDyn(t);if(npOn)syncNp()}},1200)}
 var covWait=0;
 function covPump(){
   /* пока играющий трек ещё буферизуется, чтение тегов ждёт, чтобы не отбирать у него интернет */
