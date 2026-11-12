@@ -1,0 +1,42 @@
+name: Build Android
+# Собирает APK приложения из папки android/ и выкладывает в Releases.
+# Скачать на телефон: https://github.com/lvvav/wavelab/releases/download/android-latest/SoundLife.apk
+# Запуск сам при изменении android/, или вручную: Actions → Build Android → Run workflow.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['android/**', '.github/workflows/build-android.yml']
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      # репозиторий с музыкой тяжёлый, поэтому берём только нужную папку
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: android
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Сборка APK
+        run: gradle -p android assembleDebug --no-daemon --stacktrace
+      - name: Выложить в Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk SoundLife.apk
+          gh release delete android-latest --yes --cleanup-tag -R "$GITHUB_REPOSITORY" || true
+          gh release create android-latest SoundLife.apk -R "$GITHUB_REPOSITORY" \
+            --title "SoundLife для Android" \
+            --notes "Сборка №${{ github.run_number }}. Скачайте SoundLife.apk и установите (разрешите установку из этого источника)." \
+            --prerelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SoundLife-apk
+          path: SoundLife.apk
