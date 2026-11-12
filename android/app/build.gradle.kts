@@ -26,12 +26,17 @@ android {
             storePassword = "soundlife"
             keyAlias = "soundlife"
             keyPassword = "soundlife"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
     buildTypes {
         debug { signingConfig = signingConfigs.getByName("main") }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("main")
         }
     }

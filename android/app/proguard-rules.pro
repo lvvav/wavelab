@@ -1,0 +1,3 @@
+-dontwarn **
+-keep class app.soundlife.** { *; }
+-keep class androidx.media3.** { *; }

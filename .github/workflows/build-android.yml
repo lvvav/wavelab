@@ -25,12 +25,12 @@ jobs:
         with:
           gradle-version: '8.10.2'
       - name: Сборка APK
-        run: gradle -p android assembleDebug --no-daemon --stacktrace
+        run: gradle -p android assembleRelease --no-daemon --stacktrace
       - name: Выложить в Releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk SoundLife.apk
+          cp android/app/build/outputs/apk/release/app-release.apk SoundLife.apk
           gh release delete android-latest --yes --cleanup-tag -R "$GITHUB_REPOSITORY" || true
           gh release create android-latest SoundLife.apk -R "$GITHUB_REPOSITORY" \
             --title "SoundLife для Android" \
