@@ -1152,10 +1152,13 @@ body:not(.hasTrack){padding-bottom:8px}
 @media(min-width:861px){#sortBtn2{display:none!important}}
 .pvb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--acc);color:var(--on,#000);font-size:11px;font-weight:700;vertical-align:1px;white-space:nowrap}
 .ms-note{padding:6px 16px 0;color:var(--mut);font-size:12px}
-.srcsw{display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--line);border-radius:99px;background:var(--panel)}
-.srcsw button{padding:7px 18px;border-radius:99px;color:var(--mut);font-weight:600;font-size:13px;transition:background .2s,color .2s}
+.srcsw{position:relative;display:inline-flex;gap:2px;padding:3px;margin:0 0 18px;border:1px solid var(--line);border-radius:99px;background:var(--panel)}
+.srcsw-i{position:absolute;top:3px;bottom:3px;left:0;width:0;border-radius:99px;background:var(--acc);box-shadow:0 2px 12px rgba(198,255,61,.22);transition:left .34s cubic-bezier(.2,.8,.2,1),width .34s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.srcsw button{position:relative;z-index:1;padding:7px 18px;border-radius:99px;color:var(--mut);font-weight:600;font-size:13px;transition:color .25s}
 .srcsw button:hover{color:var(--text)}
-.srcsw button.on{background:var(--acc);color:var(--on)}
+.srcsw button.on,.srcsw button.on:hover{color:var(--on)}
+.swin{animation:swin .32s cubic-bezier(.2,.8,.2,1) both}
+@keyframes swin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .msrc{margin:-8px 0 18px}.msrc:empty{display:none}.msrc .srcsw{margin:0}.msrc .srcsw button{padding:7px 15px}
 
 .pvw{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--mut);cursor:pointer}
@@ -1970,6 +1973,8 @@ function render(){
   var ymW=(ab&&ab.ym&&!ab.ld)?ab:(AR&&AR.ym&&!AR.ld&&!relView)?AR:null;
   if(ymW)html='<div class="empty"><b>'+(ymW.err?'Не удалось открыть':'Загружаю из Яндекс Музыки…')+'</b>'+(ymW.err?esc(ymW.err):'')+'</div>';
   $('list').innerHTML=html;popKey='';
+  var sw0=$('list').querySelector('.srcsw');if(sw0)swPlace(sw0,'lib');
+  if(srcFx){srcFx=0;[].forEach.call($('list').children,function(c){if(!c.classList.contains('srcsw')){c.classList.remove('swin');void c.offsetWidth;c.classList.add('swin')}})}
   var vk=view+'|'+genre+'|'+albK+'|'+artK+'|'+plId+'|'+artTab;
   var LL=$('list');
   if(!loading&&vk!==lastVk){lastVk=vk;LL.classList.remove('still');LL.classList.remove('enter');void LL.offsetWidth;LL.classList.add('enter');var HD=document.querySelector('.head');HD.classList.remove('hin');void HD.offsetWidth;HD.classList.add('hin');clearTimeout(enT);enT=setTimeout(function(){LL.classList.remove('enter');LL.classList.remove('still')},900)}
@@ -2448,14 +2453,15 @@ function renderSrch(){
     if(!h)h='<div class="ms-e">Ничего не найдено по запросу «'+esc($('msQ').value.trim())+'»</div><div class="ms-note" style="text-align:center">Попробуйте источник iTunes'+(YM_ON?' или Яндекс Музыка':'')+' выше</div>';
   }
   B.innerHTML=h;
+  if(msFx){msFx=0;B.classList.remove('swin');void B.offsetWidth;B.classList.add('swin')}
 }
 function pvHtml(q){return PVR.q===q&&PVR.list.length?'<div class="ms-h3">iTunes</div><div class="ms-note">Отрывки по 30 секунд. Нажмите «+», чтобы запросить полный трек.</div>'+PVR.list.map(function(r,i){return '<button class="ms-r" data-pv="'+i+'" type="button"><span class="c"'+ymBg(r.img)+'>'+(r.img?'':ic('disc'))+'</span><div><div class="n">'+esc(r.t)+'<span class="pvb">30 сек</span></div><div class="s">'+esc(r.a)+(r.al?' · '+esc(r.al):'')+'</div></div><span class="pvw'+(wishHas(r.id)?' on':'')+'" role="button" tabindex="0" data-wish="'+i+'" title="Хочу этот трек" aria-label="Хочу этот трек">'+ic(wishHas(r.id)?'check':'plus')+'</span></button>'}).join(''):''}
 var MSRC=load('sl_msrc','gh');
 function msNow(){var v=MSRC==='it'||MSRC==='ym'?MSRC:'gh';return v==='ym'&&!YM_ON?'gh':v}
 function msSrcPaint(){
   var n=msNow(),L=[['gh','GitHub'],['it','iTunes']];if(YM_ON)L.push(['ym','Яндекс Музыка']);
-  $('msSrc').innerHTML='<div class="srcsw" role="tablist" aria-label="Где искать">'+L.map(function(x){var on=x[0]===n;return '<button type="button" role="tab" data-ms="'+x[0]+'" class="'+(on?'on':'')+'" aria-selected="'+on+'">'+x[1]+'</button>'}).join('')+'</div>'}
-$('msSrc').onclick=function(e){var b=e.target.closest('[data-ms]');if(!b)return;MSRC=b.dataset.ms;save('sl_msrc',MSRC);renderSrch();pvQuery();ymQuery();var i=$('msQ');if(i&&!i.value)i.focus()};
+  $('msSrc').innerHTML='<div class="srcsw" role="tablist" aria-label="Где искать"><span class="srcsw-i"></span>'+L.map(function(x){var on=x[0]===n;return '<button type="button" role="tab" data-ms="'+x[0]+'" class="'+(on?'on':'')+'" aria-selected="'+on+'">'+x[1]+'</button>'}).join('')+'</div>';swPlace($('msSrc'),'ms')}
+$('msSrc').onclick=function(e){var b=e.target.closest('[data-ms]');if(!b)return;MSRC=b.dataset.ms;save('sl_msrc',MSRC);msFx=1;renderSrch();pvQuery();ymQuery();var i=$('msQ');if(i&&!i.value)i.focus()};
 var PVR={q:'',list:[],busy:''},pvT=0,PVC={},WISH=load('wl_wish',[]);if(!Array.isArray(WISH))WISH=[];
 function wishHas(id){return WISH.some(function(w){return w.id===id})}
 function wishSave(){save('wl_wish',WISH.slice(0,300))}
@@ -2530,6 +2536,14 @@ function ymHtml(q){
   return h}
 /* --- Яндекс Музыка в родных страницах сайта: альбомы и артисты лежат в тех же списках ALB и ARTS,
        поэтому страница альбома, страница артиста и сетки рисуются тем же кодом, что и свои --- */
+var SWG={},srcFx=0,msFx=0;
+function swPlace(root,name){
+  var ind=root.querySelector('.srcsw-i'),on=root.querySelector('button.on');
+  if(!ind||!on||!on.offsetWidth)return;
+  var l=on.offsetLeft,w=on.offsetWidth,f=SWG[name]||{l:l,w:w};
+  ind.style.transition='none';ind.style.left=f.l+'px';ind.style.width=f.w+'px';void ind.offsetWidth;
+  ind.style.transition='';ind.style.left=l+'px';ind.style.width=w+'px';
+  SWG[name]={l:l,w:w}}
 var YMA={},YMR2={},YML=load('sl_ym_lib',{al:[],ar:[]}),YM_ON=load('sl_ym_on',false),ymChk=0,SRCV=load('sl_src','gh'),YMS={q:'',al:[],ar:[],busy:'',err:''},ymGT=0;
 if(!YML||!Array.isArray(YML.al)||!Array.isArray(YML.ar))YML={al:[],ar:[]};
 function nat(a){return a.filter(function(x){return !x.ym})}
@@ -2588,7 +2602,7 @@ function ymLike(kind,k){
 /* переключатель источника в разделах «Альбомы» и «Артисты» */
 function srcSw(){
   if(!YM_ON)return '';var y=srcNow()==='ym';
-  return '<div class="srcsw" role="tablist" aria-label="Источник музыки"><button type="button" role="tab" data-src="gh" class="'+(y?'':'on')+'" aria-selected="'+(!y)+'">GitHub</button><button type="button" role="tab" data-src="ym" class="'+(y?'on':'')+'" aria-selected="'+y+'">Яндекс Музыка</button></div>'}
+  return '<div class="srcsw" role="tablist" aria-label="Источник музыки"><span class="srcsw-i"></span><button type="button" role="tab" data-src="gh" class="'+(y?'':'on')+'" aria-selected="'+(!y)+'">GitHub</button><button type="button" role="tab" data-src="ym" class="'+(y?'on':'')+'" aria-selected="'+y+'">Яндекс Музыка</button></div>'}
 function ymGrid(kind){
   var q=query,out;
   if(q.length>=3&&YMS.q===q)out=(kind==='al'?YMS.al:YMS.ar).map(function(k){return (kind==='al'?YMA:YMR2)[k]}).filter(Boolean);
@@ -2619,7 +2633,7 @@ function ymVerify(){
   }).catch(function(e){if(e&&e.error==='login')ymChk=0})}
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-src]');if(!b)return;
-  SRCV=b.dataset.src==='ym'?'ym':'gh';save('sl_src',SRCV);YMS={q:'',al:[],ar:[],busy:'',err:''};render()});
+  SRCV=b.dataset.src==='ym'?'ym':'gh';save('sl_src',SRCV);YMS={q:'',al:[],ar:[],busy:'',err:''};srcFx=1;render()});
 /* ссылку на полный трек просим у функции в момент воспроизведения: у Яндекса она временная */
 function ymResolve(t){
   try{audio.removeAttribute('src');audio.load()}catch(e){}
@@ -3406,7 +3420,7 @@ function paintHub(){
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=94;
+var APP_VER='7.0',APP_BUILD=95;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
