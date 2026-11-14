@@ -3416,11 +3416,12 @@ function paintHub(){
   var eco=!S.pre,pv=!SHARE_ON&&!NP_ON;
   h.innerHTML='<div class="hub-t"><button type="button" id="hubEco" class="'+(eco?'on':'')+'"><b>Экономия трафика</b><small>'+(eco?'Включена':'Выключена')+'</small></button><button type="button" id="hubPv" class="'+(pv?'on':'')+'"><b>Приватный режим</b><small>'+(pv?'Включён':'Выключен')+'</small></button></div>'+
     HUB.map(function(r){return '<button type="button" class="hub-r" data-pg="'+r[0]+'"><span class="ico">'+ic(r[1])+'</span><div><b>'+r[2]+'</b><small>'+esc(hubSub(r[0]))+'</small></div>'+ic('back','ch')+'</button>'}).join('')+
+    '<a class="btn hub-app" href="https://github.com/lvvav/SoundLife2/releases/tag/apk-latest" target="_blank" rel="noopener" style="display:block;text-align:center;margin:12px 0 4px;text-decoration:none">Скачать приложение для Android</a><small class="hint" style="display:block;text-align:center">Нужен Android 8.0 и новее</small>'+
     (USER?'<button type="button" class="btn ghost hub-out" id="hubOut">Выйти</button>':'')+
     '<button type="button" class="hub-ver" id="hubVer">SoundLife '+APP_VER+' · сборка '+APP_BUILD+'</button>';
 }
 /* версия сайта: тихая строка внизу настроек; нажатие проверяет обновление. APP_BUILD должен совпадать с номером в sw.js (sl-shell-vN) */
-var APP_VER='7.0',APP_BUILD=95;
+var APP_VER='7.1',APP_BUILD=96;
 function verCheck(){
   toast('Проверяю обновления…');
   fetch('sw.js?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
