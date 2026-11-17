@@ -1,5 +1,5 @@
 {
- "music/Валентин Стрыкало - Офисный Стиляга.mp3": {
+ "music\/Валентин Стрыкало - Офисный Стиляга.mp3": {
   "a": "Валентин Стрыкало",
   "t": "Офисный Стиляга",
   "al": "Часть чего-то большего",
@@ -9,40 +9,40 @@
  "@artists": {
   "1695624405 red august": {
    "n": "RED AUGUST",
-   "img": "music/_artists/1695624405-red-august-mwjnscoy.jpg"
+   "img": "music\/_artists\/1695624405-red-august-mwjnscoy.jpg"
   },
   "nirvana": {
-   "img": "music/_artists/nirvana-mvwacp9w.jpg"
+   "img": "music\/_artists\/nirvana-mvwacp9w.jpg"
   },
   "cupsize": {
-   "img": "music/_artists/cupsize-mvwsztg3.jpg"
+   "img": "music\/_artists\/cupsize-mvwsztg3.jpg"
   },
   "валентин стрыкало": {
-   "img": "music/_artists/валентин-стрыкало-mvwtgfe7.jpg"
+   "img": "music\/_artists\/валентин-стрыкало-mvwtgfe7.jpg"
   }
  },
- "music/пошлаямолли/Пошлая Молли - Райские цветы.mp3": {
+ "music\/пошлаямолли\/Пошлая Молли - Райские цветы.mp3": {
   "al": "Грустная девчонка с глазами как у собаки",
   "aa": "Пошлая Молли",
   "y": "2018"
  },
- "music/01. Самый Лучший Друг.mp3": {
+ "music\/01. Самый Лучший Друг.mp3": {
   "n": 1
  },
- "music/RED AUGUST/RED AUGUST - чуждо.mp3": {
+ "music\/RED AUGUST\/RED AUGUST - чуждо.mp3": {
   "a": "RED AUGUST",
   "t": "чуждо",
   "y": "2025"
  },
- "music/Nirvana - Radio Friendly Unit Shifter.mp3": {
+ "music\/Nirvana - Radio Friendly Unit Shifter.mp3": {
   "al": "In Utero",
   "aa": "Nirvana",
   "y": "1993"
  },
- "music/CUPSIZE - ты уебалась головой_compressed.mp3": {
+ "music\/CUPSIZE - ты уебалась головой_compressed.mp3": {
   "al": "удалитттт в ближаеще время"
  },
- "music/Nirvana - Endless, Nameles.mp3": {
+ "music\/Nirvana - Endless, Nameles.mp3": {
   "a": "Nirvana",
   "al": "Nevermind",
   "aa": "Nirvana",
@@ -50,284 +50,284 @@
   "n": 13,
   "t": "Endless, Nameles"
  },
- "music/пошлаямолли/Пошлая Молли - Любимая песня твоей сестры.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Любимая песня твоей сестры.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/пошлаямолли/Пошлая Молли - Молли.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Молли.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/пошлаямолли/Пошлая Молли - Нон стоп.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Нон стоп.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/пошлаямолли/Пошлая Молли - Паки пуси.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Паки пуси.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/пошлаямолли/Пошлая Молли - Супермаркет.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Супермаркет.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/пошлаямолли/Пошлая Молли - Тмстс.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Тмстс.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/пошлаямолли/Пошлая Молли - Ханнамонтана.m4a": {
+ "music\/пошлаямолли\/Пошлая Молли - Ханнамонтана.m4a": {
   "al": "8 способов как бросить...",
   "aa": "Пошлая Молли",
   "y": "2016"
  },
- "music/CUPSIZE - больше, чем творчество.mp3": {
+ "music\/CUPSIZE - больше, чем творчество.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Василий.mp3": {
+ "music\/CUPSIZE - Василий.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - верёвка.mp3": {
+ "music\/CUPSIZE - верёвка.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - вишлист.mp3": {
+ "music\/CUPSIZE - вишлист.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - влечение.mp3": {
+ "music\/CUPSIZE - влечение.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Воздух.mp3": {
+ "music\/CUPSIZE - Воздух.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - все мои поступки.mp3": {
+ "music\/CUPSIZE - все мои поступки.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Высокий градус.mp3": {
+ "music\/CUPSIZE - Высокий градус.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - детская травма.mp3": {
+ "music\/CUPSIZE - детская травма.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - ДПП (Аутро).mp3": {
+ "music\/CUPSIZE - ДПП (Аутро).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Дьявол!.mp3": {
+ "music\/CUPSIZE - Дьявол!.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Злой отчим.mp3": {
+ "music\/CUPSIZE - Злой отчим.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - ЗППП.mp3": {
+ "music\/CUPSIZE - ЗППП.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - И это прекрасно.mp3": {
+ "music\/CUPSIZE - И это прекрасно.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Или хотя бы завтра... (hitmo.net).mp3": {
+ "music\/CUPSIZE - Или хотя бы завтра... (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Кислород (hitmo.net).mp3": {
+ "music\/CUPSIZE - Кислород (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Клей.mp3": {
+ "music\/CUPSIZE - Клей.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Конъюнктивит.mp3": {
+ "music\/CUPSIZE - Конъюнктивит.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - малолетки.mp3": {
+ "music\/CUPSIZE - малолетки.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - маршрутка.mp3": {
+ "music\/CUPSIZE - маршрутка.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Минус, плюс (hitmo.net).mp3": {
+ "music\/CUPSIZE - Минус, плюс (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - мой врач думает, что у меня шизофрения.mp3": {
+ "music\/CUPSIZE - мой врач думает, что у меня шизофрения.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - нам это нравится.mp3": {
+ "music\/CUPSIZE - нам это нравится.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - напорносайтах.mp3": {
+ "music\/CUPSIZE - напорносайтах.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - неудобно.mp3": {
+ "music\/CUPSIZE - неудобно.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Но им не смешно.mp3": {
+ "music\/CUPSIZE - Но им не смешно.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - ну почему.mp3": {
+ "music\/CUPSIZE - ну почему.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Они все дрочат на тебя в интернете.mp3": {
+ "music\/CUPSIZE - Они все дрочат на тебя в интернете.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Оригами.mp3": {
+ "music\/CUPSIZE - Оригами.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - первокурсница.mp3": {
+ "music\/CUPSIZE - первокурсница.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Переломай мои кости (hitmo.net).mp3": {
+ "music\/CUPSIZE - Переломай мои кости (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Песня про спид.mp3": {
+ "music\/CUPSIZE - Песня про спид.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Печаль (hitmo.net).mp3": {
+ "music\/CUPSIZE - Печаль (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - по барабану.mp3": {
+ "music\/CUPSIZE - по барабану.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - По улице иду я.mp3": {
+ "music\/CUPSIZE - По улице иду я.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - пока-пока.mp3": {
+ "music\/CUPSIZE - пока-пока.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - привет, если ты мне не ответишь.mp3": {
+ "music\/CUPSIZE - привет, если ты мне не ответишь.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - прыгaй, дура!.mp3": {
+ "music\/CUPSIZE - прыгaй, дура!.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Пьяные.mp3": {
+ "music\/CUPSIZE - Пьяные.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Пятый Элемент.mp3": {
+ "music\/CUPSIZE - Пятый Элемент.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Самокрутки (hitmo.net).mp3": {
+ "music\/CUPSIZE - Самокрутки (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - север.mp3": {
+ "music\/CUPSIZE - север.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Семнадцатилетняя.mp3": {
+ "music\/CUPSIZE - Семнадцатилетняя.mp3": {
   "al": "Как испортить вечеринку?",
   "aa": "CUPSIZE",
   "y": "2023",
   "n": 13,
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - семнадцать ножевых (1).mp3": {
+ "music\/CUPSIZE - семнадцать ножевых (1).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - сигареты.mp3": {
+ "music\/CUPSIZE - сигареты.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - следак.mp3": {
+ "music\/CUPSIZE - следак.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - станцуй со мной.mp3": {
+ "music\/CUPSIZE - станцуй со мной.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Стенки моего подъезда.mp3": {
+ "music\/CUPSIZE - Стенки моего подъезда.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - тварьтварьтварьтварь.mp3": {
+ "music\/CUPSIZE - тварьтварьтварьтварь.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Твои поцелуи (hitmo.net).mp3": {
+ "music\/CUPSIZE - Твои поцелуи (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - тетрадь.mp3": {
+ "music\/CUPSIZE - тетрадь.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Травматика.mp3": {
+ "music\/CUPSIZE - Травматика.mp3": {
   "al": "Как испортить вечеринку?",
   "aa": "CUPSIZE",
   "y": "2023",
   "n": 6,
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Ты Любишь Танцевать.mp3": {
+ "music\/CUPSIZE - Ты Любишь Танцевать.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - ты уебалась головой.mp3": {
+ "music\/CUPSIZE - ты уебалась головой.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Улыбнись (hitmo.net).mp3": {
+ "music\/CUPSIZE - Улыбнись (hitmo.net).mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - урод.mp3": {
+ "music\/CUPSIZE - урод.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - фура.mp3": {
+ "music\/CUPSIZE - фура.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Целовались.mp3": {
+ "music\/CUPSIZE - Целовались.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Целую Тебя.mp3": {
+ "music\/CUPSIZE - Целую Тебя.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - черновик.mp3": {
+ "music\/CUPSIZE - черновик.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - шАхАшАхА.mp3": {
+ "music\/CUPSIZE - шАхАшАхА.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Юра, Юра.mp3": {
+ "music\/CUPSIZE - Юра, Юра.mp3": {
   "al": "Как испортить вечеринку?",
   "aa": "CUPSIZE",
   "y": "2023",
   "n": 1,
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - я без ума от тебя.mp3": {
+ "music\/CUPSIZE - я без ума от тебя.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Я схожу с ума.mp3": {
+ "music\/CUPSIZE - Я схожу с ума.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - я тупая, моя жизнь тупая.mp3": {
+ "music\/CUPSIZE - я тупая, моя жизнь тупая.mp3": {
   "a": "CUPSIZE"
  },
- "music/Cupsize/CUPSIZE - будка.mp3": {
+ "music\/Cupsize\/CUPSIZE - будка.mp3": {
   "a": "CUPSIZE"
  },
- "music/Cupsize/CUPSIZE - ванна, красный пол.mp3": {
+ "music\/Cupsize\/CUPSIZE - ванна, красный пол.mp3": {
   "a": "CUPSIZE"
  },
- "music/Cupsize/CUPSIZE - вата.mp3": {
+ "music\/Cupsize\/CUPSIZE - вата.mp3": {
   "a": "CUPSIZE"
  },
- "music/Cupsize/CUPSIZE - велосипед.mp3": {
+ "music\/Cupsize\/CUPSIZE - велосипед.mp3": {
   "a": "CUPSIZE"
  },
- "music/Cupsize/CUPSIZE - вся моя жизнь говно.mp3": {
+ "music\/Cupsize\/CUPSIZE - вся моя жизнь говно.mp3": {
   "a": "CUPSIZE"
  },
- "music/Cupsize/CUPSIZE - розовая могила.mp3": {
+ "music\/Cupsize\/CUPSIZE - розовая могила.mp3": {
   "a": "CUPSIZE"
  },
- "music/CUPSIZE - Давай увидимся.mp3": {
+ "music\/CUPSIZE - Давай увидимся.mp3": {
   "a": "CUPSIZE",
   "t": "Давай увидимся"
  },
- "music/CUPSIZE - 107.1.mp3": {
+ "music\/CUPSIZE - 107.1.mp3": {
   "a": "CUPSIZE",
   "t": "107.1"
  },
- "music/CUPSIZE - трамадол.mp3": {
+ "music\/CUPSIZE - трамадол.mp3": {
   "a": "CUPSIZE"
  },
- "music/yasssenev - пока пока моя любовь.mp3": {
+ "music\/yasssenev - пока пока моя любовь.mp3": {
   "a": "yasssenev",
   "t": "пока пока моя любовь",
   "al": "Окно моей спальни",
   "y": "2025"
  },
- "music/CUPSIZE - мы делили апельсин.mp3": {
+ "music\/CUPSIZE - мы делили апельсин.mp3": {
   "al": "заставь меня плакать",
   "a": "CUPSIZE",
   "aa": "CUPSIZE",
@@ -336,11 +336,11 @@
   "t": "мы делили апельсин",
   "d": 2
  },
- "music/CUPSIZE - Давай трахаться в машине.mp3": {
+ "music\/CUPSIZE - Давай трахаться в машине.mp3": {
   "a": "CUPSIZE",
   "aa": "CUPSIZE"
  },
- "music/Валентин Стрыкало - Решиться Само Собoй.mp3": {
+ "music\/Валентин Стрыкало - Решиться Само Собoй.mp3": {
   "a": "Валентин Стрыкало",
   "t": "Решиться Само Собoй",
   "al": "Решиться Само Собой",
@@ -348,20 +348,20 @@
   "y": "2015",
   "n": 1
  },
- "music/CUPSIZE - Вирус.mp3": {
+ "music\/CUPSIZE - Вирус.mp3": {
   "a": "CUPSIZE",
   "aa": "CUPSIZE"
  },
- "music/CUPSIZE - Моя мама пьет.mp3": {
+ "music\/CUPSIZE - Моя мама пьет.mp3": {
   "a": "CUPSIZE"
  },
- "music/The Caretaker - g1. Post awareness confusions ezgif.mp3": {
+ "music\/The Caretaker - g1. Post awareness confusions ezgif.mp3": {
   "a": "The Caretaker",
   "t": "g1. Post awareness confusions ezgif",
   "aa": "The Caretaker",
   "n": 1
  },
- "music/dj nasral/DJ NASRAL - Standoff 2 music.m4a": {
+ "music\/dj nasral\/DJ NASRAL - Standoff 2 music.m4a": {
   "a": "DJ NASRAL",
   "f": "DJ OBOSRAL",
   "t": "Standoff 2 music",
@@ -370,5 +370,89 @@
   "y": "2026",
   "n": 1,
   "d": 1
+ },
+ "music\/RED AUGUST\/1695624066_RED AUGUST - Demons in Place.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/1695624405_RED AUGUST - Aokigohara.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/1718979147_RED AUGUST - 23.08.07 Vol1.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/1721161286_RED AUGUST - Пропало чувство.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/1721161320_RED AUGUST - Смотрю вниз (Slowed).mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/1721161343_RED AUGUST - Беги.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - 23.08.07, Vol. 1.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - For the Last Time.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Live at Anymore.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Lost Mind (Extended Mix).mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Lost Mind.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Paranoia.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Агония.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - ВРЕМЯ.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Дружить.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Луна.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Нутрo.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Нутро.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Ошибки прошлого.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Сияние сердца.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Слабый.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Смотрю вниз.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Со мной.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Сознание.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Терять любoвь.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Терять любовь.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Удивительный мир.mp3": {
+  "a": "RED AUGUST"
+ },
+ "music\/RED AUGUST\/RED AUGUST - Элегия.mp3": {
+  "a": "RED AUGUST"
  }
 }
